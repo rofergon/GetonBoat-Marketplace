@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
-import { Button } from "../src/components/ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../src/components/ui/card"
-import { Input } from "../src/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../src/components/ui/tabs"
+import { Button } from "../ui/button"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card"
+import { Input } from "../ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import { ArrowRight, Copy, ExternalLink, MessageCircle, Moon, Search, Share2, Sun, Zap } from "lucide-react"
 import dynamic from 'next/dynamic'
-import { BrushData } from '../src/types/types'
+import { BrushData } from '../../types/types'
 
 interface PixelArtProps {
   updateBrushData: (data: BrushData | null) => void;
 }
 
-const PixelArt = dynamic<PixelArtProps>(() => import('../src/components/PixelArt'), {
+const PixelArt = dynamic<PixelArtProps>(() => import('../pixelminter/PixelArt'), {
   ssr: false,
   loading: () => <div>Cargando PixelArt...</div>
 });
@@ -21,7 +21,7 @@ interface ConnectWalletButtonProps {
   updateBrushData: (data: BrushData | null) => void;
 }
 
-const ConnectWalletButton = dynamic<ConnectWalletButtonProps>(() => import('../src/components/ConnectWalletButton'), {
+const ConnectWalletButton = dynamic<ConnectWalletButtonProps>(() => import('../pixelminter/ConnectWalletButton'), {
   ssr: false,
   loading: () => <div>Cargando ConnectWalletButton...</div>
 });

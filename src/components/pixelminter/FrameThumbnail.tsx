@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
-import { State, Frame, Layer } from '../types/types';
+import { State, Frame, Layer } from '../../types/types';
 
 interface FrameThumbnailProps {
   frame: Frame;

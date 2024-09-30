@@ -1,14 +1,14 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useCallback, useMemo } from 'react';
 import { Plus, Play, Pause, SkipForward, SkipBack, Download } from 'lucide-react';
-import { Button } from "../components/ui/button";
-import { Slider } from "../components/ui/slider";
-import { Switch } from "../components/ui/switch";
+import { Button } from "../ui/button";
+import { Slider } from "../ui/slider";
+import { Switch } from "../ui/switch";
 import FrameThumbnail from './FrameThumbnail';
-import { State, Frame } from '../types/types';
-import { useExportGif } from '../hooks/useExportGif';
-import { useAnimationControl } from '../hooks/useAnimationControl';
-import { useAnimationStatus } from '../hooks/useAnimationStatus';
+import { State, Frame } from '../../types/types';
+import { useExportGif } from '../../hooks/useExportGif';
+import { useAnimationControl } from '../../hooks/useAnimationControl';
+import { useAnimationStatus } from '../../hooks/useAnimationStatus';
 import { useMediaQuery } from 'react-responsive';
 
 interface AnimationControlsProps {

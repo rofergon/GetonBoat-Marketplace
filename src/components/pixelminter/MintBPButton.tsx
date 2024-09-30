@@ -8,9 +8,9 @@ import {
 } from '@coinbase/onchainkit/transaction';
 import type { LifeCycleStatus } from '@coinbase/onchainkit/transaction';
 import { useAccount } from 'wagmi';
-import { BasePaintAbi } from '../abi/BasePaintAbi';
-import { State } from '../types/types';
-import { calculateDay } from '../utils/dateUtils';
+import { BasePaintAbi } from '../../abi/BasePaintAbi';
+import { State } from '../../types/types';
+import { calculateDay } from '../../utils/dateUtils';
 
 interface MintBPButtonProps {
   state: State;

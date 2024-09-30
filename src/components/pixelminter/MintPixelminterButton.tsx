@@ -8,10 +8,10 @@ import {
 } from '@coinbase/onchainkit/transaction';
 import type { LifeCycleStatus } from '@coinbase/onchainkit/transaction';
 import { useAccount, useContractRead } from 'wagmi';
-import { pixelminterAbi } from '../abi/pixelminterAbi';
-import { State } from '../types/types';
-import { useExportGif } from '../hooks/useExportGif';
-import { useLighthouseUpload } from '../hooks/useLighthouseUpload';
+import { pixelminterAbi } from '../../abi/pixelminterAbi';
+import { State } from '../../types/types';
+import { useExportGif } from '../../hooks/useExportGif';
+import { useLighthouseUpload } from '../../hooks/useLighthouseUpload';
 
 interface MintPixelminterButtonProps {
   state: State;

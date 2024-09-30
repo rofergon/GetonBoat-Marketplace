@@ -1,15 +1,15 @@
 /* eslint-disable no-undef */
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import PixelArtUI from './PixelArtUI';
-import { useHandleInteraction } from '../hooks/useHandleInteraction';
-import { useSetupCanvasEffect, useWindowResizeEffect } from '../hooks/useSetupCanvasEffect';
-import { handleExtractPalette } from '../utils/paletteUtils';
-import useDrawGrid from '../hooks/useDrawGrid';
-import useCanvasDisplay from '../hooks/useCanvasDisplay';
-import { Feedback, SetFeedbackFunction, BrushData } from '../types/types';
-import usePixelArtStateManager from '../hooks/usePixelArtStateManager';
-import { saveStateToCache } from '../utils/cacheState';
-import useShiftFrame from '../hooks/useShiftFrame';
+import { useHandleInteraction } from '../../hooks/useHandleInteraction';
+import { useSetupCanvasEffect, useWindowResizeEffect } from '../../hooks/useSetupCanvasEffect';
+import { handleExtractPalette } from '../../utils/paletteUtils';
+import useDrawGrid from '../../hooks/useDrawGrid';
+import useCanvasDisplay from '../../hooks/useCanvasDisplay';
+import { Feedback, SetFeedbackFunction, BrushData } from '../../types/types';
+import usePixelArtStateManager from '../../hooks/usePixelArtStateManager';
+import { saveStateToCache } from '../../utils/cacheState';
+import useShiftFrame from '../../hooks/useShiftFrame';
 import AnimationControls from './AnimationControls';
 import MintPixelminterButton from './MintPixelminterButton';
 

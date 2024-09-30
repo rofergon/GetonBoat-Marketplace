@@ -8,13 +8,13 @@ import ColorPalette from './ColorPalette';
 import CustomPalette from './CustomPalette';
 import ConnectWalletButton from './ConnectWalletButton';
 import LayerManager from './LayerPanel';
-import { State, BrushData } from '../types/types';
+import { State, BrushData } from '../../types/types';
 import { Palette, Grid, Image, Code, Droplet, Layers } from 'lucide-react';
-import { useSidePanelLogic } from '../hooks/useSidePanelLogic';
-import { usePixelCountAndDroplets } from '../hooks/usePixelCount';
+import { useSidePanelLogic } from '../../hooks/useSidePanelLogic';
+import { usePixelCountAndDroplets } from '../../hooks/usePixelCount';
 import MintBPButton from './MintBPButton';
 import MintPixelminterButton from './MintPixelminterButton';
-import { encodePixelData } from '../utils/encodingUtils';
+import { encodePixelData } from '../../utils/encodingUtils';
 
 interface SidePanelProps {
   state: State;

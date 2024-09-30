@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import SidePanel from './SidePanel';
 import ToolPanel from './ToolPanel';
-import { State, BrushData, Feedback } from '../types/types';
+import { State, BrushData, Feedback } from '../../types/types';
 import CanvasComponent from './CanvasComponent';
 import AnimationControls from './AnimationControls';
 import ReferenceImage from './ReferenceImage';

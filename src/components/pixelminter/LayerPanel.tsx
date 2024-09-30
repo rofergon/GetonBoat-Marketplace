@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Layers, X } from 'lucide-react';
-import { State, Layer } from '../types/types';
+import { State, Layer } from '../../types/types';
 import { Input } from "@/components/ui/input";
-import { getCurrentLayers } from '../hooks/layerStateManager';
+import { getCurrentLayers } from '../../hooks/layerStateManager';
 
 interface LayerManagerProps {
   state: State;

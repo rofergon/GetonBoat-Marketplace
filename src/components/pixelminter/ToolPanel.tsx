@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Paintbrush, Eraser, Trash2, Grid, RotateCcw, RotateCw, ZoomIn, ZoomOut, PaintBucket, Move, Image, Slash } from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Feedback } from '../types/types';
+import { Feedback } from '../../types/types';
 
 interface ToolPanelProps {
   state: {

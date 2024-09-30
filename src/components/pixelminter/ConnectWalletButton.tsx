@@ -16,10 +16,10 @@ import {
   Badge,
 } from '@coinbase/onchainkit/identity';
 import { useAccount, useContractReads, usePublicClient } from 'wagmi';
-import { BasePaintBrushAbi } from '../abi/BasePaintBrushAbi';
+import { BasePaintBrushAbi } from '../../abi/BasePaintBrushAbi';
 import { getContract, ContractFunctionExecutionError } from 'viem';
-import { BrushData } from '../types/types';
-import { useBrushData } from '../hooks/useBrushData';
+import { BrushData } from '../../types/types';
+import { useBrushData } from '../../hooks/useBrushData';
 
 const DefaultAvatar = () => (
   <div className="h-6 w-6 bg-gray-300 rounded-full flex items-center justify-center">
