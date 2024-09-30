@@ -28,11 +28,11 @@ const ConnectWalletButton = dynamic<ConnectWalletButtonProps>(() => import('../s
 
 export default function NFTMarketplace() {
   const [currentPage, setCurrentPage] = useState("home")
-  const [theme, setTheme] = useState("light")
+  const [theme, setTheme] = useState("dark")
   const [brushData, setBrushData] = useState<BrushData | null>(null)
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "light"
+    const savedTheme = localStorage.getItem("theme") || "dark"
     setTheme(savedTheme)
     document.documentElement.classList.toggle("dark", savedTheme === "dark")
 
