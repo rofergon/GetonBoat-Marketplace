@@ -136,6 +136,9 @@ function HomePage() {
               <p className="mx-auto max-w-[700px] text-muted-foreground md:text-xl">
                 Explora el mundo de los NFTs. Compra, vende y colecciona obras de arte digitales únicas en nuestro marketplace.
               </p>
+              <p className="text-2xl font-semibold mt-4">
+                Get on Board. Get on Base. Get on Boat.
+              </p>
             </div>
             <div className="w-full max-w-sm space-y-2">
               <form className="flex space-x-2">
