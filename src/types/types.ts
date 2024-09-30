@@ -64,6 +64,7 @@ export interface State {
   referenceImageUrl: string; // Añade esta línea
   referenceImagePosition: { x: number; y: number }; // Añade esta línea
   referenceImageSize: { width: number; height: number }; // Añade esta línea
+  fps: number; // Añadimos esta línea
 }
 
 export const initialState: State = {
@@ -105,7 +106,8 @@ export const initialState: State = {
   showReferenceImage: false, // Añadimos esta línea
   referenceImageUrl: '', // Añadimos esta línea
   referenceImagePosition: { x: 0, y: 0 }, // Añadimos esta línea
-  referenceImageSize: { width: 0, height: 0 } // Añadimos esta línea
+  referenceImageSize: { width: 0, height: 0 }, // Añadimos esta línea
+  fps: 30, // Valor inicial para FPS
 };
 
 export interface Feedback {

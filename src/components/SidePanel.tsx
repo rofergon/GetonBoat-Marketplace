@@ -13,6 +13,7 @@ import { Palette, Grid, Image, Code, Droplet, Layers } from 'lucide-react';
 import { useSidePanelLogic } from '../hooks/useSidePanelLogic';
 import { usePixelCountAndDroplets } from '../hooks/usePixelCount';
 import MintBPButton from './MintBPButton';
+import MintPixelminterButton from './MintPixelminterButton';
 import { encodePixelData } from '../utils/encodingUtils';
 
 interface SidePanelProps {
@@ -29,6 +30,7 @@ interface SidePanelProps {
   updateLayerName: (id: string, name: string) => void;
   brushData: BrushData | null;
   updateBrushData: (data: BrushData | null) => void;
+  fps: number; // Asegúrate de añadir esta prop
 }
 
 const SidePanel: React.FC<SidePanelProps> = ({
@@ -44,7 +46,8 @@ const SidePanel: React.FC<SidePanelProps> = ({
   setActiveLayerId,
   updateLayerName,
   brushData,
-  updateBrushData
+  updateBrushData,
+  fps
 }) => {
   const [encodedData, setEncodedData] = useState<string | null>(null);
 
@@ -169,7 +172,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
         onClick={handleEncode}
         className="w-full bg-purple-600 hover:bg-purple-700 transition-colors duration-300 flex items-center justify-center p-2 rounded-md shadow-sm text-sm"
       >
-       Mint to BasePaint
+        Commit to BasePaint
       </Button>
 
       {encodedData && (
@@ -177,9 +180,11 @@ const SidePanel: React.FC<SidePanelProps> = ({
           state={state} 
           encodedData={encodedData}
           resetEncodedState={resetEncodedState}
-          onEncode={handleEncode} // Añadimos esta línea
+          onEncode={handleEncode}
         />
       )}
+
+      <MintPixelminterButton state={state} fps={fps} />
 
       <div className="bg-gray-800 p-2 rounded-md shadow-sm">
         <p className="text-xs font-semibold flex items-center">

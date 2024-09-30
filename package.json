@@ -9,6 +9,7 @@
     "@babel/preset-react": "^7.24.7",
     "@coinbase/onchainkit": "^0.31.3",
     "@jimp/gif": "^0.22.12",
+    "@lighthouse-web3/sdk": "^0.3.7",
     "@openzeppelin/contracts": "^5.0.2",
     "@radix-ui/react-collapsible": "^1.1.0",
     "@radix-ui/react-slider": "^1.2.0",

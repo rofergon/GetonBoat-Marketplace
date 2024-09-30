@@ -1,0 +1,148 @@
+Any kind of file can be uploaded to Lighthouse refer to the code example given below. For developers building on other programming languages use the API directly.
+
+Lighthouse currently allows a maximum file size of 24GB to be uploaded in a single request.
+
+JS SDK
+API
+CLI
+Method 1: NodeJS:
+
+Copy
+import lighthouse from '@lighthouse-web3/sdk'
+
+/**
+ * This function allows you to upload a file or a folder to Lighthouse.
+ * 
+ * @param {string} path - The location of your file or folder.
+ * @param {string} apiKey - Your personal API key for Lighthouse.
+ * @param {object} dealParameters - Custom parameters for file storage deals(check FVM section).
+ * @return {object} - Returns details about the uploaded file.
+*/
+const uploadResponse = await lighthouse.upload(
+  '/home/cosmos/Desktop/wow.jpg', 
+  'YOUR_API_KEY_HERE'
+)
+
+console.log(uploadResponse)
+
+/*Sample response
+{
+  data: {
+    Name: 'wow.jpg',
+    Hash: 'QmUHDKv3NNL1mrg4NTW4WwJqetzwZbGNitdjr2G6Z5Xe6s',
+    Size: '31735'
+  }
+}
+*/
+Method 2: Browser
+
+Copy
+import React from "react"
+import lighthouse from '@lighthouse-web3/sdk'
+
+function App() {
+
+  const progressCallback = (progressData) => {
+    let percentageDone =
+      100 - (progressData?.total / progressData?.uploaded)?.toFixed(2)
+    console.log(percentageDone)
+  }
+
+  const uploadFile = async(file) =>{
+    // Push file to lighthouse node
+    // Both file and folder are supported by upload function
+    // Third parameter is for multiple files, if multiple files are to be uploaded at once make it true
+    // Fourth parameter is the deal parameters, default null
+    const output = await lighthouse.upload(file, "YOUR_API_KEY", null, progressCallback)
+    console.log('File Status:', output)
+    /*
+      output:
+        data: {
+          Name: "filename.txt",
+          Size: 88000,
+          Hash: "QmWNmn2gr4ZihNPqaC5oTeePsHvFtkWNpjY3cD6Fd5am1w"
+        }
+      Note: Hash in response is CID.
+    */
+
+      console.log('Visit at https://gateway.lighthouse.storage/ipfs/' + output.data.Hash)
+  }
+
+  return (
+    <div className="App">
+      <input onChange={e=>uploadFile(e.target.files)} type="file" />
+    </div>
+  )
+}
+
+export default App
+
+
+
+Retrieve File
+Files stored on the platform can be retrieved directly via the IPFS gateway using the Content Identifier (CID) associated with each file. Here's how to retrieve a file using the CID.
+
+JS
+CLI
+Web Browser
+Copy
+const fs = require('fs');
+const fetch = require('node-fetch'); // node-fetch must be installed if you are using Node version less than 18
+
+const downloadFile = (cid, path) => {
+  fetch(`https://gateway.lighthouse.storage/ipfs/${cid}`)
+    .then(response => {
+      if (response.ok) return response.buffer();
+      throw new Error('Network response was not ok.');
+    })
+    .then(buffer => {
+      fs.writeFile(path, buffer, () => {
+        console.log(`File saved to ${path}`);
+      });
+    })
+    .catch(error => {
+      console.error('Failed to save the file:', error);
+    });
+};
+
+// Replace 'CID' with the actual Content Identifier of your file and 'path' with your desired file path.
+downloadFile('CID', 'path/to/your/directory/filename.ext');
+
+To retrieve a file using a web browser, simply navigate to the following URL:
+
+https://gateway.lighthouse.storage/ipfs/CID
+
+Replace CID with the actual Content Identifier of the file you wish to access.
+
+
+File Info
+Use file info API to get metadata of your file stored at Lighthouse.
+
+JS SDK
+API
+Copy
+const fileInfo = async() => {
+  /*
+    @param {string} cid - cid of file.
+  */
+  const cid = "QmeMsykMDyD76zpAbinCy1cjb1KL6CVNBfB44am15U1XHh"
+  const fileInfo = await lighthouse.getFileInfo(cid)
+  /* Sample Response
+    {
+      data: {
+        fileSizeInBytes: '95077',
+        cid: 'QmeMsykMDyD76zpAbinCy1cjb1KL6CVNBfB44am15U1XHh',
+        encryption: false,
+        fileName: 'itachi.jpg',
+        mimeType: 'image/jpeg',
+        txHash: ''
+      }
+    }
+  */
+}
+
+
+
+
+
+

@@ -5,7 +5,6 @@ import ToolPanel from './ToolPanel';
 import { State, BrushData, Feedback } from '../types/types';
 import CanvasComponent from './CanvasComponent';
 import AnimationControls from './AnimationControls';
-import usePixelArtStateManager from '../hooks/usePixelArtStateManager';
 import ReferenceImage from './ReferenceImage';
 
 interface PixelArtUIProps {
@@ -75,7 +74,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
   onionSkinningCanvas,
   day
 }) => {
-  const [fps, setFps] = useState(7);
+  const [fps, setFps] = useState(30);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(true);
   const [isClient, setIsClient] = useState(false);
 
@@ -183,11 +182,12 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
             updateLayerName={updateLayerName}
             brushData={brushData}
             updateBrushData={updateBrushData}
+            fps={fps}
           />
         </div>
       </div>
 
-      <div className="w-full">
+      <div className="w-full bg-gray-800 border-t border-gray-700">
         <AnimationControls
           state={state}
           fps={fps}
@@ -197,36 +197,38 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
           updateCanvasDisplay={updateCanvasDisplay}
           day={day}
         />
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <label htmlFor="onionSkinningToggle" className="text-white">
-          Onion Skinning:
-        </label>
-        <input
-          id="onionSkinningToggle"
-          type="checkbox"
-          checked={state.onionSkinning}
-          onChange={toggleOnionSkinning}
-          aria-label="Toggle onion skinning"
-        />
-        {state.onionSkinning && (
-          <>
-            <label htmlFor="onionSkinningOpacity" className="text-white">
-              Opacity:
+        
+        <div className="flex items-center p-2">
+          <div className="flex items-center space-x-2">
+            <label htmlFor="onionSkinningToggle" className="text-white">
+              Onion Skinning:
             </label>
             <input
-              id="onionSkinningOpacity"
-              type="range"
-              min="0"
-              max="1"
-              step="0.1"
-              value={state.onionSkinningOpacity}
-              onChange={(e) => updateOnionSkinningOpacity(parseFloat(e.target.value))}
-              aria-label="Adjust onion skinning opacity"
+              id="onionSkinningToggle"
+              type="checkbox"
+              checked={state.onionSkinning}
+              onChange={toggleOnionSkinning}
+              aria-label="Toggle onion skinning"
             />
-          </>
-        )}
+            {state.onionSkinning && (
+              <>
+                <label htmlFor="onionSkinningOpacity" className="text-white">
+                  Opacity:
+                </label>
+                <input
+                  id="onionSkinningOpacity"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={state.onionSkinningOpacity}
+                  onChange={(e) => updateOnionSkinningOpacity(parseFloat(e.target.value))}
+                  aria-label="Adjust onion skinning opacity"
+                />
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
       {state.showReferenceImage && (

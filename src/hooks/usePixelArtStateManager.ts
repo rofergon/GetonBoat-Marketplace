@@ -34,6 +34,7 @@ const usePixelArtStateManager = () => {
         referenceImageUrl: cachedState.referenceImageUrl || '',
         referenceImagePosition: cachedState.referenceImagePosition || { x: 0, y: 0 },
         referenceImageSize: cachedState.referenceImageSize || { width: 340, height: 460 },
+        fps: cachedState.fps || 30, // Añadimos esta línea
       };
     }
 
@@ -67,6 +68,7 @@ const usePixelArtStateManager = () => {
       referenceImageUrl: '',
       referenceImagePosition: { x: 0, y: 0 },
       referenceImageSize: { width: 340, height: 460 },
+      fps: 30, // Valor inicial para FPS
     };
   }, [cachedState, canvasSize]);
 
@@ -174,6 +176,10 @@ const usePixelArtStateManager = () => {
     },
   }), [updateCurrentFrame, updateFrames, state.activeLayerId, updateState]);
 
+  const fpsActions = useMemo(() => ({
+    setFps: (newFps: number) => updateState({ fps: newFps }),
+  }), [updateState]);
+
   const syncPixelGridWithCurrentFrame = () => {
     // Implementa la lógica necesaria
   };
@@ -207,6 +213,7 @@ const usePixelArtStateManager = () => {
     updateState,
     ...layerActions,
     ...pixelActions,
+    ...fpsActions, // Añadimos las acciones de FPS
     canUndo,
     canRedo,
     syncPixelGridWithCurrentFrame,

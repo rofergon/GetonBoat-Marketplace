@@ -10,6 +10,8 @@ import { Feedback, SetFeedbackFunction, BrushData } from '../types/types';
 import usePixelArtStateManager from '../hooks/usePixelArtStateManager';
 import { saveStateToCache } from '../utils/cacheState';
 import useShiftFrame from '../hooks/useShiftFrame';
+import AnimationControls from './AnimationControls';
+import MintPixelminterButton from './MintPixelminterButton';
 
 const PixelArt: React.FC = () => {
   const {
@@ -31,7 +33,7 @@ const PixelArt: React.FC = () => {
     updateLayerName,
     updateDay,
     toggleOnionSkinning,
-    updateOnionSkinningOpacity
+    updateOnionSkinningOpacity,
   } = usePixelArtStateManager();
 
   const [feedback, setFeedback] = useState<Feedback>({
@@ -243,7 +245,39 @@ const PixelArt: React.FC = () => {
 
   return (
     <div>
-      {memoizedPixelArtUI}
+      <PixelArtUI
+        state={state}
+        containerRef={containerRef}
+        canvasRef={canvasRef}
+        gridCanvasRef={gridCanvasRef}
+        updateState={updateState}
+        feedback={feedback}
+        handleHistoryAction={handleHistoryAction}
+        updateCanvasDisplay={updateCanvasDisplay}
+        saveState={() => saveState(state.currentFrameIndex)}
+        drawGrid={drawGrid}
+        handleExtractPalette={handleExtractPaletteCallback}
+        handleZoom={handleZoom}
+        clearCanvas={handleClearCanvas}
+        onGridSizeChange={handleGridSizeChange}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        handleShiftFrame={handleShiftFrame}
+        addLayer={addLayer}
+        removeLayer={removeLayer}
+        updateLayerVisibility={updateLayerVisibility}
+        updateLayerOpacity={updateLayerOpacity}
+        setActiveLayerId={setActiveLayerId}
+        syncPixelGridWithCurrentFrame={syncPixelGridWithCurrentFrame}
+        updateLayerName={updateLayerName}
+        updateBrushData={updateBrushData}
+        brushData={state.brushData}
+        updateDay={updateDay}
+        toggleOnionSkinning={toggleOnionSkinning}
+        updateOnionSkinningOpacity={updateOnionSkinningOpacity}
+        onionSkinningCanvas={onionSkinningCanvasRef}
+        day={state.day ?? 1} // Usa 1 como valor por defecto si state.day es null
+      />
     </div>
   );
 };

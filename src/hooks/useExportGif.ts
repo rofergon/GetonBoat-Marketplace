@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import GIF from 'gif.js';
 import { State, Layer } from '../types/types';
 
@@ -36,92 +36,93 @@ export function useExportGif(state: State, fps: number) {
     return { minX, minY, maxX, maxY };
   };
 
-  const exportGif = async () => {
+  const exportGif = useCallback((): Promise<Blob> => {
     if (state.frames.length === 0) {
-      alert("No frames to export. Please add frames first.");
-      return;
+      return Promise.reject(new Error("No frames to export. Please add frames first."));
     }
 
     setIsExporting(true);
-    try {
-      console.log('Starting GIF export');
-
-      const { minX, minY, maxX, maxY } = calculatePaintedArea(state.frames);
-      const paintedWidth = maxX - minX + 1;
-      const paintedHeight = maxY - minY + 1;
-      const margin = 300; 
-
-      const zoomFactor = Math.min(
-        (state.canvasSize - 2 * margin) / paintedWidth,
-        (state.canvasSize - 2 * margin) / paintedHeight
-      );
-
-      const gif = new GIF({
-        workers: 2,
-        quality: 10,
-        width: state.canvasSize,
-        height: state.canvasSize,
-        workerScript: '/gif.worker.js'
-      });
-
-      let backgroundImage: HTMLImageElement | null = null;
-      if (state.showBackgroundImage && state.dailyImageUrl) {
+    
+    return new Promise<Blob>((resolve, reject) => {
+      const processFrames = async () => {
         try {
-          backgroundImage = await loadImage(state.dailyImageUrl);
-        } catch (error) {
-          console.error('Failed to load background image:', error);
-        }
-      }
+          console.log('Starting GIF export');
 
-      for (const frame of state.frames) {
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = state.canvasSize;
-        tempCanvas.height = state.canvasSize;
-        const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
-        if (tempCtx) {
-          tempCtx.save();
-          tempCtx.translate(margin, margin);
-          tempCtx.scale(zoomFactor, zoomFactor);
-          tempCtx.translate(-minX, -minY);
+          const { minX, minY, maxX, maxY } = calculatePaintedArea(state.frames);
+          const paintedWidth = maxX - minX + 1;
+          const paintedHeight = maxY - minY + 1;
+          const margin = 300; 
 
-          if (backgroundImage) {
-            tempCtx.drawImage(backgroundImage, 0, 0, state.gridSize, state.gridSize);
-          }
+          const zoomFactor = Math.min(
+            (state.canvasSize - 2 * margin) / paintedWidth,
+            (state.canvasSize - 2 * margin) / paintedHeight
+          );
 
-          frame.layers.forEach((layer: Layer) => {
-            if (layer.visible) {
-              tempCtx.globalAlpha = layer.opacity;
-              layer.pixels.forEach((color, key) => {
-                const [x, y] = key.split(',').map(Number);
-                tempCtx.fillStyle = color;
-                tempCtx.fillRect(x, y, 1, 1);
-              });
-            }
+          const gif = new GIF({
+            workers: 2,
+            quality: 4,
+            width: state.canvasSize,
+            height: state.canvasSize,
+            workerScript: '/gif.worker.js'
           });
 
-          tempCtx.restore();
-          gif.addFrame(tempCanvas, { delay: 1000 / fps });
+          let backgroundImage: HTMLImageElement | null = null;
+          if (state.showBackgroundImage && state.dailyImageUrl) {
+            try {
+              backgroundImage = await loadImage(state.dailyImageUrl);
+            } catch (error) {
+              console.error('Failed to load background image:', error);
+            }
+          }
+
+          for (const frame of state.frames) {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = state.canvasSize;
+            tempCanvas.height = state.canvasSize;
+            const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+            if (tempCtx) {
+              tempCtx.save();
+              tempCtx.translate(margin, margin);
+              tempCtx.scale(zoomFactor, zoomFactor);
+              tempCtx.translate(-minX, -minY);
+
+              if (backgroundImage) {
+                tempCtx.drawImage(backgroundImage, 0, 0, state.gridSize, state.gridSize);
+              }
+
+              frame.layers.forEach((layer: Layer) => {
+                if (layer.visible) {
+                  tempCtx.globalAlpha = layer.opacity;
+                  layer.pixels.forEach((color, key) => {
+                    const [x, y] = key.split(',').map(Number);
+                    tempCtx.fillStyle = color;
+                    tempCtx.fillRect(x, y, 1, 1);
+                  });
+                }
+              });
+
+              tempCtx.restore();
+              gif.addFrame(tempCanvas, { delay: 1000 / fps });
+            }
+          }
+
+          gif.on('finished', (blob) => {
+            setIsExporting(false);
+            console.log('GIF export completed successfully');
+            resolve(blob);
+          });
+
+          gif.render();
+        } catch (error) {
+          console.error("Error creating GIF:", error);
+          reject(error);
+          setIsExporting(false);
         }
-      }
+      };
 
-      gif.on('finished', (blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'pixel-art-animation.gif';
-        link.click();
-        URL.revokeObjectURL(url);
-        setIsExporting(false);
-        console.log('GIF export completed successfully');
-      });
-
-      gif.render();
-    } catch (error) {
-      console.error("Error creating GIF:", error);
-      alert("There was an error creating the GIF. Please check the console for more details.");
-      setIsExporting(false);
-    }
-  };
+      processFrames();
+    });
+  }, [state, fps]);
 
   return { exportGif, isExporting };
 }
