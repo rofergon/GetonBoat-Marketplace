@@ -6,12 +6,24 @@ import { Input } from "../src/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../src/components/ui/tabs"
 import { ArrowRight, Copy, ExternalLink, MessageCircle, Moon, Search, Share2, Sun, Zap } from "lucide-react"
 import dynamic from 'next/dynamic'
-import ConnectWalletButton from '../src/components/ConnectWalletButton'
 import { BrushData } from '../src/types/types'
 
-const PixelArt = dynamic(() => import('../src/components/PixelArt'), {
+interface PixelArtProps {
+  updateBrushData: (data: BrushData | null) => void;
+}
+
+const PixelArt = dynamic<PixelArtProps>(() => import('../src/components/PixelArt'), {
   ssr: false,
   loading: () => <div>Cargando PixelArt...</div>
+});
+
+interface ConnectWalletButtonProps {
+  updateBrushData: (data: BrushData | null) => void;
+}
+
+const ConnectWalletButton = dynamic<ConnectWalletButtonProps>(() => import('../src/components/ConnectWalletButton'), {
+  ssr: false,
+  loading: () => <div>Cargando ConnectWalletButton...</div>
 });
 
 export default function NFTMarketplace() {
@@ -84,7 +96,7 @@ export default function NFTMarketplace() {
           >
             Painter
           </Link>
-          <ConnectWalletButton />
+          <ConnectWalletButton updateBrushData={updateBrushData} />
           <Button variant="ghost" size="icon" onClick={toggleTheme}>
             {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             <span className="sr-only">Cambiar tema</span>
@@ -94,7 +106,7 @@ export default function NFTMarketplace() {
       <main className="flex-1">
         {currentPage === "home" && <HomePage />}
         {currentPage === "profile" && <ProfilePage />}
-        {currentPage === "painter" && <PainterPage />}
+        {currentPage === "painter" && <PainterPage updateBrushData={updateBrushData} />}
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-muted-foreground">© 2024 NFT Marketplace. Todos los derechos reservados.</p>
@@ -372,10 +384,10 @@ function ProfilePage() {
   )
 }
 
-function PainterPage() {
+function PainterPage({ updateBrushData }: { updateBrushData: (data: BrushData | null) => void }) {
   return (
     <div>
-      <PixelArt />
+      <PixelArt updateBrushData={updateBrushData} />
     </div>
   )
 }
