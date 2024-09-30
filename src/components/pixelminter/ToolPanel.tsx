@@ -40,27 +40,23 @@ const ToolPanel: React.FC<ToolPanelProps> = ({
     <Button
       onClick={onClick}
       className={`w-[35px] h-[35px] p-[9px] relative ${feedback[title] ? 'scale-100' : ''} transition-all duration-200 ${
-        isActive ? 'bg-primary text-primary-foreground ring-2 ring-blue-500 ring-opacity-50' : 'bg-[#1f2a37] text-[#6b7280]'
+        isActive ? 'bg-blue-600 text-white ring-2 ring-blue-500' : 'bg-gray-700 text-gray-400'
       }`}
       title={title}
       disabled={isClient ? isDisabled : undefined}
     >
-      {React.createElement(icon, { className: `h-full w-full ${isActive ? 'text-blue-550' : ''}` })}
+      {React.createElement(icon, { className: `h-full w-full ${isActive ? 'text-white' : 'text-gray-400'}` })}
     </Button>
   );
 
   return (
-    <div className="w-12 bg-gray-900 flex flex-col items-center py-3 space-y-1.5 border-r border-gray-800">
+    <div className="w-12 bg-gray-800 flex flex-col items-center py-3 space-y-2 border-r border-gray-700">
       <div className={`relative ${feedback['colorPicker'] ? 'scale-95' : ''} transition-all duration-200`}>
         <input
           type="color"
           value={state.color}
           onChange={(e) => updateState({ color: e.target.value })}
-          className="w-[35px] h-[35px] p-0 border-2 border-gray-600 bg-transparent rounded-full cursor-pointer transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-          style={{
-            appearance: 'none',
-            WebkitAppearance: 'none',
-          }}
+          className="w-[35px] h-[35px] p-0 border-2 border-gray-600 bg-transparent rounded-full cursor-pointer transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500"
           title="Choose Color"
         />
         <div
@@ -85,7 +81,6 @@ const ToolPanel: React.FC<ToolPanelProps> = ({
       {renderToolButton(ZoomOut, "zoomOut", () => handleZoom(false))}
       {renderToolButton(ZoomIn, "zoomIn", () => handleZoom(true))}
       {renderToolButton(Image, "toggleReferenceImage", () => updateState({ showReferenceImage: !state.showReferenceImage }), state.showReferenceImage)}
-      
     </div>
   );
 };

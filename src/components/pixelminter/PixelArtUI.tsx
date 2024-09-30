@@ -209,6 +209,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
               checked={state.onionSkinning}
               onChange={toggleOnionSkinning}
               aria-label="Toggle onion skinning"
+              className="h-4 w-4 text-blue-600 bg-gray-700 rounded focus:ring-blue-500"
             />
             {state.onionSkinning && (
               <>
@@ -224,6 +225,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
                   value={state.onionSkinningOpacity}
                   onChange={(e) => updateOnionSkinningOpacity(parseFloat(e.target.value))}
                   aria-label="Adjust onion skinning opacity"
+                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
                 />
               </>
             )}

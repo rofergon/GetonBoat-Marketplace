@@ -12,6 +12,7 @@ import { pixelminterAbi } from '../../abi/pixelminterAbi';
 import { State } from '../../types/types';
 import { useExportGif } from '../../hooks/useExportGif';
 import { useLighthouseUpload } from '../../hooks/useLighthouseUpload';
+import { Button } from '../ui/button';
 
 interface MintPixelminterButtonProps {
   state: State;
@@ -136,13 +137,13 @@ const MintPixelminterButton: React.FC<MintPixelminterButtonProps> = ({ state, fp
     <div className="flex flex-col items-center gap-2">
       {error && <p className="text-red-500 text-sm">{error}</p>}
       {!ipfsHash ? (
-        <button
+        <Button
           onClick={prepareAndMint}
-          className="bg-purple-600 text-white py-2 px-4 rounded"
+          className="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition-colors"
           disabled={isExporting || uploading}
         >
           {isExporting ? 'Exporting GIF...' : uploading ? 'Loading...' : 'Mint animation WIP'}
-        </button>
+        </Button>
       ) : !isTransactionComplete ? (
         <Transaction
           key={key}
@@ -150,10 +151,10 @@ const MintPixelminterButton: React.FC<MintPixelminterButtonProps> = ({ state, fp
           contracts={contracts}
           onStatus={handleOnStatus}
         >
-          <TransactionButton text="Mint animation WIP" />
+          <TransactionButton text="Mint animation WIP" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors" />
           <TransactionStatus>
-            <TransactionStatusLabel />
-            {transactionStatus !== 'success' && <TransactionStatusAction />}
+            <TransactionStatusLabel className="text-gray-300" />
+            {transactionStatus !== 'success' && <TransactionStatusAction className="text-blue-500" />}
           </TransactionStatus>
         </Transaction>
       ) : (

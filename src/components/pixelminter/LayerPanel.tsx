@@ -31,15 +31,17 @@ const LayerManager: React.FC<LayerManagerProps> = ({
   const [editingLayerId, setEditingLayerId] = useState<string | null>(null);
 
   return (
-    <div className="bg-gray-800 p-2 rounded-md shadow-sm">
-      <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-700">
-        <h3 className="text-xs font-semibold flex items-center">
+    <div className="bg-gray-800 p-4 rounded-md shadow-sm">
+      <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-700">
+        <h3 className="text-xs font-semibold flex items-center text-white">
           <Layers className="mr-1" size={14} aria-hidden="true" /> Layers
         </h3>
-        <Button onClick={addLayer} className="text-xs py-0 px-2 h-6">Add Layer</Button>
+        <Button onClick={addLayer} className="text-xs py-0 px-2 h-6 bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white">
+          Add Layer
+        </Button>
       </div>
       {layers.map((layer: Layer) => (
-        <div key={layer.id} className="flex items-center justify-between mb-2 pb-2 border-b border-gray-700 text-xs">
+        <div key={layer.id} className="flex items-center justify-between mb-3 pb-2 border-b border-gray-700 text-xs">
           {editingLayerId === layer.id ? (
             <Input
               value={layer.name}
@@ -51,7 +53,7 @@ const LayerManager: React.FC<LayerManagerProps> = ({
             />
           ) : (
             <span 
-              className={`flex-grow mr-2 truncate cursor-pointer ${layer.id === state.activeLayerId ? 'font-bold' : ''}`}
+              className={`flex-grow mr-2 truncate cursor-pointer ${layer.id === state.activeLayerId ? 'font-bold text-blue-400' : 'text-gray-300'}`}
               onClick={() => setActiveLayerId(layer.id)}
               onDoubleClick={() => setEditingLayerId(layer.id)}
             >
@@ -77,7 +79,7 @@ const LayerManager: React.FC<LayerManagerProps> = ({
               disabled={layers.length === 1}
               variant="destructive"
               size="icon"
-              className="h-4 w-4 p-0"
+              className="h-6 w-6 p-0 bg-red-600 hover:bg-red-700 text-white rounded-full"
             >
               <X size={10} />
             </Button>

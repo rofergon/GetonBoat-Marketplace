@@ -11,6 +11,7 @@ import { useAccount } from 'wagmi';
 import { BasePaintAbi } from '../../abi/BasePaintAbi';
 import { State } from '../../types/types';
 import { calculateDay } from '../../utils/dateUtils';
+import { Button } from '../ui/button';
 
 interface MintBPButtonProps {
   state: State;
@@ -70,12 +71,12 @@ const MintBPButton: React.FC<MintBPButtonProps> = ({
   return (
     <div className="flex flex-col items-center gap-2">
       {!encodedData ? (
-        <button
+        <Button
           onClick={onEncode}
-          className="bg-purple-600 text-white py-2 px-4 rounded"
+          className="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition-colors"
         >
           Encode BP
-        </button>
+        </Button>
       ) : !isTransactionComplete ? (
         <Transaction
           key={key}
@@ -83,10 +84,10 @@ const MintBPButton: React.FC<MintBPButtonProps> = ({
           contracts={contracts}
           onStatus={handleOnStatus}
         >
-          <TransactionButton text="Mint BP" />
+          <TransactionButton text="Mint BP" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors" />
           <TransactionStatus>
-            <TransactionStatusLabel />
-            {transactionStatus !== 'success' && <TransactionStatusAction />}
+            <TransactionStatusLabel className="text-gray-300" />
+            {transactionStatus !== 'success' && <TransactionStatusAction className="text-blue-500" />}
           </TransactionStatus>
         </Transaction>
       ) : (

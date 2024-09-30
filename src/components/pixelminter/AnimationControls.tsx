@@ -84,7 +84,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
     updateCanvasDisplay();
   }, [updateState, updateCanvasDisplay]);
 
-  const buttonStyle = useMemo(() => "w-9 h-9 p-2 bg-[#1f2a37] text-[#6b7280] hover:bg-[#374151] hover:text-[#9ca3af] focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50", []);
+  const buttonStyle = useMemo(() => "w-9 h-9 p-2 bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded", []);
 
   const isLargeScreen = useMediaQuery({ minWidth: 1024 });
 
@@ -121,7 +121,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
                 onValueChange={value => setFps(value[0])}
                 className="w-32"
               />
-              <span className="text-sm font-medium">{fps} FPS</span>
+              <span className="text-sm font-medium text-white">{fps} FPS</span>
             </div>
             <div className="flex items-center gap-2 font-roboto ml-4">
               <span className="flex items-center gap-1 text-red-600 animate-pulse">
@@ -130,7 +130,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
                   <circle cx={1} cy={1} r={1} />
                 </svg>
               </span>
-              00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}
+              <span className="text-sm text-white">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
             </div>
           </>
         )}
@@ -144,7 +144,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
                 <circle cx={1} cy={1} r={1} />
               </svg>
             </span>
-            00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}
+            <span className="text-sm text-white">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
           </div>
         )}
         <Button onClick={handleDownloadGif} className={`${buttonStyle} flex`}>
@@ -155,7 +155,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
           onCheckedChange={setShowFrames}
           className="data-[state=checked]:bg-blue-500"
         />
-        <span className="text-sm hidden sm:inline">Show Frames</span>
+        <span className="text-sm hidden sm:inline text-white">Show Frames</span>
       </div>
     </div>
   ), [isPlaying, setIsPlaying, changeFrame, state.frames.length, state.currentFrameIndex, fps, setFps, isLargeScreen, seconds, frame, handleDownloadGif, showFrames, setShowFrames]);

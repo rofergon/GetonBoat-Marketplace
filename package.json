@@ -23,6 +23,7 @@
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.5.1",
     "@wagmi/core": "^1.4.13",
+    "alchemy-sdk": "^3.4.2",
     "axios": "^1.6.2",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
