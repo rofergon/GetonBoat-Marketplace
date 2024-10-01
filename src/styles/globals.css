@@ -112,7 +112,19 @@
     --bg-ock-warning: theme(colors.orange.400);
     --bg-ock-success: theme(colors.lime.700);
     --bg-ock-default-reverse: theme(colors.gray.50);
-    
+
+  }
+
+  .brand {
+    height: 2.5rem;
+    width: 6rem;
+    background-image: url('/logo.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
+  .dark .brand {
+    background-image: url('/logo-white.svg');
   }
 }
 

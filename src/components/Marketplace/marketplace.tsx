@@ -4,7 +4,7 @@ import { Button } from "../ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card"
 import { Input } from "../ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
-import { ArrowRight, Copy, ExternalLink, MessageCircle, Moon, Search, Share2, Sun, Zap } from "lucide-react"
+import { ArrowRight, Copy, ExternalLink, MessageCircle, Moon, Search, Share2, Sun } from "lucide-react"
 import dynamic from 'next/dynamic'
 import { BrushData } from '../../types/types'
 import Profile from './Profile'
@@ -66,9 +66,8 @@ export default function NFTMarketplace() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link className="flex items-center justify-center" href="#" onClick={() => setCurrentPage("home")}>
-          <Zap className="h-6 w-6" />
-          <span className="sr-only">NFT Marketplace</span>
+        <Link className="" href="#" onClick={() => setCurrentPage("home")}>
+          <div className="brand my-2"></div>
         </Link>
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
