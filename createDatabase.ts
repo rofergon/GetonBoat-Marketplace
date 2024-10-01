@@ -49,9 +49,17 @@ async function createTables() {
         UNIQUE(owner_address, token_id, contract_address)
       )
     `);
-    console.log('Tabla NFTs creada exitosamente.');
+    
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS LastUpdate (
+        owner_address TEXT PRIMARY KEY,
+        last_update_timestamp INTEGER NOT NULL
+      )
+    `);
+    
+    console.log('Tablas creadas exitosamente.');
   } catch (error) {
-    console.error('Error al crear la tabla NFTs:', error);
+    console.error('Error al crear las tablas:', error);
   } finally {
     await client.close();
   }
