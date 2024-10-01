@@ -44,20 +44,20 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
     <div className="flex justify-end">
       <Wallet>
         <ConnectWallet
-          className="bg-[var(--bg-ock-primary)] hover:bg-[var(--bg-ock-primary-hover)] active:bg-[var(--bg-ock-primary-active)] text-[var(--text-ock-inverse)] font-bold py-2 px-4 rounded transition-colors duration-200"
+          className="font-bold py-2 px-3 rounded-full transition-colors duration-200 bg-[var(--bg-ock-primary)] hover:bg-[var(--bg-ock-primary-hover)] active:bg-[var(--bg-ock-primary-active)] text-[var(--text-ock-inverse)]"
           withWalletAggregator
           text="Connect Wallet"
         >
-          <Avatar 
-            className="h-6 w-6 mr-2" 
+          <Avatar
+            className="h-6 w-6 mr-2"
             defaultComponent={<DefaultAvatar />}
             loadingComponent={<LoadingAvatar />}
           />
           <Name className="text-[var(--text-ock-inverse)]" />
         </ConnectWallet>
         <WalletDropdown>
-          <Identity 
-            className="px-4 pt-3 pb-2 hover:bg-[var(--bg-ock-default-hover)]" 
+          <Identity
+            className="px-4 pt-3 pb-2 hover:bg-[var(--bg-ock-default-hover)]"
             hasCopyAddressOnClick
             schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
           >
@@ -87,9 +87,9 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
               </div>
             )}
           </Identity>
-          <WalletDropdownLink 
-            className="hover:bg-[var(--bg-ock-default-hover)] px-4 py-2 flex items-center text-[var(--text-ock-foreground)]" 
-            icon="wallet" 
+          <WalletDropdownLink
+            className="hover:bg-[var(--bg-ock-default-hover)] px-4 py-2 flex items-center text-[var(--text-ock-foreground)]"
+            icon="wallet"
             href="https://wallet.coinbase.com"
           >
             Wallet

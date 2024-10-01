@@ -69,7 +69,7 @@ export default function NFTMarketplace() {
         <Link className="" href="#" onClick={() => setCurrentPage("home")}>
           <div className="brand my-2"></div>
         </Link>
-        <nav className="ml-auto flex gap-4 sm:gap-6">
+        <nav className="ml-auto gap-4 sm:gap-6 flex items-center justify-center">
           <Link
             className="text-sm font-medium hover:underline underline-offset-4"
             href="#"

@@ -47,9 +47,9 @@
     --bg-ock-inverse: theme(colors.gray.100);
     --bg-ock-inverse-hover: theme(colors.gray.200);
     --bg-ock-inverse-active: theme(colors.gray.300);
-    --bg-ock-primary: theme(colors.indigo.600);
-    --bg-ock-primary-hover: theme(colors.indigo.700);
-    --bg-ock-primary-active: theme(colors.indigo.800);
+    --bg-ock-primary: #0051FE;
+    --bg-ock-primary-hover: #003fc5;
+    --bg-ock-primary-active: #0051FE;
     --bg-ock-secondary: theme(colors.slate.200);
     --bg-ock-secondary-hover: theme(colors.slate.300);
     --bg-ock-secondary-active: theme(colors.slate.400);
@@ -85,7 +85,7 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
 
-    --text-ock-inverse: theme(colors.gray.950);
+    --text-ock-inverse: white;
     --text-ock-foreground: theme(colors.gray.50);
     --text-ock-foreground-muted: theme(colors.gray.400);
     --text-ock-error: theme(colors.rose.400);
@@ -102,9 +102,9 @@
     --bg-ock-inverse: theme(colors.gray.900);
     --bg-ock-inverse-hover: theme(colors.gray.800);
     --bg-ock-inverse-active: theme(colors.gray.700);
-    --bg-ock-primary: theme(colors.indigo.400);
-    --bg-ock-primary-hover: theme(colors.indigo.300);
-    --bg-ock-primary-active: theme(colors.indigo.200);
+    --bg-ock-primary: #1f2937;
+    --bg-ock-primary-hover: #151e2b;
+    --bg-ock-primary-active: #1f2937;
     --bg-ock-secondary: theme(colors.slate.800);
     --bg-ock-secondary-hover: theme(colors.slate.700);
     --bg-ock-secondary-active: theme(colors.slate.600);
