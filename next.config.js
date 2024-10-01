@@ -3,7 +3,7 @@ const nextConfig = {
     reactStrictMode: true,
 
     images: {
-      domains: ['basepaint.xyz', 'pixelminter.xyz', 'localhost'], 
+      domains: ['basepaint.xyz', 'pixelminter.xyz', 'localhost', 'res.cloudinary.com', 'ipfs.io'], 
       dangerouslyAllowSVG: true,
       contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     },

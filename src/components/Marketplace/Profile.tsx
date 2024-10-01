@@ -16,7 +16,7 @@ interface NFT {
   tokenId?: string;
   image?: string;
   description?: string;
-  tokenURI?: string; // Añadido
+  tokenURI?: string;
   attributes?: { trait_type: string; value: string }[];
 }
 
@@ -180,16 +180,15 @@ export default function Profile() {
                   {collectedNFTs.map((nft, i) => (
                     <Card key={nft.id || i}>
                       <CardHeader className="p-0">
-                        <img
+                        <Image
                           alt={`NFT coleccionado ${nft.name || i}`}
                           className="w-full h-48 object-cover rounded-t-lg"
-                          height="192"
+                          height={192}
+                          width={256}
                           src={nft.image || DEFAULT_IMAGE}
                           style={{
-                            aspectRatio: "256/192",
                             objectFit: "cover",
                           }}
-                          width="256"
                         />
                       </CardHeader>
                       <CardContent className="p-4">
@@ -261,7 +260,7 @@ export default function Profile() {
                       </ul>
                     </div>
                   )}
-                  {selectedNFT.tokenURI && ( // Añadido
+                  {selectedNFT.tokenURI && (
                     <div className="mt-4">
                       <h3 className="font-semibold">Token URI</h3>
                       <a

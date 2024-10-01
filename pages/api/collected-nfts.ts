@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Alchemy, Network } from 'alchemy-sdk';
+import { Alchemy, Network, OwnedNft } from 'alchemy-sdk';
 import NodeCache from 'node-cache';
 
 // Configuración de Alchemy
@@ -12,6 +12,9 @@ const alchemy = new Alchemy(config);
 
 // Inicializa el caché con un tiempo de vida de 1 hora (3600 segundos)
 const cache = new NodeCache({ stdTTL: 3600 });
+
+// Definir DEFAULT_IMAGE
+const DEFAULT_IMAGE = '/path/to/default-nft-image.jpg';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -45,7 +48,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       responseData = {
         address: userAddress,
-        nfts: nftsResponse.ownedNfts.slice(0, 10),
+        nfts: nftsResponse.ownedNfts.slice(0, 10).map((nft: OwnedNft) => ({
+          id: nft.tokenId,
+          name: nft.contract?.name || `NFT #${nft.tokenId}`,
+          tokenId: nft.tokenId,
+          image: nft.image?.thumbnailUrl || DEFAULT_IMAGE,
+          description: nft.description,
+          tokenURI: nft.tokenUri,
+          attributes: nft.raw?.metadata?.attributes,
+        })),
         totalCount: nftsResponse.totalCount,
         pageKey: nftsResponse.pageKey
       };
@@ -55,13 +66,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Agregar logs para los metadatos de los NFTs
       responseData.nfts.forEach((nft, index) => {
         console.log(`Metadatos del NFT ${index + 1}:`);
-        console.log('  Título:', nft.title);
+        console.log('  Título:', nft.name);
         console.log('  Descripción:', nft.description);
         console.log('  ID del token:', nft.tokenId);
-        console.log('  Dirección del contrato:', nft.contract.address);
+        console.log('  Dirección del contrato:', nft.contract?.address || 'No disponible');
         console.log('  Tipo de token:', nft.tokenType);
-        console.log('  URL de la imagen:', nft.media && nft.media[0] ? nft.media[0].gateway : 'No disponible');
-        console.log('  Atributos:', JSON.stringify(nft.rawMetadata?.attributes || [], null, 2));
+        console.log('  URL de la imagen:', nft.image || 'No disponible');
+        console.log('  Atributos:', JSON.stringify(nft.attributes || [], null, 2));
         console.log('---');
       });
 
