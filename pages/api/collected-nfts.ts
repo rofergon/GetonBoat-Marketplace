@@ -2,6 +2,9 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { Alchemy, Network, OwnedNft } from 'alchemy-sdk';
 import NodeCache from 'node-cache';
 
+// Definir el tipo AcquiredAt si no está disponible en alchemy-sdk
+type AcquiredAt = string | Date | null;
+
 // Configuración de Alchemy
 const config = {
   apiKey: process.env.ALCHEMY_API_KEY,
@@ -41,14 +44,32 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('Caché no encontrado o expirado para la clave:', cacheKey);
       console.log('Realizando solicitud a Alchemy para la dirección:', userAddress);
 
-      // Obtener los NFTs utilizando Alchemy (limitado a 5)
-      const nftsResponse = await alchemy.nft.getNftsForOwner(userAddress as string, { pageSize: 10 });
+      // Obtener los NFTs utilizando Alchemy (sin límite inicial)
+      const nftsResponse = await alchemy.nft.getNftsForOwner(userAddress as string);
 
       console.log('Respuesta de Alchemy:', JSON.stringify(nftsResponse, null, 2));
 
+      // Función auxiliar para convertir AcquiredAt a número
+      const getAcquiredAtTime = (acquiredAt: AcquiredAt): number => {
+        if (!acquiredAt) return 0;
+        if (typeof acquiredAt === 'string') return new Date(acquiredAt).getTime();
+        if (acquiredAt instanceof Date) return acquiredAt.getTime();
+        return 0;
+      };
+
+      // Ordenar los NFTs por fecha de adquisición (si está disponible) o por tokenId
+      const sortedNfts = nftsResponse.ownedNfts.sort((a, b) => {
+        const dateA = getAcquiredAtTime(a.acquiredAt as AcquiredAt) || parseInt(a.tokenId);
+        const dateB = getAcquiredAtTime(b.acquiredAt as AcquiredAt) || parseInt(b.tokenId);
+        return dateB - dateA; // Orden descendente
+      });
+
+      // Tomar los últimos 10 NFTs
+      const latestNfts = sortedNfts.slice(0, 10);
+
       responseData = {
         address: userAddress,
-        nfts: nftsResponse.ownedNfts.slice(0, 10).map((nft: OwnedNft) => ({
+        nfts: latestNfts.map((nft: OwnedNft) => ({
           id: nft.tokenId,
           name: nft.contract?.name || `NFT #${nft.tokenId}`,
           tokenId: nft.tokenId,
@@ -56,25 +77,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           description: nft.description,
           tokenURI: nft.tokenUri,
           attributes: nft.raw?.metadata?.attributes,
+          acquiredAt: nft.acquiredAt ? getAcquiredAtTime(nft.acquiredAt as AcquiredAt).toString() : null,
         })),
         totalCount: nftsResponse.totalCount,
-        pageKey: nftsResponse.pageKey
       };
 
-      console.log('NFTs obtenidos de Alchemy:', responseData.nfts.length);
-
-      // Agregar logs para los metadatos de los NFTs
-      responseData.nfts.forEach((nft, index) => {
-        console.log(`Metadatos del NFT ${index + 1}:`);
-        console.log('  Título:', nft.name);
-        console.log('  Descripción:', nft.description);
-        console.log('  ID del token:', nft.tokenId);
-        console.log('  Dirección del contrato:', nft.contract?.address || 'No disponible');
-        console.log('  Tipo de token:', nft.tokenType);
-        console.log('  URL de la imagen:', nft.image || 'No disponible');
-        console.log('  Atributos:', JSON.stringify(nft.attributes || [], null, 2));
-        console.log('---');
-      });
+      console.log('Últimos 10 NFTs obtenidos de Alchemy:', responseData.nfts.length);
 
       // Guardar en el caché
       cache.set(cacheKey, responseData);

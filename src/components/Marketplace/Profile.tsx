@@ -7,6 +7,7 @@ import { Address } from '@coinbase/onchainkit/identity';
 import { useAccount } from 'wagmi';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
+import { Avatar } from '@coinbase/onchainkit/identity';
 
 const DEFAULT_IMAGE = '/path/to/default-nft-image.jpg';
 
@@ -76,17 +77,12 @@ export default function Profile() {
                 }}
                 width="384"
               />
-              <img
-                alt="Avatar del usuario"
-                className="relative w-24 h-24 rounded-full border-4 border-background mt-16"
-                height="96"
-                src="/placeholder.svg?height=96&width=96&text=Avatar"
-                style={{
-                  aspectRatio: "96/96",
-                  objectFit: "cover",
-                }}
-                width="96"
-              />
+              <div className="relative mt-16">
+                <Avatar
+                  address={address || undefined}
+                  className="w-24 h-24 rounded-full border-4 border-background"
+                />
+              </div>
             </CardHeader>
             <CardContent className="pt-4">
               <h2 className="text-2xl font-bold">CryptoArtista</h2>
@@ -192,7 +188,9 @@ export default function Profile() {
                         />
                       </CardHeader>
                       <CardContent className="p-4">
-                        <CardTitle className="text-lg">{nft.name || `NFT #${nft.tokenId || i}`}</CardTitle>
+                        <CardTitle className="text-lg">
+                          {nft.name ?? `NFT #${nft.tokenId ?? i + 1}`}
+                        </CardTitle>
                         <p className="text-sm text-muted-foreground">ID: {nft.tokenId || 'N/A'}</p>
                         <Button className="w-full mt-2" size="sm" onClick={() => handleViewDetails(nft)}>
                           Ver detalles
