@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
-    // Aquí puedes añadir otras configuraciones específicas de tu proyecto
+
     images: {
-      domains: ['basepaint.xyz', 'pixelminter.xyz', 'localhost'], // Añade 'localhost' o el dominio de tu aplicación
+      domains: ['basepaint.xyz', 'pixelminter.xyz', 'localhost'], 
       dangerouslyAllowSVG: true,
       contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     },
@@ -28,7 +28,7 @@ const nextConfig = {
         },
       ];
     },
-    // Añade esta línea
+
     publicRuntimeConfig: {
       staticFolder: '/public',
     },
