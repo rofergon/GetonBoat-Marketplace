@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic'
 import { BrushData } from '../../types/types'
 import Profile from './Profile'
 import Home from './Home'
+import Create from './Create'
 
 interface PixelArtProps {
   updateBrushData: (data: BrushData | null) => void;
@@ -77,7 +78,11 @@ export default function NFTMarketplace() {
           >
             Explorar
           </Link>
-          <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
+          <Link 
+            className="text-sm font-medium hover:underline underline-offset-4" 
+            href="#"
+            onClick={() => setCurrentPage("create")}
+          >
             Crear
           </Link>
           <Link className="text-sm font-medium hover:underline underline-offset-4" href="#">
@@ -108,6 +113,7 @@ export default function NFTMarketplace() {
         {currentPage === "home" && <Home />}
         {currentPage === "profile" && <Profile />}
         {currentPage === "painter" && <PainterPage updateBrushData={updateBrushData} />}
+        {currentPage === "create" && <Create />}
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
         <p className="text-xs text-muted-foreground">© 2024 NFT Marketplace. Todos los derechos reservados.</p>
