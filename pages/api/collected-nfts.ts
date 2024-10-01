@@ -14,7 +14,7 @@ const config = {
 const alchemy = new Alchemy(config);
 
 // Inicializa el caché con un tiempo de vida de 1 hora (3600 segundos)
-const cache = new NodeCache({ stdTTL: 3600 });
+const cache = new NodeCache({ stdTTL: 10000 });
 
 // Definir DEFAULT_IMAGE
 const DEFAULT_IMAGE = '/path/to/default-nft-image.jpg';
