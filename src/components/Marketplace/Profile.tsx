@@ -60,6 +60,10 @@ export default function Profile() {
     setIsModalOpen(false);
   };
 
+  const handleListNFT = (nft: NFT) => {
+    // Aquí puedes implementar la lógica para listar el NFT
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="grid gap-6 lg:grid-cols-3">
@@ -192,9 +196,14 @@ export default function Profile() {
                           {nft.name ?? `NFT #${nft.tokenId ?? i + 1}`}
                         </CardTitle>
                         <p className="text-sm text-muted-foreground">ID: {nft.tokenId || 'N/A'}</p>
-                        <Button className="w-full mt-2" size="sm" onClick={() => handleViewDetails(nft)}>
-                          Ver detalles
-                        </Button>
+                        <div className="flex gap-2 mt-2">
+                          <Button className="flex-1" size="sm" onClick={() => handleViewDetails(nft)}>
+                            Ver detalles
+                          </Button>
+                          <Button className="flex-1" size="sm" variant="outline" onClick={() => handleListNFT(nft)}>
+                            Listar
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
