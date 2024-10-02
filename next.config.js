@@ -3,7 +3,15 @@ const nextConfig = {
     reactStrictMode: true,
 
     images: {
-      domains: ['basepaint.xyz', 'pixelminter.xyz', 'localhost', 'res.cloudinary.com', 'ipfs.io'], 
+      domains: [
+        'basepaint.xyz', 
+        'pixelminter.xyz', 
+        'localhost', 
+        'res.cloudinary.com', 
+        'ipfs.io', 
+        'base.org',
+        'nft-cdn.alchemy.com'  // Añadimos el nuevo dominio aquí
+      ], 
       dangerouslyAllowSVG: true,
       contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     },

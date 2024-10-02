@@ -39,14 +39,15 @@ async function createTables() {
     `);
     console.log('Tabla LastUpdate anterior eliminada.');
 
-    // Crear la nueva tabla LastUpdate con last_update_block
+    // Crear la nueva tabla LastUpdate con last_update_block y last_update_time
     await client.execute(`
       CREATE TABLE IF NOT EXISTS LastUpdate (
         owner_address TEXT PRIMARY KEY,
-        last_update_block INTEGER NOT NULL
+        last_update_block INTEGER NOT NULL,
+        last_update_time INTEGER NOT NULL
       )
     `);
-    console.log('Nueva tabla LastUpdate creada con last_update_block.');
+    console.log('Nueva tabla LastUpdate creada con last_update_block y last_update_time.');
 
     // Crear la tabla NFTs si no existe
     await client.execute(`
