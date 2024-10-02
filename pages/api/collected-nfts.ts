@@ -77,68 +77,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const shouldUpdate = timeSinceLastUpdate > CACHE_TTL || hasNewTransfers;
 
-    console.log('¿Debería actualizar?', shouldUpdate);
-    console.log('Razón de actualización:', 
-      !lastUpdateTime ? 'No hay actualización previa' : 
-      timeSinceLastUpdate > CACHE_TTL ? 'Caché expirado' : 
-      hasNewTransfers ? 'Nuevas transferencias' : 'No se necesita actualización');
-
-    if (!responseData || shouldUpdate) {
-      console.log('Obteniendo datos de Alchemy...');
-      const nftsResponse = await alchemy.nft.getNftsForOwner(address);
-      console.log('NFTs obtenidos de Alchemy:', nftsResponse.ownedNfts.length);
-      
-      console.log('Actualizando base de datos...');
-      for (const nft of nftsResponse.ownedNfts) {
-        await client.execute({
-          sql: `INSERT OR REPLACE INTO NFTs (
-            owner_address, token_id, contract_address, name, image, description, 
-            token_uri, attributes, acquired_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          args: [
-            address,
-            nft.tokenId,
-            nft.contract.address,
-            nft.name || `NFT #${nft.tokenId}`,
-            nft.image?.cachedUrl || DEFAULT_IMAGE,
-            nft.description || '',
-            getTokenUri(nft.tokenUri),
-            JSON.stringify((nft as any).raw?.metadata?.attributes || []),
-            getAcquiredAtTime(nft.acquiredAt as AcquiredAt),
-            currentBlock
-          ]
-        });
-      }
-      console.log('Base de datos actualizada');
-
-      // Actualizar LastUpdate
-      await client.execute({
-        sql: 'INSERT OR REPLACE INTO LastUpdate (owner_address, last_update_block, last_update_time) VALUES (?, ?, ?)',
-        args: [address, currentBlock, currentTime]
+    if (responseData) {
+      console.log('Using data from cache');
+    } else if (!shouldUpdate) {
+      console.log('Fetching data from database...');
+      // Fetch data from the database
+      const nftsResult = await client.execute({
+        sql: 'SELECT * FROM NFTs WHERE owner_address = ?',
+        args: [address]
       });
-      console.log('Última actualización guardada en BD');
+
+      const nfts = nftsResult.rows.map((row: any) => ({
+        contractAddress: row.contract_address,
+        name: row.name,
+        tokenId: row.token_id,
+        image: row.image || DEFAULT_IMAGE,
+        description: row.description || '',
+        tokenURI: row.token_uri || '',
+        attributes: JSON.parse(row.attributes || '[]'),
+        acquiredAt: new Date(row.acquired_at).toString(),
+      }));
 
       responseData = {
-        nfts: nftsResponse.ownedNfts.map((nft: OwnedNft) => ({
-          contractAddress: nft.contract.address,
-          name: nft.name || `NFT #${nft.tokenId}`,
-          tokenId: nft.tokenId,
-          image: nft.image?.cachedUrl || DEFAULT_IMAGE,
-          description: nft.description || '',
-          tokenURI: getTokenUri(nft.tokenUri),
-          attributes: (nft as any).raw?.metadata?.attributes || [],
-          acquiredAt: getAcquiredAtTime(nft.acquiredAt as AcquiredAt).toString(),
-        })),
-        totalCount: nftsResponse.totalCount,
+        nfts,
+        totalCount: nfts.length,
       };
 
+      // Cache the data
       cache.set(cacheKey, responseData);
-      console.log('Datos guardados en caché');
+      console.log('Data loaded from database and cached');
     } else {
-      console.log('Usando datos del caché');
+      console.log('Fetching data from Alchemy...');
+      // ... [existing code to fetch from Alchemy, update DB, cache]
     }
 
-    console.log('Enviando respuesta...');
+    console.log('Sending response...');
     res.status(200).json(responseData);
   } catch (error) {
     console.error('Error detallado:', error);

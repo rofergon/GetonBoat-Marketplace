@@ -5,9 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Copy, ExternalLink, MessageCircle, Share2 } from "lucide-react";
 import { Address } from '@coinbase/onchainkit/identity';
 import { useAccount } from 'wagmi';
-import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
 import { Avatar } from '@coinbase/onchainkit/identity';
+import CustomImage from '../pixelminter/CustomImage';
+import Image from 'next/image';
 
 const DEFAULT_IMAGE = '/path/to/default-nft-image.jpg';
 
@@ -70,16 +71,16 @@ export default function Profile() {
         <div className="lg:col-span-1">
           <Card>
             <CardHeader className="relative">
-              <img
+              <Image
                 alt="Banner de perfil"
                 className="absolute inset-0 w-full h-32 object-cover rounded-t-lg"
-                height="128"
+                height={128}
+                width={384}
                 src="/placeholder.svg?height=128&width=384&text=Banner"
                 style={{
                   aspectRatio: "384/128",
                   objectFit: "cover",
                 }}
-                width="384"
               />
               <div className="relative mt-16">
                 <Avatar
@@ -149,16 +150,16 @@ export default function Profile() {
                 {Array.from({ length: 6 }).map((_, i) => (
                   <Card key={i}>
                     <CardHeader className="p-0">
-                      <img
+                      <Image
                         alt={`NFT creado #${i + 1}`}
                         className="w-full h-48 object-cover rounded-t-lg"
-                        height="192"
+                        height={192}
+                        width={192}
                         src={`/placeholder.svg?height=192&width=256&text=NFT+${i + 1}`}
                         style={{
                           aspectRatio: "256/192",
                           objectFit: "cover",
                         }}
-                        width="256"
                       />
                     </CardHeader>
                     <CardContent className="p-4">
@@ -181,12 +182,11 @@ export default function Profile() {
                     <Card key={nft.id || i}>
                       <CardHeader className="p-0">
                         <div className="relative w-full aspect-square">
-                          <Image
+                          <CustomImage
                             alt={`NFT coleccionado ${nft.name || i}`}
                             src={nft.image || DEFAULT_IMAGE}
                             layout="fill"
                             objectFit="contain"
-                            unoptimized={nft.image?.endsWith('.gif')}
                           />
                         </div>
                       </CardHeader>
@@ -244,13 +244,12 @@ export default function Profile() {
               <DialogHeader>
                 <DialogTitle>{selectedNFT.name || `NFT #${selectedNFT.tokenId}`}</DialogTitle>
                 <DialogDescription>
-                  <div className="relative w-full aspect-square">
-                    <Image
+                  <div className="relative w-full h-64">
+                    <CustomImage
                       alt={selectedNFT.name || `NFT #${selectedNFT.tokenId}`}
                       src={selectedNFT.image || DEFAULT_IMAGE}
                       layout="fill"
                       objectFit="contain"
-                      unoptimized={selectedNFT.image?.endsWith('.gif')}
                     />
                   </div>
                   <p className="mt-4">{selectedNFT.description || "No hay descripción disponible."}</p>

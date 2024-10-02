@@ -11,18 +11,15 @@ interface CustomImageProps {
 
 const CustomImage: React.FC<CustomImageProps> = ({ src, alt, layout, objectFit, onError }) => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [isBlob, setIsBlob] = useState(false);
+  const [isAnimated, setIsAnimated] = useState(false);
 
   useEffect(() => {
-    if (src && (src.startsWith('blob:') || src.startsWith('data:'))) {
+    if (src) {
       setImageSrc(src);
-      setIsBlob(true);
-    } else if (src && (src.startsWith('http://') || src.startsWith('https://'))) {
-      setImageSrc(src);
-      setIsBlob(false);
+      setIsAnimated(src.toLowerCase().endsWith('.gif') || src.toLowerCase().includes('animated'));
     } else {
       setImageSrc(null);
-      setIsBlob(false);
+      setIsAnimated(false);
     }
   }, [src]);
 
@@ -30,16 +27,20 @@ const CustomImage: React.FC<CustomImageProps> = ({ src, alt, layout, objectFit, 
     return null;
   }
 
-  if (isBlob) {
+  if (isAnimated) {
     return (
-      <img
+      <Image
         src={imageSrc}
         alt={alt}
-        style={{ objectFit, width: '100%', height: '100%' }}
+        layout={layout}
+        objectFit={objectFit}
         onError={() => {
           console.error('Error al cargar la imagen:', src);
           if (onError) onError();
         }}
+        width={layout === 'fill' ? undefined : 100}
+        height={layout === 'fill' ? undefined : 100}
+        unoptimized
       />
     );
   }
