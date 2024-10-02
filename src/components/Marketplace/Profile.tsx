@@ -180,16 +180,15 @@ export default function Profile() {
                   {collectedNFTs.map((nft, i) => (
                     <Card key={nft.id || i}>
                       <CardHeader className="p-0">
-                        <Image
-                          alt={`NFT coleccionado ${nft.name || i}`}
-                          className="w-full h-48 object-cover rounded-t-lg"
-                          height={192}
-                          width={256}
-                          src={nft.image || DEFAULT_IMAGE}
-                          style={{
-                            objectFit: "cover",
-                          }}
-                        />
+                        <div className="relative w-full aspect-square">
+                          <Image
+                            alt={`NFT coleccionado ${nft.name || i}`}
+                            src={nft.image || DEFAULT_IMAGE}
+                            layout="fill"
+                            objectFit="contain"
+                            unoptimized={nft.image?.endsWith('.gif')}
+                          />
+                        </div>
                       </CardHeader>
                       <CardContent className="p-4">
                         <CardTitle className="text-lg">
@@ -245,14 +244,15 @@ export default function Profile() {
               <DialogHeader>
                 <DialogTitle>{selectedNFT.name || `NFT #${selectedNFT.tokenId}`}</DialogTitle>
                 <DialogDescription>
-                  <img
-                    alt={selectedNFT.name || `NFT #${selectedNFT.tokenId}`}
-                    className="w-full h-64 object-cover rounded-lg"
-                    src={selectedNFT.image || DEFAULT_IMAGE}
-                    style={{
-                      objectFit: "cover",
-                    }}
-                  />
+                  <div className="relative w-full aspect-square">
+                    <Image
+                      alt={selectedNFT.name || `NFT #${selectedNFT.tokenId}`}
+                      src={selectedNFT.image || DEFAULT_IMAGE}
+                      layout="fill"
+                      objectFit="contain"
+                      unoptimized={selectedNFT.image?.endsWith('.gif')}
+                    />
+                  </div>
                   <p className="mt-4">{selectedNFT.description || "No hay descripción disponible."}</p>
                   {selectedNFT.attributes && selectedNFT.attributes.length > 0 && (
                     <div className="mt-4">
