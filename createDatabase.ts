@@ -33,6 +33,22 @@ const client = createClient({
 
 async function createTables() {
   try {
+    // Eliminar la tabla anterior LastUpdate si existe
+    await client.execute(`
+      DROP TABLE IF EXISTS LastUpdate
+    `);
+    console.log('Tabla LastUpdate anterior eliminada.');
+
+    // Crear la nueva tabla LastUpdate con last_update_block
+    await client.execute(`
+      CREATE TABLE IF NOT EXISTS LastUpdate (
+        owner_address TEXT PRIMARY KEY,
+        last_update_block INTEGER NOT NULL
+      )
+    `);
+    console.log('Nueva tabla LastUpdate creada con last_update_block.');
+
+    // Crear la tabla NFTs si no existe
     await client.execute(`
       CREATE TABLE IF NOT EXISTS NFTs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,19 +65,12 @@ async function createTables() {
         UNIQUE(owner_address, token_id, contract_address)
       )
     `);
-    
-    await client.execute(`
-      CREATE TABLE IF NOT EXISTS LastUpdate (
-        owner_address TEXT PRIMARY KEY,
-        last_update_timestamp INTEGER NOT NULL
-      )
-    `);
-    
-    console.log('Tablas creadas exitosamente.');
+    console.log('Tabla NFTs creada exitosamente.');
   } catch (error) {
     console.error('Error al crear las tablas:', error);
   } finally {
     await client.close();
+    console.log('Conexión a la base de datos cerrada.');
   }
 }
 

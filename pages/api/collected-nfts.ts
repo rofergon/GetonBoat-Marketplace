@@ -19,14 +19,6 @@ const DEFAULT_IMAGE = '/path/to/default-nft-image.jpg';
 // Definir el tipo AcquiredAt
 type AcquiredAt = string | Date | undefined;
 
-// Función para manejar diferentes tipos de acquiredAt
-function getAcquiredAtTime(acquiredAt: AcquiredAt): number {
-  if (!acquiredAt) return 0;
-  if (typeof acquiredAt === 'string') return new Date(acquiredAt).getTime();
-  if (acquiredAt instanceof Date) return acquiredAt.getTime();
-  return 0;
-}
-
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { userAddress } = req.query;
   
@@ -51,23 +43,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const lastUpdateResult = await client.execute({
-      sql: 'SELECT last_update_timestamp FROM LastUpdate WHERE owner_address = ?',
+      sql: 'SELECT last_update_block FROM LastUpdate WHERE owner_address = ?',
       args: [address]
     });
-    console.log('Última actualización en BD:', lastUpdateResult.rows[0]?.last_update_timestamp);
+    console.log('Última actualización en BD:', lastUpdateResult.rows[0]?.last_update_block);
 
-    const lastUpdateTimestamp = lastUpdateResult.rows[0]?.last_update_timestamp as number || 0;
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-
-    // Obtener el número de bloque actual
+    const lastUpdateBlock = lastUpdateResult.rows[0]?.last_update_block as number || 0;
     const currentBlock = await alchemy.core.getBlockNumber();
     console.log('Bloque actual:', currentBlock);
 
-    // Usar el mínimo entre el último bloque actualizado y el bloque actual
-    const fromBlock = Math.min(lastUpdateTimestamp, currentBlock);
+    // Usar el número de bloque para determinar actualizaciones
+    const fromBlock = lastUpdateBlock;
 
     const transfers = await alchemy.core.getAssetTransfers({
-      fromBlock: "0x" + fromBlock.toString(16),
+      fromBlock: fromBlock.toString(),
       toBlock: "latest",
       toAddress: address,
       category: [AssetTransfersCategory.ERC721, AssetTransfersCategory.ERC1155],
@@ -98,15 +87,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             typeof nft.tokenUri === 'object' ? (nft.tokenUri as any).raw : nft.tokenUri || '',
             JSON.stringify((nft as any).raw?.metadata?.attributes || []),
             getAcquiredAtTime(nft.acquiredAt as AcquiredAt),
-            currentTimestamp
+            currentBlock
           ]
         });
       }
       console.log('Base de datos actualizada');
 
+      // Actualizar el número de bloque en lugar de la marca de tiempo
       await client.execute({
-        sql: 'INSERT OR REPLACE INTO LastUpdate (owner_address, last_update_timestamp) VALUES (?, ?)',
-        args: [address, currentTimestamp]
+        sql: 'INSERT OR REPLACE INTO LastUpdate (owner_address, last_update_block) VALUES (?, ?)',
+        args: [address, currentBlock]
       });
       console.log('Última actualización guardada en BD');
 
@@ -158,4 +148,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     await client.close();
     console.log('Conexión a la base de datos cerrada');
   }
+}
+
+function getAcquiredAtTime(acquiredAt: AcquiredAt): number {
+  if (!acquiredAt) return 0;
+  if (typeof acquiredAt === 'string') return new Date(acquiredAt).getTime();
+  if (acquiredAt instanceof Date) return acquiredAt.getTime();
+  return 0;
 }
