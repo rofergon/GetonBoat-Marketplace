@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
+import { useTheme } from 'next-themes';
 
 interface DialogProps {
   open: boolean;
@@ -8,6 +9,8 @@ interface DialogProps {
 }
 
 export const Dialog: React.FC<DialogProps> = ({ open, onClose, children }) => {
+  const { theme } = useTheme();
+
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -30,7 +33,9 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, children }) => {
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-lg max-w-lg w-full"
+        className={`rounded-lg shadow-lg max-w-lg w-full ${
+          theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
@@ -45,7 +50,8 @@ interface DialogHeaderProps {
 }
 
 export const DialogHeader: React.FC<DialogHeaderProps> = ({ children }) => {
-  return <div className="px-6 py-4 border-b">{children}</div>;
+  const { theme } = useTheme();
+  return <div className={`px-6 py-4 border-b ${theme === 'dark' ? 'border-gray-700' : 'border-gray-200'}`}>{children}</div>;
 };
 
 interface DialogTitleProps {
