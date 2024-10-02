@@ -6,6 +6,7 @@ import { useAccount } from 'wagmi';
 import { Address, Avatar } from '@coinbase/onchainkit/identity';
 import CustomImage from '../pixelminter/CustomImage';
 import Image from 'next/image';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 
 interface NFT {
   id?: string;
@@ -28,7 +29,6 @@ const mockCollections: Collection[] = [
   { name: "Infected Rats", items: 1, floorPrice: "3.98 ETH" },
   { name: "BASE MonkeGodz", items: 4, floorPrice: "0.5 ETH" },
   { name: "SimpPunks", items: 10000, floorPrice: "0.01 ETH" },
-  // Añade más colecciones simuladas aquí
 ];
 
 export default function Profile() {
@@ -37,7 +37,7 @@ export default function Profile() {
   const { address } = useAccount();
 
   const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const fetchCollectedNFTs = async () => {
     if (!address) return;
@@ -62,16 +62,15 @@ export default function Profile() {
 
   const handleViewDetails = (nft: NFT) => {
     setSelectedNFT(nft);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setSelectedNFT(null);
-    setIsModalOpen(false);
+    setIsDialogOpen(true);
   };
 
   const handleListNFT = (nft: NFT) => {
-    // Aquí puedes implementar la lógica para listar el NFT
+    console.log("Listing NFT:", nft);
+  };
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
   };
 
   return (
@@ -129,7 +128,7 @@ export default function Profile() {
             
             <div className="flex-1">
               <TabsContent value="collected">
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
                   {collectedNFTs.map((nft, i) => (
                     <Card key={nft.id || i} className="overflow-hidden">
                       <div className="aspect-square relative">
@@ -142,6 +141,10 @@ export default function Profile() {
                       </div>
                       <CardContent className="p-2">
                         <h4 className="text-sm font-medium truncate">{nft.name || `NFT #${nft.tokenId || i}`}</h4>
+                        <div className="flex justify-between mt-2">
+                          <Button variant="outline" size="sm" onClick={() => handleViewDetails(nft)}>Details</Button>
+                          <Button variant="outline" size="sm" onClick={() => handleListNFT(nft)}>List</Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -152,6 +155,36 @@ export default function Profile() {
           </div>
         </Tabs>
       </div>
+
+      <Dialog 
+        open={isDialogOpen} 
+        onClose={handleCloseDialog}
+        onOpenChange={setIsDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedNFT?.name || 'NFT Details'}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-2">
+            {selectedNFT && (
+              <>
+                <img src={selectedNFT.image} alt={selectedNFT.name} className="w-full h-auto" />
+                <p className="mt-2">{selectedNFT.description}</p>
+                {selectedNFT.attributes && (
+                  <div className="mt-4">
+                    <h4 className="font-semibold">Attributes:</h4>
+                    <ul>
+                      {selectedNFT.attributes.map((attr, index) => (
+                        <li key={index}>{attr.trait_type}: {attr.value}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

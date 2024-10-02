@@ -5,16 +5,18 @@ import { useTheme } from 'next-themes';
 interface DialogProps {
   open: boolean;
   onClose: () => void;
+  onOpenChange?: (open: boolean) => void;  // Añadimos esta línea
   children: React.ReactNode;
 }
 
-export const Dialog: React.FC<DialogProps> = ({ open, onClose, children }) => {
+export const Dialog: React.FC<DialogProps> = ({ open, onClose, onOpenChange, children }) => {
   const { theme } = useTheme();
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         onClose();
+        onOpenChange && onOpenChange(false);  // Añadimos esta línea
       }
     };
     if (open) {
@@ -23,14 +25,19 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, children }) => {
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [open, onClose]);
+  }, [open, onClose, onOpenChange]);
 
   if (!open) return null;
+
+  const handleDialogClose = () => {
+    onClose();
+    onOpenChange && onOpenChange(false);  // Añadimos esta línea
+  };
 
   return ReactDOM.createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      onClick={onClose}
+      onClick={handleDialogClose}
     >
       <div
         className={`rounded-lg shadow-lg max-w-lg w-full ${
