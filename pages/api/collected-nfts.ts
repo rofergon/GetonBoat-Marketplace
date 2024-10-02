@@ -52,11 +52,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const currentBlock = await alchemy.core.getBlockNumber();
     console.log('Bloque actual:', currentBlock);
 
-    // Usar el número de bloque para determinar actualizaciones
-    const fromBlock = lastUpdateBlock;
+    // Convertir el número de bloque a una cadena hexadecimal
+    const fromBlockHex = `0x${lastUpdateBlock.toString(16)}`;
 
     const transfers = await alchemy.core.getAssetTransfers({
-      fromBlock: fromBlock.toString(),
+      fromBlock: fromBlockHex,
       toBlock: "latest",
       toAddress: address,
       category: [AssetTransfersCategory.ERC721, AssetTransfersCategory.ERC1155],
