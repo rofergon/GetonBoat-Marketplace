@@ -84,3 +84,17 @@ interface DialogContentProps {
 export const DialogContent: React.FC<DialogContentProps> = ({ children }) => {
   return <div className="px-6 py-4">{children}</div>;
 };
+
+// Añadir el nuevo componente DialogTrigger
+interface DialogTriggerProps {
+  children: React.ReactNode;
+  onClick: () => void;
+}
+
+export const DialogTrigger: React.FC<DialogTriggerProps> = ({ children, onClick }) => {
+  return (
+    <div onClick={onClick} className="cursor-pointer">
+      {children}
+    </div>
+  );
+};
