@@ -1,7 +1,7 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { Alchemy, Network, AssetTransfersCategory, OwnedNft } from 'alchemy-sdk';
+import { Alchemy, Network, AssetTransfersCategory } from 'alchemy-sdk';
 import NodeCache from 'node-cache';
-import { createClient } from '@libsql/client';
+import { NFTDatabaseManager } from './nftDatabaseManager';
 
 // Configuración de Alchemy
 const config = {
@@ -14,10 +14,7 @@ const alchemy = new Alchemy(config);
 // Inicializa el caché con un tiempo de vida de 1 hora (3600 segundos)
 const cache = new NodeCache({ stdTTL: 3600 });
 
-const DEFAULT_IMAGE = '/placeholder.svg';
-
-// Definir el tipo AcquiredAt
-type AcquiredAt = string | Date | undefined;
+const DEFAULT_IMAGE = '/placeholder.png';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { userAddress } = req.query;
@@ -36,19 +33,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   let responseData = cache.get(cacheKey) as any;
   console.log('Datos en caché:', responseData ? 'Encontrados' : 'No encontrados');
 
-  const client = createClient({
-    url: process.env.TURSO_DATABASE_URL!,
-    authToken: process.env.TURSO_AUTH_TOKEN!,
-  });
+  const dbManager = new NFTDatabaseManager();
 
   try {
-    const lastUpdateResult = await client.execute({
-      sql: 'SELECT last_update_block, last_update_time FROM LastUpdate WHERE owner_address = ?',
-      args: [address]
-    });
-    
-    const lastUpdateBlock = lastUpdateResult.rows[0]?.last_update_block as number || 0;
-    const lastUpdateTime = lastUpdateResult.rows[0]?.last_update_time as number || 0;
+    const { lastUpdateBlock, lastUpdateTime } = await dbManager.getLastUpdate(address);
     
     console.log('Última actualización en BD - Bloque:', lastUpdateBlock, 'Tiempo:', new Date(lastUpdateTime).toISOString());
 
@@ -58,7 +46,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const currentBlock = await alchemy.core.getBlockNumber();
     console.log('Bloque actual:', currentBlock);
 
-    // Convertir el número de bloque a una cadena hexadecimal
     const fromBlockHex = `0x${lastUpdateBlock.toString(16)}`;
 
     const transfers = await alchemy.core.getAssetTransfers({
@@ -81,29 +68,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('Using data from cache');
     } else if (!shouldUpdate) {
       console.log('Fetching data from database...');
-      // Fetch data from the database
-      const nftsResult = await client.execute({
-        sql: 'SELECT * FROM NFTs WHERE owner_address = ?',
-        args: [address]
-      });
-
-      const nfts = nftsResult.rows.map((row: any) => ({
-        contractAddress: row.contract_address,
-        name: row.name,
-        tokenId: row.token_id,
-        image: row.image || DEFAULT_IMAGE,
-        description: row.description || '',
-        tokenURI: row.token_uri || '',
-        attributes: JSON.parse(row.attributes || '[]'),
-        acquiredAt: new Date(row.acquired_at).toString(),
-      }));
+      const nfts = await dbManager.getNFTsFromDatabase(address);
 
       responseData = {
         nfts,
         totalCount: nfts.length,
       };
 
-      // Cache the data
       cache.set(cacheKey, responseData);
       console.log('Data loaded from database and cached');
     } else {
@@ -112,33 +83,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('NFTs obtenidos de Alchemy:', nftsResponse.ownedNfts.length);
 
       console.log('Actualizando base de datos...');
-      for (const nft of nftsResponse.ownedNfts) {
-        await client.execute({
-          sql: `INSERT OR REPLACE INTO NFTs (
-            owner_address, token_id, contract_address, name, image, description, 
-            token_uri, attributes, acquired_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          args: [
-            address,
-            nft.tokenId,
-            nft.contract.address,
-            nft.name || `NFT #${nft.tokenId}`,
-            nft.image?.cachedUrl || nft.image?.originalUrl || DEFAULT_IMAGE,
-            nft.description || '',
-            getTokenUri(nft.tokenUri),
-            JSON.stringify(nft.raw?.metadata?.attributes || []),
-            getAcquiredAtTime(nft.acquiredAt as AcquiredAt),
-            currentBlock
-          ]
-        });
-      }
+      await dbManager.updateNFTsInDatabase(address, nftsResponse.ownedNfts, currentBlock);
       console.log('Base de datos actualizada');
 
-      // Update the block number instead of the timestamp
-      await client.execute({
-        sql: 'INSERT OR REPLACE INTO LastUpdate (owner_address, last_update_block, last_update_time) VALUES (?, ?, ?)',
-        args: [address, currentBlock, Date.now()]
-      });
+      await dbManager.updateLastUpdate(address, currentBlock);
       console.log('Last update saved in DB');
 
       responseData = {
@@ -148,9 +96,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           tokenId: nft.tokenId,
           image: nft.image?.cachedUrl || nft.image?.originalUrl || DEFAULT_IMAGE,
           description: nft.description || '',
-          tokenURI: getTokenUri(nft.tokenUri),
+          tokenURI: nft.tokenUri,
           attributes: nft.raw?.metadata?.attributes || [],
-          acquiredAt: getAcquiredAtTime(nft.acquiredAt as AcquiredAt).toString(),
+          acquiredAt: nft.acquiredAt?.toString(),
         })),
         totalCount: nftsResponse.totalCount,
       };
@@ -165,23 +113,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('Error detallado:', error);
     res.status(500).json({ error: 'Error interno del servidor', details: (error as Error).message });
   } finally {
-    await client.close();
+    await dbManager.close();
     console.log('Conexión a la base de datos cerrada');
   }
-}
-
-function getAcquiredAtTime(acquiredAt: AcquiredAt): number {
-  if (!acquiredAt) return 0;
-  if (typeof acquiredAt === 'string') return new Date(acquiredAt).getTime();
-  if (acquiredAt instanceof Date) return acquiredAt.getTime();
-  return 0;
-}
-
-function getTokenUri(tokenUri: string | { raw: string } | null | undefined): string {
-  if (typeof tokenUri === 'string') {
-    return tokenUri;
-  } else if (tokenUri && typeof tokenUri === 'object' && 'raw' in tokenUri) {
-    return tokenUri.raw;
-  }
-  return '';
 }
