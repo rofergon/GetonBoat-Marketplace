@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "../ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { Copy, ExternalLink, MessageCircle, Share2 } from "lucide-react";
-import { Address } from '@coinbase/onchainkit/identity';
 import { useAccount } from 'wagmi';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../ui/dialog";
-import { Avatar } from '@coinbase/onchainkit/identity';
+import { Address, Avatar } from '@coinbase/onchainkit/identity';
 import CustomImage from '../pixelminter/CustomImage';
 import Image from 'next/image';
-
-const DEFAULT_IMAGE = '/path/to/default-nft-image.jpg';
 
 interface NFT {
   id?: string;
@@ -21,6 +16,20 @@ interface NFT {
   tokenURI?: string;
   attributes?: { trait_type: string; value: string }[];
 }
+
+interface Collection {
+  name: string;
+  items: number;
+  floorPrice: string;
+}
+
+const mockCollections: Collection[] = [
+  { name: "BasePaint", items: 15421, floorPrice: "0.0021 ETH" },
+  { name: "Infected Rats", items: 1, floorPrice: "3.98 ETH" },
+  { name: "BASE MonkeGodz", items: 4, floorPrice: "0.5 ETH" },
+  { name: "SimpPunks", items: 10000, floorPrice: "0.01 ETH" },
+  // Añade más colecciones simuladas aquí
+];
 
 export default function Profile() {
   const [collectedNFTs, setCollectedNFTs] = useState<NFT[]>([]);
@@ -66,230 +75,83 @@ export default function Profile() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader className="relative">
-              <Image
-                alt="Banner de perfil"
-                className="absolute inset-0 w-full h-32 object-cover rounded-t-lg"
-                height={128}
-                width={384}
-                src="/placeholder.svg?height=128&width=384&text=Banner"
-                style={{
-                  aspectRatio: "384/128",
-                  objectFit: "cover",
-                }}
-              />
-              <div className="relative mt-16">
-                <Avatar
-                  address={address || undefined}
-                  className="w-24 h-24 rounded-full border-4 border-background"
-                />
-              </div>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <h2 className="text-2xl font-bold">CryptoArtista</h2>
-              <p className="text-sm text-muted-foreground">@cryptoartista</p>
-              <div className="flex items-center mt-2 space-x-2">
-                <Button size="sm" variant="outline">
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Mensaje
-                </Button>
-                <Button size="icon" variant="outline">
-                  <Share2 className="w-4 h-4" />
-                  <span className="sr-only">Compartir perfil</span>
-                </Button>
-              </div>
-              <div className="mt-4">
-                <h3 className="font-semibold">Bio</h3>
-                <p className="text-sm mt-1">
-                  Artista digital especializado en arte generativo y NFTs. Explorando los límites entre la tecnología y la creatividad.
-                </p>
-              </div>
-              <div className="mt-4 flex items-center space-x-4 text-sm">
-                <div>
-                  <span className="font-bold">10k</span> Seguidores
-                </div>
-                <div>
-                  <span className="font-bold">5k</span> Siguiendo
-                </div>
-              </div>
-              <div className="mt-4">
-                <h3 className="font-semibold">Dirección de la billetera</h3>
-                <div className="flex items-center mt-1">
-                  {address && (
-                    <Address 
-                      address={address} 
-                      className="text-[var(--text-ock-foreground-muted)]" 
-                    />
-                  )}
-                  <Button size="icon" variant="ghost" className="ml-2">
-                    <Copy className="w-4 h-4" />
-                    <span className="sr-only">Copiar dirección de la billetera</span>
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+    <div className="w-full min-h-screen bg-background">
+      <div className="relative w-full h-48">
+        <Image
+          alt="Banner de perfil"
+          src="/placeholder.svg?height=192&width=1024&text=Banner"
+          layout="fill"
+          objectFit="cover"
+        />
+      </div>
+      <div className="max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 -mt-24">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end mb-6">
+          <Avatar
+            address={address || undefined}
+            className="w-32 h-32 rounded-full border-4 border-background"
+          />
+          <div className="mt-4 sm:mt-0 sm:ml-4 mb-2">
+            <h2 className="text-2xl font-bold">Unnamed</h2>
+            <Address 
+              address={address || '0x0'} 
+              className="text-sm text-muted-foreground" 
+            />
+            <div className="mt-1">
+              <span className="text-sm">Joined April 2022</span>
+            </div>
+          </div>
         </div>
-        <div className="lg:col-span-2">
-          <Tabs defaultValue="creados" onValueChange={(value) => {
-            if (value === 'coleccionados') {
-              fetchCollectedNFTs();
-            }
-          }}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="creados">Creados</TabsTrigger>
-              <TabsTrigger value="coleccionados">Coleccionados</TabsTrigger>
-              <TabsTrigger value="actividad">Actividad</TabsTrigger>
-            </TabsList>
-            <TabsContent value="creados" className="mt-6">
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i}>
-                    <CardHeader className="p-0">
-                      <Image
-                        alt={`NFT creado #${i + 1}`}
-                        className="w-full h-48 object-cover rounded-t-lg"
-                        height={192}
-                        width={192}
-                        src={`/placeholder.svg?height=192&width=256&text=NFT+${i + 1}`}
-                        style={{
-                          aspectRatio: "256/192",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </CardHeader>
-                    <CardContent className="p-4">
-                      <CardTitle className="text-lg">NFT Creado #{i + 1}</CardTitle>
-                      <p className="text-sm text-muted-foreground">Precio: 0.5 ETH</p>
-                      <Button className="w-full mt-2" size="sm">
-                        Ver detalles
-                      </Button>
-                    </CardContent>
-                  </Card>
+
+        <Tabs defaultValue="collected" className="w-full">
+          <TabsList className="w-full justify-start border-b overflow-x-auto">
+            <TabsTrigger value="collected">Collected 4.7K</TabsTrigger>
+            <TabsTrigger value="created">Created</TabsTrigger>
+            <TabsTrigger value="favorited">Favorited 505</TabsTrigger>
+            <TabsTrigger value="activity">Activity</TabsTrigger>
+            <TabsTrigger value="more">More</TabsTrigger>
+          </TabsList>
+          
+          <div className="flex flex-col lg:flex-row mt-6">
+            <div className="w-full lg:w-56 xl:w-64 mb-6 lg:mb-0 lg:pr-4">
+              <h3 className="font-semibold mb-2">Collections</h3>
+              <div className="space-y-2">
+                {mockCollections.map((collection, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 bg-secondary rounded-lg">
+                    <div>
+                      <p className="font-medium">{collection.name}</p>
+                      <p className="text-sm text-muted-foreground">{collection.items} items</p>
+                    </div>
+                    <p className="text-sm">{collection.floorPrice}</p>
+                  </div>
                 ))}
               </div>
-            </TabsContent>
-            <TabsContent value="coleccionados" className="mt-6">
-              {isLoading ? (
-                <p>Cargando NFTs coleccionados...</p>
-              ) : collectedNFTs.length > 0 ? (
-                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            </div>
+            
+            <div className="flex-1">
+              <TabsContent value="collected">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {collectedNFTs.map((nft, i) => (
-                    <Card key={nft.id || i}>
-                      <CardHeader className="p-0">
-                        <div className="relative w-full aspect-square">
-                          <CustomImage
-                            alt={`NFT coleccionado ${nft.name || i}`}
-                            src={nft.image || DEFAULT_IMAGE}
-                            layout="fill"
-                            objectFit="contain"
-                          />
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                        <CardTitle className="text-lg">
-                          {nft.name ?? `NFT #${nft.tokenId ?? i + 1}`}
-                        </CardTitle>
-                        <p className="text-sm text-muted-foreground">ID: {nft.tokenId || 'N/A'}</p>
-                        <div className="flex gap-2 mt-2">
-                          <Button className="flex-1" size="sm" onClick={() => handleViewDetails(nft)}>
-                            Ver detalles
-                          </Button>
-                          <Button className="flex-1" size="sm" variant="outline" onClick={() => handleListNFT(nft)}>
-                            Listar
-                          </Button>
-                        </div>
+                    <Card key={nft.id || i} className="overflow-hidden">
+                      <div className="aspect-square relative">
+                        <CustomImage
+                          alt={`NFT ${nft.name || i}`}
+                          src={nft.image || "/placeholder.svg"}
+                          layout="fill"
+                          objectFit="cover"
+                        />
+                      </div>
+                      <CardContent className="p-2">
+                        <h4 className="text-sm font-medium truncate">{nft.name || `NFT #${nft.tokenId || i}`}</h4>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
-              ) : (
-                <p>No se encontraron NFTs coleccionados.</p>
-              )}
-            </TabsContent>
-            <TabsContent value="actividad" className="mt-6">
-              <Card>
-                <CardContent className="p-4">
-                  <ul className="space-y-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <li key={i} className="flex items-center space-x-4">
-                        <div className="bg-primary/10 p-2 rounded-full">
-                          <ExternalLink className="w-4 h-4 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">
-                            {i % 2 === 0 ? "Vendió" : "Compró"} NFT #{i + 1}
-                          </p>
-                          <p className="text-xs text-muted-foreground">Hace {i + 1} días</p>
-                        </div>
-                        <div className="text-sm font-medium">{(0.1 * (i + 1)).toFixed(1)} ETH</div>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </div>
-      </div>
-
-      {selectedNFT && (
-        <Dialog open={isModalOpen} onClose={closeModal}>
-          <div className="max-w-2xl">
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{selectedNFT.name || `NFT #${selectedNFT.tokenId}`}</DialogTitle>
-                <DialogDescription>
-                  <div className="relative w-full h-64">
-                    <CustomImage
-                      alt={selectedNFT.name || `NFT #${selectedNFT.tokenId}`}
-                      src={selectedNFT.image || DEFAULT_IMAGE}
-                      layout="fill"
-                      objectFit="contain"
-                    />
-                  </div>
-                  <p className="mt-4">{selectedNFT.description || "No hay descripción disponible."}</p>
-                  {selectedNFT.attributes && selectedNFT.attributes.length > 0 && (
-                    <div className="mt-4">
-                      <h3 className="font-semibold">Atributos</h3>
-                      <ul className="mt-2 grid grid-cols-2 gap-2">
-                        {selectedNFT.attributes.map((attr, index) => (
-                          <li key={index} className="flex justify-between">
-                            <span className="font-medium">{attr.trait_type}:</span>
-                            <span>{attr.value}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                  {selectedNFT.tokenURI && (
-                    <div className="mt-4">
-                      <h3 className="font-semibold">Token URI</h3>
-                      <a
-                        href={selectedNFT.tokenURI}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-500 underline mt-2 block break-all"
-                      >
-                        {selectedNFT.tokenURI}
-                      </a>
-                    </div>
-                  )}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="mt-4 flex justify-end">
-                <Button variant="ghost" onClick={closeModal}>
-                  Cerrar
-                </Button>
-              </div>
-            </DialogContent>
+              </TabsContent>
+              {/* Otros TabsContent para created, favorited, etc. */}
+            </div>
           </div>
-        </Dialog>
-      )}
+        </Tabs>
+      </div>
     </div>
   );
 }

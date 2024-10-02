@@ -67,54 +67,56 @@ export default function NFTMarketplace() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link className="" href="#" onClick={() => setCurrentPage("home")}>
-          <div className="brand my-2"></div>
-        </Link>
-        <nav className="ml-auto gap-4 sm:gap-6 flex items-center justify-center">
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#"
-            onClick={() => setCurrentPage("home")}
-          >
-            Explorar
+      <header className="fixed top-0 left-0 right-0 z-50 bg-background shadow-md">
+        <div className="max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 py-4 flex justify-between items-center">
+          <Link className="" href="#" onClick={() => setCurrentPage("home")}>
+            <div className="brand my-2"></div>
           </Link>
-          <Link 
-            className="text-sm font-medium hover:underline underline-offset-4" 
-            href="#"
-            onClick={() => setCurrentPage("create")}
-          >
-            Crear
-          </Link>
-          <Link 
-            className="text-sm font-medium hover:underline underline-offset-4" 
-            href="#"
-            onClick={() => setCurrentPage("collections")}
-          >
-            Colecciones
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#"
-            onClick={() => setCurrentPage("profile")}
-          >
-            Perfil
-          </Link>
-          <Link
-            className="text-sm font-medium hover:underline underline-offset-4"
-            href="#"
-            onClick={() => setCurrentPage("painter")}
-          >
-            Painter
-          </Link>
-          <ConnectWalletButton updateBrushData={updateBrushData} />
-          <Button variant="ghost" size="icon" onClick={toggleTheme}>
-            {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-            <span className="sr-only">Cambiar tema</span>
-          </Button>
-        </nav>
+          <nav className="flex items-center space-x-4">
+            <Link
+              className="text-sm font-medium hover:underline underline-offset-4"
+              href="#"
+              onClick={() => setCurrentPage("home")}
+            >
+              Explorar
+            </Link>
+            <Link 
+              className="text-sm font-medium hover:underline underline-offset-4" 
+              href="#"
+              onClick={() => setCurrentPage("create")}
+            >
+              Crear
+            </Link>
+            <Link 
+              className="text-sm font-medium hover:underline underline-offset-4" 
+              href="#"
+              onClick={() => setCurrentPage("collections")}
+            >
+              Colecciones
+            </Link>
+            <Link
+              className="text-sm font-medium hover:underline underline-offset-4"
+              href="#"
+              onClick={() => setCurrentPage("profile")}
+            >
+              Perfil
+            </Link>
+            <Link
+              className="text-sm font-medium hover:underline underline-offset-4"
+              href="#"
+              onClick={() => setCurrentPage("painter")}
+            >
+              Painter
+            </Link>
+            <ConnectWalletButton updateBrushData={updateBrushData} />
+            <Button variant="ghost" size="icon" onClick={toggleTheme}>
+              {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+              <span className="sr-only">Cambiar tema</span>
+            </Button>
+          </nav>
+        </div>
       </header>
-      <main className="flex-1">
+      <main className="flex-1 mt-16"> {/* Añadimos margen superior para compensar el header fijo */}
         {currentPage === "home" && <Home />}
         {currentPage === "profile" && <Profile />}
         {currentPage === "painter" && <PainterPage updateBrushData={updateBrushData} />}
