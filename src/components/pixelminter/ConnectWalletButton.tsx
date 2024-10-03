@@ -104,12 +104,6 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
               </div>
             )}
           </Identity>
-          <WalletDropdownLink
-            className="hover:bg-[var(--bg-ock-default-hover)] px-4 py-2 flex items-center text-[var(--text-ock-foreground)]"
-            icon="wallet"
-            href="https://wallet.coinbase.com"
-          >
-            Wallet
 
           <WalletDropdownBasename />
 
