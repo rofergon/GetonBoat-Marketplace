@@ -21,7 +21,7 @@ import { BasePaintBrushAbi } from '../../abi/BasePaintBrushAbi';
 import { getContract, ContractFunctionExecutionError } from 'viem';
 import { BrushData } from '../../types/types';
 import { useBrushData } from '../../hooks/useBrushData';
-import { Moon, Sun, CircleUserIcon } from "lucide-react"
+import { Moon, Sun, CircleUserIcon } from "lucide-react";
 
 const DefaultAvatar = () => (
   <div className="h-6 w-6 bg-gray-300 rounded-full flex items-center justify-center">
@@ -35,12 +35,12 @@ const LoadingAvatar = () => (
 
 const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) => void }> = ({ updateBrushData }) => {
   const { userTokenIds, brushData, isLoading, balance } = useBrushData();
-  const [theme, setTheme] = useState("dark")
+  const [theme, setTheme] = useState("dark");
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") || "dark"
-    setTheme(savedTheme)
-    document.documentElement.classList.toggle("dark", savedTheme === "dark")
+    const savedTheme = localStorage.getItem("theme") || "dark";
+    setTheme(savedTheme);
+    document.documentElement.classList.toggle("dark", savedTheme === "dark");
 
     if (brushData) {
       updateBrushData(brushData);
@@ -48,11 +48,11 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
   }, [brushData, updateBrushData]);
 
   const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light"
-    setTheme(newTheme)
-    localStorage.setItem("theme", newTheme)
-    document.documentElement.classList.toggle("dark", newTheme === "dark")
-  }
+    const newTheme = theme === "light" ? "dark" : "light";
+    setTheme(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+  };
 
   return (
     <div className="flex justify-end">
@@ -71,8 +71,6 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
         </ConnectWallet>
 
         <WalletDropdown className="rounded-xl shadow">
-
-        <WalletDropdown>
           <Identity
             className="px-4 pt-3 pb-2 hover:bg-[var(--bg-ock-default-hover)]"
             hasCopyAddressOnClick
@@ -86,7 +84,6 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
               <Badge />
             </Avatar>
             <Name />
-            <Address className="text-[var(--text-ock-foreground-muted)]" />
             <EthBalance />
             {!isLoading && balance && (
               <div className="text-[var(--text-ock-foreground-muted)]">
@@ -107,15 +104,20 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
 
           <WalletDropdownBasename />
 
-          <WalletDropdownLink className="px-4 py-2 flex items-center custom-btn-wallet">
-            <div class='items-center custom-div' onClick={toggleTheme}>
-              {theme === "light" ? <Moon className="h-5 w-5 mr-1" /> : <Sun className="h-5 w-5 mr-1" />}
-              Cambiar tema
-            </div>
-          </WalletDropdownLink>
+          {/* Custom Theme Toggle */}
+          <div
+            className="px-4 py-2 flex items-center custom-btn-wallet cursor-pointer hover:bg-[var(--bg-ock-default-hover)]"
+            onClick={toggleTheme}
+          >
+            {theme === "light" ? (
+              <Moon className="h-5 w-5 mr-1" />
+            ) : (
+              <Sun className="h-5 w-5 mr-1" />
+            )}
+            Cambiar tema
+          </div>
 
           <WalletDropdownDisconnect className="px-4 py-2" />
-
         </WalletDropdown>
       </Wallet>
     </div>
