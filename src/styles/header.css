@@ -1,0 +1,11 @@
+.brand {
+  height: 2.5rem;
+  width: 6rem;
+  background-image: url('/logo.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.dark .brand {
+  background-image: url('/logo-white.svg');
+}

@@ -4,7 +4,6 @@ import { Button } from "../ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card"
 import { Input } from "../ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
-import { ArrowRight, Copy, ExternalLink, MessageCircle, Moon, Search, Share2, Sun } from "lucide-react"
 import dynamic from 'next/dynamic'
 import { BrushData } from '../../types/types'
 import Profile from './Profile'
@@ -54,13 +53,6 @@ export default function NFTMarketplace() {
     }
   }, [])
 
-  const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light"
-    setTheme(newTheme)
-    localStorage.setItem("theme", newTheme)
-    document.documentElement.classList.toggle("dark", newTheme === "dark")
-  }
-
   const updateBrushData = useCallback((data: BrushData | null) => {
     setBrushData(data)
   }, [])
@@ -80,15 +72,15 @@ export default function NFTMarketplace() {
             >
               Explorar
             </Link>
-            <Link 
-              className="text-sm font-medium hover:underline underline-offset-4" 
+            <Link
+              className="text-sm font-medium hover:underline underline-offset-4"
               href="#"
               onClick={() => setCurrentPage("create")}
             >
               Crear
             </Link>
-            <Link 
-              className="text-sm font-medium hover:underline underline-offset-4" 
+            <Link
+              className="text-sm font-medium hover:underline underline-offset-4"
               href="#"
               onClick={() => setCurrentPage("collections")}
             >
@@ -109,10 +101,6 @@ export default function NFTMarketplace() {
               Painter
             </Link>
             <ConnectWalletButton updateBrushData={updateBrushData} />
-            <Button variant="ghost" size="icon" onClick={toggleTheme}>
-              {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-              <span className="sr-only">Cambiar tema</span>
-            </Button>
           </nav>
         </div>
       </header>
