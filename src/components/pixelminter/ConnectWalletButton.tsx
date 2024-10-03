@@ -71,8 +71,6 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
         </ConnectWallet>
 
         <WalletDropdown className="rounded-xl shadow">
-
-        <WalletDropdown>
           <Identity
             className="px-4 pt-3 pb-2 hover:bg-[var(--bg-ock-default-hover)]"
             hasCopyAddressOnClick
@@ -86,7 +84,6 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
               <Badge />
             </Avatar>
             <Name />
-            <Address className="text-[var(--text-ock-foreground-muted)]" />
             <EthBalance />
             {!isLoading && balance && (
               <div className="text-[var(--text-ock-foreground-muted)]">
@@ -108,7 +105,7 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
           <WalletDropdownBasename />
 
           <WalletDropdownLink className="px-4 py-2 flex items-center custom-btn-wallet">
-            <div class='items-center custom-div' onClick={toggleTheme}>
+            <div className='items-center custom-div' onClick={toggleTheme}>
               {theme === "light" ? <Moon className="h-5 w-5 mr-1" /> : <Sun className="h-5 w-5 mr-1" />}
               Cambiar tema
             </div>
