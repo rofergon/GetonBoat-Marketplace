@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -7,6 +7,10 @@ import { Address, Avatar } from '@coinbase/onchainkit/identity';
 import CustomImage from '../pixelminter/CustomImage';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Transaction, TransactionButton, TransactionStatus, TransactionStatusLabel, TransactionStatusAction } from '@coinbase/onchainkit/transaction';
+import type { LifeCycleStatus } from '@coinbase/onchainkit/transaction';
+import { Abi } from 'viem';
+import { useNFTListing } from '../../hooks/useNFTListing';
 
 interface NFT {
   id?: string;
@@ -16,6 +20,7 @@ interface NFT {
   description?: string;
   tokenURI?: string;
   attributes?: { trait_type: string; value: string }[];
+  contractAddress?: string;
 }
 
 interface Collection {
@@ -31,6 +36,8 @@ const mockCollections: Collection[] = [
   { name: "SimpPunks", items: 10000, floorPrice: "0.01 ETH" },
 ];
 
+const MARKETPLACE_ADDRESS = '0x960f887ddf97d872878e6fa7c25d7a059f8fb6d7';
+
 export default function Profile() {
   const [collectedNFTs, setCollectedNFTs] = useState<NFT[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -38,6 +45,20 @@ export default function Profile() {
 
   const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const [listingNFT, setListingNFT] = useState<NFT | null>(null);
+  const [listingPrice, setListingPrice] = useState<string>('');
+
+  const {
+    isApproved,
+    approvalTxHash,
+    listingTxHash,
+    error,
+    handleApprovalStatus,
+    handleListingStatus,
+    getApprovalContract,
+    getListingContract,
+  } = useNFTListing(listingNFT?.contractAddress as `0x${string}`, listingNFT?.tokenId || '');
 
   const fetchCollectedNFTs = async () => {
     if (!address) return;
@@ -66,10 +87,12 @@ export default function Profile() {
   };
 
   const handleListNFT = (nft: NFT) => {
-    console.log("Listing NFT:", nft);
+    setListingNFT(nft);
+    setIsDialogOpen(true);
   };
 
-  const handleCloseDialog = () => {
+  const handleConfirmListing = () => {
+    if (!listingNFT || !listingPrice) return;
     setIsDialogOpen(false);
   };
 
@@ -156,29 +179,63 @@ export default function Profile() {
         </Tabs>
       </div>
 
-      <Dialog 
-        open={isDialogOpen} 
-        onClose={handleCloseDialog}
-        onOpenChange={setIsDialogOpen}
-      >
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{selectedNFT?.name || 'NFT Details'}</DialogTitle>
+            <DialogTitle>{listingNFT?.name || 'List NFT'}</DialogTitle>
           </DialogHeader>
           <div className="mt-2">
-            {selectedNFT && (
+            {listingNFT && (
               <>
-                <img src={selectedNFT.image} alt={selectedNFT.name} className="w-full h-auto" />
-                <p className="mt-2">{selectedNFT.description}</p>
-                {selectedNFT.attributes && (
-                  <div className="mt-4">
-                    <h4 className="font-semibold">Attributes:</h4>
-                    <ul>
-                      {selectedNFT.attributes.map((attr, index) => (
-                        <li key={index}>{attr.trait_type}: {attr.value}</li>
-                      ))}
-                    </ul>
-                  </div>
+                <img src={listingNFT.image} alt={listingNFT.name} className="w-full h-auto" />
+                <input
+                  type="text"
+                  value={listingPrice}
+                  onChange={(e) => setListingPrice(e.target.value)}
+                  placeholder="Enter listing price in wei"
+                  className="mt-2 w-full p-2 border rounded"
+                />
+                {!isApproved ? (
+                  <Transaction
+                    chainId={8453}
+                    contracts={getApprovalContract()}
+                    onStatus={handleApprovalStatus}
+                  >
+                    <TransactionButton
+                      text="Approve NFT"
+                      className="mt-2 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors"
+                    />
+                    <TransactionStatus>
+                      <TransactionStatusLabel className="text-gray-300" />
+                      <TransactionStatusAction className="text-blue-500" />
+                    </TransactionStatus>
+                  </Transaction>
+                ) : (
+                  <Transaction
+                    chainId={8453}
+                    contracts={getListingContract(listingPrice)}
+                    onStatus={handleListingStatus}
+                  >
+                    <TransactionButton
+                      text="List NFT"
+                      className="mt-2 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors"
+                    />
+                    <TransactionStatus>
+                      <TransactionStatusLabel className="text-gray-300" />
+                      <TransactionStatusAction className="text-blue-500" />
+                    </TransactionStatus>
+                  </Transaction>
+                )}
+                {error && <p className="text-red-500 mt-2">{error}</p>}
+                {approvalTxHash && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    Approval Transaction: <Address address={approvalTxHash as `0x${string}`} />
+                  </p>
+                )}
+                {listingTxHash && (
+                  <p className="text-sm text-gray-600 mt-2">
+                    Listing Transaction: <Address address={listingTxHash as `0x${string}`} />
+                  </p>
                 )}
               </>
             )}

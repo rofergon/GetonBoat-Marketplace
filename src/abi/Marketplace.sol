@@ -1,90 +1,300 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 
-contract NFTMarketplaceWithFees is ReentrancyGuard, Ownable {
-    uint256 public feePercentage = 250; // 2.5% fee
-    uint256 public constant FEE_DENOMINATOR = 10000;
+contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
+    using Counters for Counters.Counter;
+    using EnumerableSet for EnumerableSet.UintSet;
 
-    struct Listing {
+    Counters.Counter private _marketItemIds;
+    Counters.Counter private _tokensSold;
+    Counters.Counter private _tokensCanceled;
+
+    uint256 private constant BASIS_POINTS = 10000;
+    uint256 private commissionPercentage = 250;
+    uint256 private accumulatedCommissions;
+
+    mapping(uint256 => MarketItem) private marketItemIdToMarketItem;
+
+    struct MarketItem {
+        uint256 marketItemId;
+        address nftContractAddress;
+        uint256 tokenId;
+        address payable seller;
+        address payable owner;
         uint256 price;
-        address seller;
+        bool sold;
+        bool canceled;
     }
 
-    mapping(address => mapping(uint256 => Listing)) private s_listings;
-    mapping(address => uint256) private s_proceeds;
-    uint256 private s_accumulatedFees;
+    enum Property { Seller, Owner }
 
-    event ItemListed(address indexed seller, address indexed nftAddress, uint256 indexed tokenId, uint256 price);
-    event ItemBought(address indexed buyer, address indexed nftAddress, uint256 indexed tokenId, uint256 price);
-    event ItemCanceled(address indexed seller, address indexed nftAddress, uint256 indexed tokenId);
-    event FeePercentageUpdated(uint256 newFeePercentage);
+    event MarketItemCreated(
+        uint256 indexed marketItemId,
+        address indexed nftContract,
+        uint256 indexed tokenId,
+        address seller,
+        address owner,
+        uint256 price,
+        bool sold,
+        bool canceled
+    );
+    event MarketItemSold(uint256 indexed marketItemId, address buyer, uint256 price);
+    event MarketItemCanceled(uint256 indexed marketItemId);
+    event CommissionsWithdrawn(address indexed owner, uint256 amount);
+    event MarketItemOwnershipChanged(uint256 indexed marketItemId, address indexed previousOwner, address indexed newOwner);
+    event MarketItemPriceUpdated(uint256 indexed marketItemId, uint256 oldPrice, uint256 newPrice);
+    event NFTTransferred(address indexed from, address indexed to, uint256 indexed tokenId, address nftContract);
+    event CommissionPercentageUpdated(uint256 oldPercentage, uint256 newPercentage);
 
     constructor() Ownable(msg.sender) {
-        // Inicialización adicional si es necesaria
     }
 
-    modifier notListed(address nftAddress, uint256 tokenId, address owner) {
-        Listing memory listing = s_listings[nftAddress][tokenId];
-        require(listing.price == 0, "Already listed");
-        _;
+    mapping(address => EnumerableSet.UintSet) private userListedItems;
+    mapping(address => EnumerableSet.UintSet) private userOwnedItems;
+
+    function createMarketItem(
+        address nftContractAddress,
+        uint256 tokenId,
+        uint256 price
+    ) public nonReentrant returns (uint256) {
+        require(price > 0, "Price must be at least 1 wei");
+        require(
+            IERC721(nftContractAddress).getApproved(tokenId) == address(this) ||
+            IERC721(nftContractAddress).isApprovedForAll(msg.sender, address(this)),
+            "Marketplace contract is not approved to transfer this NFT"
+        );
+
+        _marketItemIds.increment();
+        uint256 marketItemId = _marketItemIds.current();
+
+        marketItemIdToMarketItem[marketItemId] = MarketItem(
+            marketItemId,
+            nftContractAddress,
+            tokenId,
+            payable(msg.sender),
+            payable(address(0)),
+            price,
+            false,
+            false
+        );
+
+        IERC721(nftContractAddress).safeTransferFrom(msg.sender, address(this), tokenId);
+        emit NFTTransferred(msg.sender, address(this), tokenId, nftContractAddress);
+
+        userListedItems[msg.sender].add(marketItemId);
+
+        emit MarketItemCreated(
+            marketItemId,
+            nftContractAddress,
+            tokenId,
+            msg.sender,
+            address(0),
+            price,
+            false,
+            false
+        );
+
+        return marketItemId;
     }
 
-    modifier isOwner(address nftAddress, uint256 tokenId, address spender) {
-        IERC721 nft = IERC721(nftAddress);
-        require(nft.ownerOf(tokenId) == spender, "Not the owner");
-        _;
+    function cancelMarketItem(address nftContractAddress, uint256 marketItemId) public nonReentrant {
+        MarketItem storage item = marketItemIdToMarketItem[marketItemId];
+        require(item.tokenId > 0, "Market item does not exist");
+        require(item.seller == msg.sender, "You are not the seller");
+        require(!item.sold, "Cannot cancel a sold item");
+        require(!item.canceled, "Market item is already canceled");
+
+        userListedItems[msg.sender].remove(marketItemId);
+
+        item.owner = payable(address(0));
+        item.canceled = true;
+        _tokensCanceled.increment();
+
+        emit MarketItemCanceled(marketItemId);
+
+        IERC721(nftContractAddress).safeTransferFrom(address(this), msg.sender, item.tokenId);
+        emit NFTTransferred(address(this), msg.sender, item.tokenId, nftContractAddress);
     }
 
-    function listItem(address nftAddress, uint256 tokenId, uint256 price) external notListed(nftAddress, tokenId, msg.sender) isOwner(nftAddress, tokenId, msg.sender) {
-        require(price > 0, "Price must be above zero");
-        IERC721 nft = IERC721(nftAddress);
-        require(nft.getApproved(tokenId) == address(this), "Not approved for marketplace");
-        s_listings[nftAddress][tokenId] = Listing(price, msg.sender);
-        emit ItemListed(msg.sender, nftAddress, tokenId, price);
+    function createMarketSale(address nftContractAddress, uint256 marketItemId) public payable nonReentrant {
+        MarketItem storage item = marketItemIdToMarketItem[marketItemId];
+        require(item.price > 0, "Market item does not exist");
+        require(!item.sold, "Market item is already sold");
+        require(!item.canceled, "Market item has been canceled");
+        require(msg.value >= item.price, "Insufficient funds sent");
+        require(item.seller != msg.sender, "El comprador no puede ser el vendedor");
+
+        uint256 commission = (item.price * commissionPercentage) / BASIS_POINTS;
+        uint256 sellerProceeds = item.price - commission;
+        uint256 excess = msg.value - item.price;
+
+        address previousOwner = item.owner;
+        item.owner = payable(msg.sender);
+        _tokensSold.increment();
+        accumulatedCommissions += commission;
+
+        userListedItems[item.seller].remove(marketItemId);
+        userOwnedItems[msg.sender].add(marketItemId);
+
+        emit MarketItemOwnershipChanged(marketItemId, previousOwner, msg.sender);
+
+        emit MarketItemSold(marketItemId, msg.sender, item.price);
+
+        (bool sent, ) = item.seller.call{value: sellerProceeds}("");
+        require(sent, "Failed to send Ether to the seller");
+
+        if (excess > 0) {
+            (bool refundSuccess, ) = msg.sender.call{value: excess}("");
+            require(refundSuccess, "Refund failed");
+        }
+
+        IERC721(nftContractAddress).safeTransferFrom(address(this), msg.sender, item.tokenId);
+        emit NFTTransferred(address(this), msg.sender, item.tokenId, nftContractAddress);
     }
 
-    function buyItem(address nftAddress, uint256 tokenId) external payable nonReentrant {
-        Listing memory listedItem = s_listings[nftAddress][tokenId];
-        require(listedItem.price > 0, "Item not listed");
-        require(msg.value == listedItem.price, "Incorrect price");
+    function fetchAvailableMarketItems(uint256 start, uint256 count) public view returns (MarketItem[] memory) {
+        uint256 itemsCount = _marketItemIds.current();
+        uint256 availableItemsCount = 0;
+        uint256 currentIndex = 0;
 
-        uint256 fee = (msg.value * feePercentage) / FEE_DENOMINATOR;
-        uint256 sellerProceeds = msg.value - fee;
+        for (uint256 i = start; i < itemsCount && i < start + count; i++) {
+            if (!marketItemIdToMarketItem[i + 1].sold && !marketItemIdToMarketItem[i + 1].canceled) {
+                availableItemsCount++;
+            }
+        }
 
-        s_proceeds[listedItem.seller] += sellerProceeds;
-        s_accumulatedFees += fee;
+        MarketItem[] memory marketItems = new MarketItem[](availableItemsCount);
 
-        delete s_listings[nftAddress][tokenId];
-        IERC721(nftAddress).safeTransferFrom(listedItem.seller, msg.sender, tokenId);
-        emit ItemBought(msg.sender, nftAddress, tokenId, msg.value);
+        for (uint256 i = start; i < itemsCount && currentIndex < availableItemsCount; i++) {
+            MarketItem storage item = marketItemIdToMarketItem[i + 1];
+            if (!item.sold && !item.canceled) {
+                marketItems[currentIndex] = item;
+                currentIndex++;
+            }
+        }
+
+        return marketItems;
     }
 
-    function withdrawProceeds() external {
-        uint256 proceeds = s_proceeds[msg.sender];
-        require(proceeds > 0, "No proceeds to withdraw");
-        s_proceeds[msg.sender] = 0;
-        payable(msg.sender).transfer(proceeds);
+    function fetchSellingMarketItems(uint256 start, uint256 count) public view returns (MarketItem[] memory) {
+        uint256 totalItems = userListedItems[msg.sender].length();
+        if (start >= totalItems) {
+            return new MarketItem[](0);
+        }
+
+        uint256 end = start + count;
+        if (end > totalItems) {
+            end = totalItems;
+        }
+        uint256 resultCount = end - start;
+
+        MarketItem[] memory marketItems = new MarketItem[](resultCount);
+        for (uint256 i = 0; i < resultCount; i++) {
+            uint256 marketItemId = userListedItems[msg.sender].at(start + i);
+            marketItems[i] = marketItemIdToMarketItem[marketItemId];
+        }
+
+        return marketItems;
     }
 
-    function cancelListing(address nftAddress, uint256 tokenId) external isOwner(nftAddress, tokenId, msg.sender) {
-        delete s_listings[nftAddress][tokenId];
-        emit ItemCanceled(msg.sender, nftAddress, tokenId);
+    function fetchOwnedMarketItems(uint256 start, uint256 count) public view returns (MarketItem[] memory) {
+        uint256 totalItems = userOwnedItems[msg.sender].length();
+        if (start >= totalItems) {
+            return new MarketItem[](0);
+        }
+
+        uint256 end = start + count;
+        if (end > totalItems) {
+            end = totalItems;
+        }
+        uint256 resultCount = end - start;
+
+        MarketItem[] memory marketItems = new MarketItem[](resultCount);
+        for (uint256 i = 0; i < resultCount; i++) {
+            uint256 marketItemId = userOwnedItems[msg.sender].at(start + i);
+            marketItems[i] = marketItemIdToMarketItem[marketItemId];
+        }
+
+        return marketItems;
     }
 
-    function setFeePercentage(uint256 _feePercentage) external onlyOwner {
-        require(_feePercentage <= 1000, "Fee percentage cannot exceed 10%");
-        feePercentage = _feePercentage;
-        emit FeePercentageUpdated(_feePercentage);
+    function fetchMarketItemsFromArray(uint256[] storage itemIds, uint256 start, uint256 count)
+        internal
+        view
+        returns (MarketItem[] memory)
+    {
+        uint256 itemCount = itemIds.length;
+        if (start >= itemCount) {
+            return new MarketItem[](0);
+        }
+
+        uint256 end = start + count;
+        if (end > itemCount) {
+            end = itemCount;
+        }
+        uint256 resultCount = end - start;
+
+        MarketItem[] memory items = new MarketItem[](resultCount);
+        for (uint256 i = 0; i < resultCount; i++) {
+            items[i] = marketItemIdToMarketItem[itemIds[start + i]];
+        }
+
+        return items;
     }
 
-    function withdrawFees() external onlyOwner {
-        uint256 fees = s_accumulatedFees;
-        require(fees > 0, "No fees to withdraw");
-        s_accumulatedFees = 0;
-        payable(owner()).transfer(fees);
+    function withdrawCommissions() public onlyOwner {
+        require(accumulatedCommissions > 0, "No commissions to withdraw");
+        uint256 amount = accumulatedCommissions;
+        accumulatedCommissions = 0;
+        (bool success, ) = owner().call{value: amount}("");
+        require(success, "Failed to transfer Ether");
+        emit CommissionsWithdrawn(owner(), amount);
+    }
+
+    function getAccumulatedCommissions() public view returns (uint256) {
+        return accumulatedCommissions;
+    }
+
+    function setCommissionPercentage(uint256 newPercentage) public onlyOwner {
+        require(newPercentage <= 1000, "Commission percentage cannot exceed 10%");
+        uint256 oldPercentage = commissionPercentage;
+        commissionPercentage = newPercentage;
+        emit CommissionPercentageUpdated(oldPercentage, newPercentage);
+    }
+
+    function updateMarketItemPrice(uint256 marketItemId, uint256 newPrice) public nonReentrant {
+        MarketItem storage item = marketItemIdToMarketItem[marketItemId];
+        require(item.seller == msg.sender, "Only the seller can update the price");
+        require(!item.sold && !item.canceled, "Cannot update price of sold or canceled items");
+        require(newPrice > 0, "Price must be greater than zero");
+
+        uint256 oldPrice = item.price;
+        item.price = newPrice;
+
+        emit MarketItemPriceUpdated(marketItemId, oldPrice, newPrice);
+    }
+
+    function onERC721Received(
+        address,
+        address,
+        uint256,
+        bytes calldata
+    ) external pure override returns (bytes4) {
+        return IERC721Receiver.onERC721Received.selector;
+    }
+
+    receive() external payable {
+        revert("Direct Ether transfers not allowed");
+    }
+
+    fallback() external payable {
+        revert("Direct Ether transfers not allowed");
     }
 }

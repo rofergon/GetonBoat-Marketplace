@@ -4,19 +4,17 @@ import { useTheme } from 'next-themes';
 
 interface DialogProps {
   open: boolean;
-  onClose: () => void;
-  onOpenChange?: (open: boolean) => void;  // Añadimos esta línea
+  onOpenChange: (open: boolean) => void;
   children: React.ReactNode;
 }
 
-export const Dialog: React.FC<DialogProps> = ({ open, onClose, onOpenChange, children }) => {
+export const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
   const { theme } = useTheme();
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
-        onOpenChange && onOpenChange(false);  // Añadimos esta línea
+        onOpenChange(false);
       }
     };
     if (open) {
@@ -25,13 +23,12 @@ export const Dialog: React.FC<DialogProps> = ({ open, onClose, onOpenChange, chi
     return () => {
       document.removeEventListener("keydown", handleEscape);
     };
-  }, [open, onClose, onOpenChange]);
+  }, [open, onOpenChange]);
 
   if (!open) return null;
 
   const handleDialogClose = () => {
-    onClose();
-    onOpenChange && onOpenChange(false);  // Añadimos esta línea
+    onOpenChange(false);
   };
 
   return ReactDOM.createPortal(
