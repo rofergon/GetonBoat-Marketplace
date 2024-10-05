@@ -1,18 +1,31 @@
 import { useState, useCallback, useEffect } from 'react';
-import { useAccount, useContractReads } from 'wagmi';
+import { useAccount, useContractReads, useContractRead } from 'wagmi';
 import { Address } from 'viem';
 import type { LifeCycleStatus } from '@coinbase/onchainkit/transaction';
 import { BasePaintBrushAbi } from '../abi/BasePaintBrushAbi';
+import { marketplaceAbi } from '../abi/marketplace.abi';
 
 const MARKETPLACE_ADDRESS = '0x960f887ddf97d872878e6fa7c25d7a059f8fb6d7' as Address;
+
+// Definimos el tipo de retorno esperado para fetchMarketItem
+interface MarketItem {
+  marketItemId: bigint;
+  nftContractAddress: Address;
+  tokenId: bigint;
+  seller: Address;
+  owner: Address;
+  price: bigint;
+  sold: boolean;
+  canceled: boolean;
+}
 
 export const useNFTListing = (nftAddress: Address, tokenId: string) => {
   const { address } = useAccount();
   const [isApproved, setIsApproved] = useState(false);
+  const [isListed, setIsListed] = useState(false);
   const [approvalTxHash, setApprovalTxHash] = useState<string | null>(null);
   const [listingTxHash, setListingTxHash] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
- 
 
   const { data: approvalData } = useContractReads({
     contracts: [
@@ -31,6 +44,13 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
     ],
   });
 
+  const { data: marketItemData } = useContractRead({
+    address: MARKETPLACE_ADDRESS,
+    abi: marketplaceAbi,
+    functionName: 'fetchMarketItem',
+    args: [nftAddress, BigInt(tokenId)],
+  }) as { data: MarketItem | undefined };
+
   useEffect(() => {
     if (approvalData && address && nftAddress && tokenId) {
       const [getApprovedResult, isApprovedForAllResult] = approvalData;
@@ -40,6 +60,16 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
       );
     }
   }, [approvalData, address, nftAddress, tokenId]);
+
+  useEffect(() => {
+    if (marketItemData) {
+      setIsListed(
+        marketItemData.seller !== '0x0000000000000000000000000000000000000000' &&
+        !marketItemData.sold &&
+        !marketItemData.canceled
+      );
+    }
+  }, [marketItemData]);
 
   const handleApprovalStatus = useCallback((status: LifeCycleStatus) => {
     console.log('Estado de la aprobación:', status);
@@ -63,6 +93,19 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
       setError(`Error in listing: ${status.statusData.message || 'Unknown'}`);
     }
   }, []);
+
+  const handleCancelListing = useCallback(async () => {
+    try {
+      // Aquí iría la lógica para cancelar el listado
+      // Por ejemplo, llamar a la función cancelMarketItem del contrato
+      console.log('Cancelando listado para:', nftAddress, tokenId);
+      // Simular una llamada exitosa
+      setIsListed(false);
+    } catch (error) {
+      console.error('Error al cancelar el listado:', error);
+      setError(`Error al cancelar el listado: ${(error as Error).message || 'Desconocido'}`);
+    }
+  }, [nftAddress, tokenId]);
 
   const getApprovalContract = useCallback(() => [
     {
@@ -94,14 +137,26 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
     },
   ], [nftAddress, tokenId]);
 
+  const getCancelListingContract = useCallback(() => [
+    {
+      address: MARKETPLACE_ADDRESS,
+      abi: marketplaceAbi,
+      functionName: 'cancelMarketItem',
+      args: [nftAddress, BigInt(tokenId)],
+    },
+  ], [nftAddress, tokenId]);
+
   return {
     isApproved,
+    isListed,
     approvalTxHash,
     listingTxHash,
     error,
     handleApprovalStatus,
     handleListingStatus,
+    handleCancelListing,
     getApprovalContract,
     getListingContract,
+    getCancelListingContract,
   };
 };

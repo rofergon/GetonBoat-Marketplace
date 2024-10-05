@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -51,14 +51,22 @@ export default function Profile() {
 
   const {
     isApproved,
+    isListed,
     approvalTxHash,
     listingTxHash,
     error,
     handleApprovalStatus,
     handleListingStatus,
+    handleCancelListing,
     getApprovalContract,
     getListingContract,
+    getCancelListingContract,
   } = useNFTListing(listingNFT?.contractAddress as `0x${string}`, listingNFT?.tokenId || '');
+
+  const handleCancelListingClick = useCallback((nft: NFT) => {
+    setListingNFT(nft);
+    handleCancelListing();
+  }, [handleCancelListing]);
 
   const fetchCollectedNFTs = async () => {
     if (!address) return;
@@ -165,8 +173,12 @@ export default function Profile() {
                       <CardContent className="p-2">
                         <h4 className="text-sm font-medium truncate">{nft.name || `NFT #${nft.tokenId || i}`}</h4>
                         <div className="flex justify-between mt-2">
-                          <Button variant="outline" size="sm" onClick={() => handleViewDetails(nft)}>Details</Button>
-                          <Button variant="outline" size="sm" onClick={() => handleListNFT(nft)}>List</Button>
+                          <Button variant="outline" size="sm" onClick={() => handleViewDetails(nft)}>Detalles</Button>
+                          {isListed ? (
+                            <Button variant="outline" size="sm" onClick={() => handleCancelListingClick(nft)}>Cancelar listado</Button>
+                          ) : (
+                            <Button variant="outline" size="sm" onClick={() => handleListNFT(nft)}>Listar</Button>
+                          )}
                         </div>
                       </CardContent>
                     </Card>

@@ -59,16 +59,33 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
     mapping(address => EnumerableSet.UintSet) private userListedItems;
     mapping(address => EnumerableSet.UintSet) private userOwnedItems;
 
+    // Agregar este mapeo al inicio del contrato, junto con las otras variables de estado
+    mapping(address => mapping(uint256 => bool)) private nftListed;
+
     function createMarketItem(
         address nftContractAddress,
         uint256 tokenId,
         uint256 price
-    ) public nonReentrant returns (uint256) {
+    ) external nonReentrant returns (uint256) {
         require(price > 0, "Price must be at least 1 wei");
+        
+        // Verificar que el llamante es el propietario del NFT
+        require(
+            IERC721(nftContractAddress).ownerOf(tokenId) == msg.sender,
+            "Caller is not the owner of the NFT"
+        );
+        
+        // Verificar la aprobación
         require(
             IERC721(nftContractAddress).getApproved(tokenId) == address(this) ||
             IERC721(nftContractAddress).isApprovedForAll(msg.sender, address(this)),
             "Marketplace contract is not approved to transfer this NFT"
+        );
+
+        // Agregar esta nueva verificación
+        require(
+            !nftListed[nftContractAddress][tokenId],
+            "This NFT is already listed"
         );
 
         _marketItemIds.increment();
@@ -85,10 +102,15 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
             false
         );
 
+        // Marcar el NFT como listado antes de la transferencia
+        nftListed[nftContractAddress][tokenId] = true;
+
+        // Actualizar userListedItems antes de la transferencia
+        userListedItems[msg.sender].add(marketItemId);
+
+        // Realizar la transferencia después de actualizar el estado
         IERC721(nftContractAddress).safeTransferFrom(msg.sender, address(this), tokenId);
         emit NFTTransferred(msg.sender, address(this), tokenId, nftContractAddress);
-
-        userListedItems[msg.sender].add(marketItemId);
 
         emit MarketItemCreated(
             marketItemId,
@@ -121,6 +143,9 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
 
         IERC721(nftContractAddress).safeTransferFrom(address(this), msg.sender, item.tokenId);
         emit NFTTransferred(address(this), msg.sender, item.tokenId, nftContractAddress);
+
+        // Marcar el NFT como no listado
+        nftListed[nftContractAddress][item.tokenId] = false;
     }
 
     function createMarketSale(address nftContractAddress, uint256 marketItemId) public payable nonReentrant {
@@ -157,9 +182,12 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
 
         IERC721(nftContractAddress).safeTransferFrom(address(this), msg.sender, item.tokenId);
         emit NFTTransferred(address(this), msg.sender, item.tokenId, nftContractAddress);
+
+        // Marcar el NFT como no listado después de la venta
+        nftListed[nftContractAddress][item.tokenId] = false;
     }
 
-    function fetchAvailableMarketItems(uint256 start, uint256 count) public view returns (MarketItem[] memory) {
+    function fetchAvailableMarketItems(uint256 start, uint256 count) external view returns (MarketItem[] memory) {
         uint256 itemsCount = _marketItemIds.current();
         uint256 availableItemsCount = 0;
         uint256 currentIndex = 0;
@@ -223,30 +251,6 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
         }
 
         return marketItems;
-    }
-
-    function fetchMarketItemsFromArray(uint256[] storage itemIds, uint256 start, uint256 count)
-        internal
-        view
-        returns (MarketItem[] memory)
-    {
-        uint256 itemCount = itemIds.length;
-        if (start >= itemCount) {
-            return new MarketItem[](0);
-        }
-
-        uint256 end = start + count;
-        if (end > itemCount) {
-            end = itemCount;
-        }
-        uint256 resultCount = end - start;
-
-        MarketItem[] memory items = new MarketItem[](resultCount);
-        for (uint256 i = 0; i < resultCount; i++) {
-            items[i] = marketItemIdToMarketItem[itemIds[start + i]];
-        }
-
-        return items;
     }
 
     function withdrawCommissions() public onlyOwner {
