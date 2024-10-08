@@ -108,7 +108,7 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
   const handleCancelListing = useCallback(async () => {
     try {
       console.log('Cancelando listado para:', nftAddress, tokenId);
-      // Aquí iría la lógica para cancelar el listado
+     
       setIsListed(false);
     } catch (error) {
       console.error('Error al cancelar el listado:', error);
@@ -132,7 +132,7 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
       return BigInt(value.toString()).toString();
     };
 
-    // Asegúrate de que el precio no sea demasiado bajo
+    
     const minimumPrice = '1000000000000000'; // 0.001 ETH en wei
     const safePrice = BigInt(price) < BigInt(minimumPrice) ? minimumPrice : safeBigInt(price);
 
@@ -154,7 +154,7 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
         nftAddress,
         safeBigInt(tokenId),
         safePrice,
-        listingDurationInSeconds // Ahora pasamos la duración correcta en segundos
+        listingDurationInSeconds 
       ],
     }];
   }, [nftAddress, tokenId]);
@@ -247,9 +247,9 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
       }
       const listingContract = getListingContract(price, durationInDays);
       console.log('Contrato de listado:', listingContract);
-      // Aquí iría la lógica para ejecutar la transacción de listado
+      
       console.log('Listando NFT:', nftAddress, tokenId, price, durationInDays);
-      // ... resto del código
+     
     } catch (error) {
       console.error('Error al listar el NFT:', error);
       setError(`Error al listar el NFT: ${(error as Error).message || 'Desconocido'}`);

@@ -87,7 +87,7 @@ export const useHandleInteraction = ({
       saveState(refs.currentStroke.current);
       refs.currentStroke.current = [];
     }
-  }, [getActiveLayer, updatePixel, draw, updateCanvasDisplay, saveState]);
+  }, [updateCanvasDisplay, saveState, refs.currentStroke, refs.lastDrawnPixel, updatePixel, markPixelAsModified]);
 
   const initPreviewCanvas = useCallback(() => {
     const canvas = canvasRef.current;
@@ -103,7 +103,7 @@ export const useHandleInteraction = ({
       canvas.parentNode?.insertBefore(previewCanvas, canvas.nextSibling);
       refs.previewCtx.current = previewCanvas.getContext('2d');
     }
-  }, [canvasRef]);
+  }, [canvasRef, refs.previewCtx]);
 
   const drawPreviewLine = useCallback((startX: number, startY: number, endX: number, endY: number) => {
     const canvas = canvasRef.current;
@@ -126,7 +126,7 @@ export const useHandleInteraction = ({
     previewCtx.stroke();
     
     previewCtx.restore();
-  }, [canvasRef, stateRef]);
+  }, [canvasRef, refs.previewCtx, stateRef]);
 
   const handleStart = useCallback((e: PointerEvent) => {
     const state = stateRef.current;
@@ -176,7 +176,7 @@ export const useHandleInteraction = ({
       refs.isPanning.current = true;
       refs.panStart.current = { x: e.clientX, y: e.clientY };
     }
-  }, [stateRef, refs.isPanning, refs.panStart, refs.isInteracting, refs.currentStroke, refs.activeButton, refs.lastDrawnPixel, getGridCoordinates, updateState, updateCanvasDisplay, saveState, handleDraw, initPreviewCanvas]);
+  }, [stateRef, initPreviewCanvas, refs.isDrawingLine, refs.lineStart, refs.lastDrawnPixel, refs.isPanning, refs.panStart, refs.isInteracting, refs.currentStroke, refs.activeButton, getGridCoordinates, updateState, updateCanvasDisplay, saveState, handleDraw]);
 
   const handleMove = useCallback((e: PointerEvent) => {
     const state = stateRef.current;
@@ -207,7 +207,7 @@ export const useHandleInteraction = ({
       handleDraw(gridX, gridY, color, state);
       updateCanvasDisplay();
     }
-  }, [stateRef, refs.isPanning, refs.panStart, refs.isInteracting, refs.activeButton, containerRef, getGridCoordinates, handleDraw, updateCanvasDisplay, drawPreviewLine]);
+  }, [stateRef, refs.lastPointerPosition, refs.isDrawingLine, refs.lineStart, refs.isPanning, refs.panStart, refs.isInteracting, refs.activeButton, getGridCoordinates, drawPreviewLine, containerRef, handleDraw, updateCanvasDisplay]);
 
   const handleEnd = useCallback((e: PointerEvent) => {
     if (refs.isDrawingLine.current && refs.lineStart.current) {
@@ -247,7 +247,7 @@ export const useHandleInteraction = ({
       refs.isPanning.current = false;
       refs.panStart.current = null;
     }
-  }, [refs.lineStart, getGridCoordinates, handleDrawLine, saveState, updateCanvasDisplay, canvasRef]);
+  }, [refs.isDrawingLine, refs.lineStart, refs.isInteracting, refs.isPanning, refs.previewCtx, refs.lastDrawnPixel, refs.activeButton, refs.currentStroke, refs.panStart, stateRef, getGridCoordinates, handleDrawLine, canvasRef, saveState, updateCanvasDisplay]);
 
   const handleInteraction = useCallback((e: PointerEvent) => {
     const state = stateRef.current;

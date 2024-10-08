@@ -14,6 +14,7 @@ import { useNFTListing } from '../../hooks/useNFTListing';
 import { useFetchMarketItems } from '../../hooks/useFetchMarketItems';
 import { useNFTs } from '../../hooks/useNFTs'; // Asumiendo que tienes un hook para obtener los NFTs del usuario
 import { ethers } from 'ethers';
+import { useCancelNFTListing } from '../../hooks/useCancelNFTListing';
 
 interface NFT {
   id?: string;
@@ -26,6 +27,7 @@ interface NFT {
   contractAddress?: string;
   isListed?: boolean;
   listedPrice?: string | null;
+  marketItemId?: bigint;
 }
 
 interface Collection {
@@ -77,6 +79,13 @@ const Profile: React.FC = () => {
 
   const [, setListedNFTs] = useState<Set<string>>(new Set());
 
+  const {
+    handleCancelListing: handleCancelListingHook,
+    isCancelling,
+    isSuccess: isCancelSuccess,
+    error: cancelError
+  } = useCancelNFTListing();
+
   const weiToEth = (weiAmount: string | null): string => {
     if (!weiAmount) return '0';
     return ethers.utils.formatEther(weiAmount);
@@ -97,7 +106,8 @@ const Profile: React.FC = () => {
         return {
           ...nft,
           isListed: !!listedItem,
-          listedPrice: listedItem ? listedItem.price.toString() : null
+          listedPrice: listedItem ? listedItem.price.toString() : null,
+          marketItemId: listedItem ? listedItem.marketItemId : undefined
         };
       });
       
@@ -148,9 +158,21 @@ const Profile: React.FC = () => {
   }, []);
 
   const handleCancelListingClick = useCallback((nft: NFT) => {
-    setListingNFT(nft);
-    handleCancelListing();
-  }, [handleCancelListing]);
+    if (nft.marketItemId) {
+      // Convertimos el marketItemId a un número, eliminando la 'n' al final
+      const marketItemIdNumber = Number(nft.marketItemId.toString());
+      handleCancelListingHook(BigInt(marketItemIdNumber));
+    } else {
+      console.error('No se pudo cancelar el listado: marketItemId no disponible');
+    }
+  }, [handleCancelListingHook]);
+
+  useEffect(() => {
+    if (isCancelSuccess) {
+      console.log('Listado cancelado con éxito');
+      fetchCollectedNFTs(); // Actualizar la lista de NFTs después de cancelar
+    }
+  }, [isCancelSuccess, fetchCollectedNFTs]);
 
   const handleViewDetails = (nft: NFT) => {
     // Implementa la lógica para mostrar los detalles del NFT
@@ -235,16 +257,25 @@ const Profile: React.FC = () => {
                         <div className="flex justify-between mt-2">
                           <Button variant="outline" size="sm" onClick={() => handleViewDetails(nft)}>Detalles</Button>
                           {nft.isListed ? (
-                            <Button variant="outline" size="sm" onClick={() => handleCancelListingClick(nft)}>
-                              Cancelar listado 
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleCancelListingClick(nft)}
+                              disabled={isCancelling}
+                            >
+                              {isCancelling ? 'Cancelando...' : 'Cancelar listado'}
                             </Button>
                           ) : (
                             <Button variant="outline" size="sm" onClick={() => handleListNFT(nft)}>Listar</Button>
                           )}
                         </div>
                         {nft.isListed && (
-                          <p className="text-sm mt-1">Precio listado: {weiToEth(nft.listedPrice || null)} ETH</p>
+                          <p className="text-sm mt-1">
+                            Precio listado: {weiToEth(nft.listedPrice || null)} ETH
+                            {nft.marketItemId && ` (ID: ${nft.marketItemId.toString()})`}
+                          </p>
                         )}
+                        {cancelError && <p className="text-red-500 text-sm mt-1">{cancelError}</p>}
                       </CardContent>
                     </Card>
                   ))}

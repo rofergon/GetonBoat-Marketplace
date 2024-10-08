@@ -1,4 +1,4 @@
-import { useContractRead } from 'wagmi';
+import { useReadContract } from 'wagmi';
 import { marketplaceAbi } from '../abi/marketplace.abi';
 import { useState, useEffect } from 'react';
 import { NFTDatabaseManager } from '../../pages/api/nftDatabaseManager';
@@ -23,13 +23,13 @@ export const useFetchMarketItems = (page: number = 0) => {
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [totalItems, setTotalItems] = useState<number>(0);
 
-  const { data: totalItemsData } = useContractRead({
+  const { data: totalItemsData } = useReadContract({
     address: MARKETPLACE_ADDRESS,
     abi: marketplaceAbi,
     functionName: 'getTotalAvailableMarketItems',
   });
 
-  const { data: fetchedItems, isLoading, error } = useContractRead({
+  const { data: fetchedItems, isLoading, error } = useReadContract({
     address: MARKETPLACE_ADDRESS,
     abi: marketplaceAbi,
     functionName: 'fetchAvailableMarketItems',
@@ -53,12 +53,12 @@ export const useFetchMarketItems = (page: number = 0) => {
   }, [fetchedItems]);
 
   const updateNFTListingStatus = async (items: MarketItem[]) => {
-    console.log('Actualizando estado de listado para', items.length, 'items');
+    
     const dbManager = new NFTDatabaseManager();
     try {
       await dbManager.resetListingStatus();
       await dbManager.updateNFTListingStatus(items);
-      console.log('Estado de listado actualizado exitosamente');
+     
     } catch (error) {
       console.error('Error al actualizar el estado de listado de los NFTs:', error);
     } finally {
@@ -67,7 +67,7 @@ export const useFetchMarketItems = (page: number = 0) => {
   };
 
   const hasMore = totalItems > (page + 1) * ITEMS_PER_PAGE;
-  console.log('¿Hay más items?', hasMore);
+ 
 
   return {
     marketItems,
