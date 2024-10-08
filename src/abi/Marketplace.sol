@@ -3,22 +3,25 @@ pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 
 contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
-    using Counters for Counters.Counter;
     using EnumerableSet for EnumerableSet.UintSet;
+    using Address for address payable;
 
-    Counters.Counter private _marketItemIds;
-    Counters.Counter private _tokensSold;
-    Counters.Counter private _tokensCanceled;
+    uint256 private _lastItemId;
+    uint256 private _soldItemsCount;
+    uint256 private _canceledItemsCount;
 
     uint256 private constant BASIS_POINTS = 10000;
-    uint256 private commissionPercentage = 250;
+    uint256 private commissionPercentage = 250; // 2.5%
     uint256 private accumulatedCommissions;
+
+    uint256 private constant MIN_LISTING_DURATION = 6 days;
+    uint256 private constant MAX_LISTING_DURATION = 180 days; // 6 meses
 
     mapping(uint256 => MarketItem) private marketItemIdToMarketItem;
 
@@ -27,185 +30,177 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
         address nftContractAddress;
         uint256 tokenId;
         address payable seller;
-        address payable owner;
+        address payable buyer;
         uint256 price;
         bool sold;
         bool canceled;
+        uint256 expirationTime;
     }
-
-    enum Property { Seller, Owner }
 
     event MarketItemCreated(
         uint256 indexed marketItemId,
         address indexed nftContract,
         uint256 indexed tokenId,
         address seller,
-        address owner,
-        uint256 price,
-        bool sold,
-        bool canceled
+        uint256 price
     );
     event MarketItemSold(uint256 indexed marketItemId, address buyer, uint256 price);
     event MarketItemCanceled(uint256 indexed marketItemId);
     event CommissionsWithdrawn(address indexed owner, uint256 amount);
-    event MarketItemOwnershipChanged(uint256 indexed marketItemId, address indexed previousOwner, address indexed newOwner);
     event MarketItemPriceUpdated(uint256 indexed marketItemId, uint256 oldPrice, uint256 newPrice);
-    event NFTTransferred(address indexed from, address indexed to, uint256 indexed tokenId, address nftContract);
     event CommissionPercentageUpdated(uint256 oldPercentage, uint256 newPercentage);
+    event NFTTransferred(
+        address indexed from,
+        address indexed to,
+        uint256 indexed tokenId,
+        address nftContractAddress
+    );
+    event MarketItemExpired(uint256 indexed marketItemId);
 
-    constructor() Ownable(msg.sender) {
-    }
+    constructor() Ownable(msg.sender) {}
 
     mapping(address => EnumerableSet.UintSet) private userListedItems;
-    mapping(address => EnumerableSet.UintSet) private userOwnedItems;
-
-    // Agregar este mapeo al inicio del contrato, junto con las otras variables de estado
     mapping(address => mapping(uint256 => bool)) private nftListed;
+    EnumerableSet.UintSet private availableMarketItemIds;
 
     function createMarketItem(
         address nftContractAddress,
         uint256 tokenId,
-        uint256 price
+        uint256 price,
+        uint256 listingDuration
     ) external nonReentrant returns (uint256) {
-        require(price > 0, "Price must be at least 1 wei");
-        
-        // Verificar que el llamante es el propietario del NFT
+        require(price > 0, "Precio invalido");
         require(
             IERC721(nftContractAddress).ownerOf(tokenId) == msg.sender,
-            "Caller is not the owner of the NFT"
+            "No eres el propietario"
         );
-        
-        // Verificar la aprobación
         require(
             IERC721(nftContractAddress).getApproved(tokenId) == address(this) ||
             IERC721(nftContractAddress).isApprovedForAll(msg.sender, address(this)),
-            "Marketplace contract is not approved to transfer this NFT"
+            "Marketplace no aprobado"
         );
-
-        // Agregar esta nueva verificación
         require(
             !nftListed[nftContractAddress][tokenId],
-            "This NFT is already listed"
+            "NFT ya listado"
+        );
+        require(
+            listingDuration >= MIN_LISTING_DURATION && listingDuration <= MAX_LISTING_DURATION,
+            "Duracion de listado invalida"
         );
 
-        _marketItemIds.increment();
-        uint256 marketItemId = _marketItemIds.current();
+        _lastItemId += 1;
+        uint256 newItemId = _lastItemId;
 
-        marketItemIdToMarketItem[marketItemId] = MarketItem(
-            marketItemId,
+        uint256 expirationTime = block.timestamp + listingDuration;
+
+        marketItemIdToMarketItem[newItemId] = MarketItem(
+            newItemId,
             nftContractAddress,
             tokenId,
             payable(msg.sender),
             payable(address(0)),
             price,
             false,
-            false
+            false,
+            expirationTime
         );
 
-        // Marcar el NFT como listado antes de la transferencia
         nftListed[nftContractAddress][tokenId] = true;
-
-        // Actualizar userListedItems antes de la transferencia
-        userListedItems[msg.sender].add(marketItemId);
-
-        // Realizar la transferencia después de actualizar el estado
-        IERC721(nftContractAddress).safeTransferFrom(msg.sender, address(this), tokenId);
-        emit NFTTransferred(msg.sender, address(this), tokenId, nftContractAddress);
+        userListedItems[msg.sender].add(newItemId);
+        availableMarketItemIds.add(newItemId);
 
         emit MarketItemCreated(
-            marketItemId,
+            newItemId,
             nftContractAddress,
             tokenId,
             msg.sender,
-            address(0),
-            price,
-            false,
-            false
+            price
         );
 
-        return marketItemId;
+        return newItemId;
     }
 
-    function cancelMarketItem(address nftContractAddress, uint256 marketItemId) public nonReentrant {
-        MarketItem storage item = marketItemIdToMarketItem[marketItemId];
-        require(item.tokenId > 0, "Market item does not exist");
-        require(item.seller == msg.sender, "You are not the seller");
-        require(!item.sold, "Cannot cancel a sold item");
-        require(!item.canceled, "Market item is already canceled");
+    function cancelMarketItem(uint256 itemId) public nonReentrant {
+        MarketItem storage item = marketItemIdToMarketItem[itemId];
+        require(item.tokenId > 0, "El item del mercado no existe");
+        require(item.seller == msg.sender, "No eres el vendedor");
+        require(!item.sold, "No se puede cancelar un item vendido");
+        require(!item.canceled, "El item del mercado ya esta cancelado");
 
-        userListedItems[msg.sender].remove(marketItemId);
+        _removeMarketItem(itemId, item);
+        _canceledItemsCount += 1;
 
-        item.owner = payable(address(0));
-        item.canceled = true;
-        _tokensCanceled.increment();
-
-        emit MarketItemCanceled(marketItemId);
-
-        IERC721(nftContractAddress).safeTransferFrom(address(this), msg.sender, item.tokenId);
-        emit NFTTransferred(address(this), msg.sender, item.tokenId, nftContractAddress);
-
-        // Marcar el NFT como no listado
-        nftListed[nftContractAddress][item.tokenId] = false;
+        emit MarketItemCanceled(itemId);
     }
 
-    function createMarketSale(address nftContractAddress, uint256 marketItemId) public payable nonReentrant {
-        MarketItem storage item = marketItemIdToMarketItem[marketItemId];
-        require(item.price > 0, "Market item does not exist");
-        require(!item.sold, "Market item is already sold");
-        require(!item.canceled, "Market item has been canceled");
-        require(msg.value >= item.price, "Insufficient funds sent");
+    function createMarketSale(uint256 itemId) public payable nonReentrant {
+        MarketItem storage item = marketItemIdToMarketItem[itemId];
+        
+        if (!_isMarketItemValid(item)) {
+            revert("Listado expirado o invalido");
+        }
+
+        require(item.price > 0, "El item del mercado no existe");
+        require(!item.sold, "El item ya esta vendido");
+        require(!item.canceled, "El item ha sido cancelado");
+        require(msg.value >= item.price, "Fondos insuficientes enviados");
         require(item.seller != msg.sender, "El comprador no puede ser el vendedor");
+
+        IERC721 nftContract = IERC721(item.nftContractAddress);
+        require(
+            nftContract.ownerOf(item.tokenId) == item.seller,
+            "El vendedor ya no es el propietario del NFT"
+        );
+        require(
+            nftContract.getApproved(item.tokenId) == address(this) ||
+            nftContract.isApprovedForAll(item.seller, address(this)),
+            "El marketplace no tiene la aprobacion para transferir este NFT"
+        );
 
         uint256 commission = (item.price * commissionPercentage) / BASIS_POINTS;
         uint256 sellerProceeds = item.price - commission;
         uint256 excess = msg.value - item.price;
 
-        address previousOwner = item.owner;
-        item.owner = payable(msg.sender);
-        _tokensSold.increment();
         accumulatedCommissions += commission;
 
-        userListedItems[item.seller].remove(marketItemId);
-        userOwnedItems[msg.sender].add(marketItemId);
+        address seller = item.seller;
+        uint256 price = item.price;
+        
+        _removeMarketItem(itemId, item);
 
-        emit MarketItemOwnershipChanged(marketItemId, previousOwner, msg.sender);
+        nftContract.safeTransferFrom(seller, msg.sender, item.tokenId);
+        emit NFTTransferred(seller, msg.sender, item.tokenId, item.nftContractAddress);
 
-        emit MarketItemSold(marketItemId, msg.sender, item.price);
-
-        (bool sent, ) = item.seller.call{value: sellerProceeds}("");
-        require(sent, "Failed to send Ether to the seller");
+        payable(seller).sendValue(sellerProceeds);
 
         if (excess > 0) {
-            (bool refundSuccess, ) = msg.sender.call{value: excess}("");
-            require(refundSuccess, "Refund failed");
+            payable(msg.sender).sendValue(excess);
         }
 
-        IERC721(nftContractAddress).safeTransferFrom(address(this), msg.sender, item.tokenId);
-        emit NFTTransferred(address(this), msg.sender, item.tokenId, nftContractAddress);
-
-        // Marcar el NFT como no listado después de la venta
-        nftListed[nftContractAddress][item.tokenId] = false;
+        emit MarketItemSold(itemId, msg.sender, price);
     }
 
     function fetchAvailableMarketItems(uint256 start, uint256 count) external view returns (MarketItem[] memory) {
-        uint256 itemsCount = _marketItemIds.current();
-        uint256 availableItemsCount = 0;
-        uint256 currentIndex = 0;
+        uint256 totalAvailable = availableMarketItemIds.length();
+        uint256 fetchedCount = 0;
+        MarketItem[] memory tempItems = new MarketItem[](count);
 
-        for (uint256 i = start; i < itemsCount && i < start + count; i++) {
-            if (!marketItemIdToMarketItem[i + 1].sold && !marketItemIdToMarketItem[i + 1].canceled) {
-                availableItemsCount++;
+        uint256 i = start;
+        while (i < totalAvailable && fetchedCount < count) {
+            uint256 marketItemId = availableMarketItemIds.at(i);
+            MarketItem storage item = marketItemIdToMarketItem[marketItemId];
+
+            if (block.timestamp <= item.expirationTime && !item.sold && !item.canceled) {
+                tempItems[fetchedCount] = item;
+                fetchedCount++;
             }
+
+            i++;
         }
 
-        MarketItem[] memory marketItems = new MarketItem[](availableItemsCount);
-
-        for (uint256 i = start; i < itemsCount && currentIndex < availableItemsCount; i++) {
-            MarketItem storage item = marketItemIdToMarketItem[i + 1];
-            if (!item.sold && !item.canceled) {
-                marketItems[currentIndex] = item;
-                currentIndex++;
-            }
+        MarketItem[] memory marketItems = new MarketItem[](fetchedCount);
+        for (uint256 j = 0; j < fetchedCount; j++) {
+            marketItems[j] = tempItems[j];
         }
 
         return marketItems;
@@ -232,33 +227,11 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
         return marketItems;
     }
 
-    function fetchOwnedMarketItems(uint256 start, uint256 count) public view returns (MarketItem[] memory) {
-        uint256 totalItems = userOwnedItems[msg.sender].length();
-        if (start >= totalItems) {
-            return new MarketItem[](0);
-        }
-
-        uint256 end = start + count;
-        if (end > totalItems) {
-            end = totalItems;
-        }
-        uint256 resultCount = end - start;
-
-        MarketItem[] memory marketItems = new MarketItem[](resultCount);
-        for (uint256 i = 0; i < resultCount; i++) {
-            uint256 marketItemId = userOwnedItems[msg.sender].at(start + i);
-            marketItems[i] = marketItemIdToMarketItem[marketItemId];
-        }
-
-        return marketItems;
-    }
-
     function withdrawCommissions() public onlyOwner {
-        require(accumulatedCommissions > 0, "No commissions to withdraw");
+        require(accumulatedCommissions > 0, "No hay comisiones para retirar");
         uint256 amount = accumulatedCommissions;
         accumulatedCommissions = 0;
-        (bool success, ) = owner().call{value: amount}("");
-        require(success, "Failed to transfer Ether");
+        payable(owner()).sendValue(amount);
         emit CommissionsWithdrawn(owner(), amount);
     }
 
@@ -267,22 +240,29 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
     }
 
     function setCommissionPercentage(uint256 newPercentage) public onlyOwner {
-        require(newPercentage <= 1000, "Commission percentage cannot exceed 10%");
+        require(newPercentage <= 1000, "El porcentaje de comision no puede exceder el 10%");
         uint256 oldPercentage = commissionPercentage;
         commissionPercentage = newPercentage;
         emit CommissionPercentageUpdated(oldPercentage, newPercentage);
     }
 
-    function updateMarketItemPrice(uint256 marketItemId, uint256 newPrice) public nonReentrant {
+    function updateMarketItemPrice(uint256 marketItemId, uint256 newPrice) public {
         MarketItem storage item = marketItemIdToMarketItem[marketItemId];
-        require(item.seller == msg.sender, "Only the seller can update the price");
-        require(!item.sold && !item.canceled, "Cannot update price of sold or canceled items");
-        require(newPrice > 0, "Price must be greater than zero");
+        require(item.seller == msg.sender, "Solo el vendedor puede actualizar el precio");
+        require(!item.sold && !item.canceled, "No se puede actualizar el precio de items vendidos o cancelados");
+        require(newPrice > 0, "El precio debe ser mayor que cero");
 
         uint256 oldPrice = item.price;
         item.price = newPrice;
 
         emit MarketItemPriceUpdated(marketItemId, oldPrice, newPrice);
+    }
+
+    function _removeMarketItem(uint256 marketItemId, MarketItem storage item) internal {
+        nftListed[item.nftContractAddress][item.tokenId] = false;
+        availableMarketItemIds.remove(marketItemId);
+        userListedItems[item.seller].remove(marketItemId);
+        delete marketItemIdToMarketItem[marketItemId]; // Liberar almacenamiento
     }
 
     function onERC721Received(
@@ -295,10 +275,42 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
     }
 
     receive() external payable {
-        revert("Direct Ether transfers not allowed");
+        revert("Transferencias directas de Ether no permitidas");
     }
 
     fallback() external payable {
-        revert("Direct Ether transfers not allowed");
+        revert("Transferencias directas de Ether no permitidas");
+    }
+
+    // Nueva función para obtener un artículo del mercado por su ID
+    function fetchMarketItem(uint256 marketItemId) external view returns (MarketItem memory) {
+        return marketItemIdToMarketItem[marketItemId];
+    }
+
+    // Nueva función para obtener el total de artículos disponibles en el mercado
+    function getTotalAvailableMarketItems() external view returns (uint256) {
+        return availableMarketItemIds.length();
+    }
+
+    // Función para manejar la expiración de elementos del mercado
+    function removeExpiredMarketItems(uint256[] calldata marketItemIds) external {
+        for (uint256 i = 0; i < marketItemIds.length; i++) {
+            uint256 marketItemId = marketItemIds[i];
+            MarketItem storage item = marketItemIdToMarketItem[marketItemId];
+            if (block.timestamp > item.expirationTime && !item.sold && !item.canceled) {
+                _expireMarketItem(marketItemId, item);
+            }
+        }
+    }
+
+    function _expireMarketItem(uint256 marketItemId, MarketItem storage item) internal {
+        _removeMarketItem(marketItemId, item);
+        _canceledItemsCount += 1;
+        emit MarketItemExpired(marketItemId);
+    }
+
+    // Nueva función auxiliar para verificar la validez del MarketItem
+    function _isMarketItemValid(MarketItem storage item) internal view returns (bool) {
+        return item.price > 0 && !item.sold && !item.canceled && block.timestamp <= item.expirationTime;
     }
 }

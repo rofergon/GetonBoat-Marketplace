@@ -8,6 +8,69 @@ export const marketplaceAbi = [
 		"inputs": [
 			{
 				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "AddressInsufficientBalance",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "marketItemId",
+				"type": "uint256"
+			}
+		],
+		"name": "cancelMarketItem",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "nftContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "expirationDuration",
+				"type": "uint256"
+			}
+		],
+		"name": "createMarketItem",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "FailedInnerCall",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
 				"name": "owner",
 				"type": "address"
 			}
@@ -65,6 +128,19 @@ export const marketplaceAbi = [
 		"type": "event"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "marketItemId",
+				"type": "uint256"
+			}
+		],
+		"name": "createMarketSale",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
 		"anonymous": false,
 		"inputs": [
 			{
@@ -106,27 +182,9 @@ export const marketplaceAbi = [
 			},
 			{
 				"indexed": false,
-				"internalType": "address",
-				"name": "owner",
-				"type": "address"
-			},
-			{
-				"indexed": false,
 				"internalType": "uint256",
 				"name": "price",
 				"type": "uint256"
-			},
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "sold",
-				"type": "bool"
-			},
-			{
-				"indexed": false,
-				"internalType": "bool",
-				"name": "canceled",
-				"type": "bool"
 			}
 		],
 		"name": "MarketItemCreated",
@@ -140,21 +198,9 @@ export const marketplaceAbi = [
 				"internalType": "uint256",
 				"name": "marketItemId",
 				"type": "uint256"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "previousOwner",
-				"type": "address"
-			},
-			{
-				"indexed": true,
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
 			}
 		],
-		"name": "MarketItemOwnershipChanged",
+		"name": "MarketItemExpired",
 		"type": "event"
 	},
 	{
@@ -231,7 +277,7 @@ export const marketplaceAbi = [
 			{
 				"indexed": false,
 				"internalType": "address",
-				"name": "nftContract",
+				"name": "nftContractAddress",
 				"type": "address"
 			}
 		],
@@ -258,73 +304,83 @@ export const marketplaceAbi = [
 		"type": "event"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "marketItemIds",
+				"type": "uint256[]"
+			}
+		],
+		"name": "removeExpiredMarketItems",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "renounceOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "newPercentage",
+				"type": "uint256"
+			}
+		],
+		"name": "setCommissionPercentage",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"stateMutability": "payable",
 		"type": "fallback"
 	},
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "nftContractAddress",
-				"type": "address"
-			},
-			{
 				"internalType": "uint256",
 				"name": "marketItemId",
 				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "newPrice",
+				"type": "uint256"
 			}
 		],
-		"name": "cancelMarketItem",
+		"name": "updateMarketItemPrice",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "nftContractAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "tokenId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "price",
-				"type": "uint256"
-			}
-		],
-		"name": "createMarketItem",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "",
-				"type": "uint256"
-			}
-		],
+		"inputs": [],
+		"name": "withdrawCommissions",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "nftContractAddress",
-				"type": "address"
-			},
-			{
-				"internalType": "uint256",
-				"name": "marketItemId",
-				"type": "uint256"
-			}
-		],
-		"name": "createMarketSale",
-		"outputs": [],
 		"stateMutability": "payable",
-		"type": "function"
+		"type": "receive"
 	},
 	{
 		"inputs": [
@@ -365,7 +421,7 @@ export const marketplaceAbi = [
 					},
 					{
 						"internalType": "address payable",
-						"name": "owner",
+						"name": "buyer",
 						"type": "address"
 					},
 					{
@@ -382,6 +438,11 @@ export const marketplaceAbi = [
 						"internalType": "bool",
 						"name": "canceled",
 						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "expirationTime",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct Marketplace.MarketItem[]",
@@ -396,16 +457,11 @@ export const marketplaceAbi = [
 		"inputs": [
 			{
 				"internalType": "uint256",
-				"name": "start",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "count",
+				"name": "marketItemId",
 				"type": "uint256"
 			}
 		],
-		"name": "fetchOwnedMarketItems",
+		"name": "fetchMarketItem",
 		"outputs": [
 			{
 				"components": [
@@ -431,7 +487,7 @@ export const marketplaceAbi = [
 					},
 					{
 						"internalType": "address payable",
-						"name": "owner",
+						"name": "buyer",
 						"type": "address"
 					},
 					{
@@ -448,11 +504,16 @@ export const marketplaceAbi = [
 						"internalType": "bool",
 						"name": "canceled",
 						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "expirationTime",
+						"type": "uint256"
 					}
 				],
-				"internalType": "struct Marketplace.MarketItem[]",
+				"internalType": "struct Marketplace.MarketItem",
 				"name": "",
-				"type": "tuple[]"
+				"type": "tuple"
 			}
 		],
 		"stateMutability": "view",
@@ -497,7 +558,7 @@ export const marketplaceAbi = [
 					},
 					{
 						"internalType": "address payable",
-						"name": "owner",
+						"name": "buyer",
 						"type": "address"
 					},
 					{
@@ -514,6 +575,11 @@ export const marketplaceAbi = [
 						"internalType": "bool",
 						"name": "canceled",
 						"type": "bool"
+					},
+					{
+						"internalType": "uint256",
+						"name": "expirationTime",
+						"type": "uint256"
 					}
 				],
 				"internalType": "struct Marketplace.MarketItem[]",
@@ -527,6 +593,19 @@ export const marketplaceAbi = [
 	{
 		"inputs": [],
 		"name": "getAccumulatedCommissions",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getTotalAvailableMarketItems",
 		"outputs": [
 			{
 				"internalType": "uint256",
@@ -583,67 +662,5 @@ export const marketplaceAbi = [
 		],
 		"stateMutability": "view",
 		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "renounceOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "newPercentage",
-				"type": "uint256"
-			}
-		],
-		"name": "setCommissionPercentage",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
-			}
-		],
-		"name": "transferOwnership",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "marketItemId",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "newPrice",
-				"type": "uint256"
-			}
-		],
-		"name": "updateMarketItemPrice",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "withdrawCommissions",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"stateMutability": "payable",
-		"type": "receive"
 	}
-]
+] as const;

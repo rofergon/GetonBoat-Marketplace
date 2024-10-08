@@ -1,9 +1,6 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
-import { Button } from "../ui/button"
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card"
-import { Input } from "../ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs"
 import dynamic from 'next/dynamic'
 import { BrushData } from '../../types/types'
 import Profile from './Profile'

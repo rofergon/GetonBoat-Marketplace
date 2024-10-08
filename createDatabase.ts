@@ -37,7 +37,7 @@ async function createTables() {
     `);
     console.log('Tabla LastUpdate creada o ya existente.');
 
-    // Crear la tabla NFTs
+    // Modificar la tabla NFTs
     await client.execute(`
       CREATE TABLE IF NOT EXISTS NFTs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -51,12 +51,14 @@ async function createTables() {
         attributes TEXT,
         acquired_at INTEGER,
         updated_at INTEGER NOT NULL,
+        is_listed BOOLEAN DEFAULT FALSE,
+        listed_price TEXT,
         UNIQUE(owner_address, token_id, contract_address)
       )
     `);
-    console.log('Tabla NFTs creada o ya existente.');
+    console.log('Tabla NFTs creada o modificada.');
   } catch (error) {
-    console.error('Error al crear las tablas:', error);
+    console.error('Error al crear o modificar las tablas:', error);
   }
 }
 

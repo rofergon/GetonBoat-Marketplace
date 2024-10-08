@@ -12,7 +12,7 @@ const config = {
 const alchemy = new Alchemy(config);
 
 // Inicializa el caché con un tiempo de vida de 1 hora (3600 segundos)
-const cache = new NodeCache({ stdTTL: 3600 });
+const cache = new NodeCache({ stdTTL: 100 });
 
 const DEFAULT_IMAGE = '/placeholder.png';
 

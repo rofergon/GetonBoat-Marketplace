@@ -6,10 +6,9 @@ import { useAccount } from 'wagmi';
 import { Address, Avatar } from '@coinbase/onchainkit/identity';
 import CustomImage from '../pixelminter/CustomImage';
 import Image from 'next/image';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
-import { Transaction, TransactionButton, TransactionStatus, TransactionStatusLabel, TransactionStatusAction } from '@coinbase/onchainkit/transaction';
-import type { LifeCycleStatus } from '@coinbase/onchainkit/transaction';
-import { Abi } from 'viem';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Transaction, TransactionButton, TransactionStatus, TransactionStatusLabel, TransactionStatusAction, LifeCycleStatus } from '@coinbase/onchainkit/transaction';
+
 import { useNFTListing } from '../../hooks/useNFTListing';
 
 interface NFT {
@@ -36,18 +35,15 @@ const mockCollections: Collection[] = [
   { name: "SimpPunks", items: 10000, floorPrice: "0.01 ETH" },
 ];
 
-const MARKETPLACE_ADDRESS = '0x960f887ddf97d872878e6fa7c25d7a059f8fb6d7';
-
 export default function Profile() {
   const [collectedNFTs, setCollectedNFTs] = useState<NFT[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const { address } = useAccount();
 
-  const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [listingNFT, setListingNFT] = useState<NFT | null>(null);
   const [listingPrice, setListingPrice] = useState<string>('');
+  const [listingDuration] = useState<number>(7);
 
   const {
     isApproved,
@@ -55,22 +51,40 @@ export default function Profile() {
     approvalTxHash,
     listingTxHash,
     error,
-    handleApprovalStatus,
-    handleListingStatus,
-    handleCancelListing,
     getApprovalContract,
     getListingContract,
     getCancelListingContract,
+    handleCancelListing,
   } = useNFTListing(listingNFT?.contractAddress as `0x${string}`, listingNFT?.tokenId || '');
+
+  const handleApprovalStatus = useCallback((status: LifeCycleStatus) => {
+    console.log('Estado de aprobación:', status);
+    // Lógica adicional para manejar el estado de aprobación
+  }, []);
+
+  const handleListingStatus = useCallback((status: LifeCycleStatus) => {
+    console.log('Estado de listado:', status);
+    // Lógica adicional para manejar el estado de listado
+  }, []);
+
+  const handleCancelListingStatus = useCallback((status: LifeCycleStatus) => {
+    console.log('Estado de cancelación de listado:', status);
+    if (status.statusName === 'success') {
+      console.log('Listado cancelado con éxito');
+      setIsDialogOpen(false);
+      fetchCollectedNFTs(); // Actualizar la lista de NFTs después de cancelar
+    } else if (status.statusName === 'error') {
+      console.error('Error al cancelar el listado:', status.statusData);
+    }
+  }, []);
 
   const handleCancelListingClick = useCallback((nft: NFT) => {
     setListingNFT(nft);
     handleCancelListing();
   }, [handleCancelListing]);
 
-  const fetchCollectedNFTs = async () => {
+  const fetchCollectedNFTs = useCallback(async () => {
     if (!address) return;
-    setIsLoading(true);
     try {
       const response = await fetch(`/api/collected-nfts?userAddress=${address}`);
       const data = await response.json();
@@ -78,30 +92,23 @@ export default function Profile() {
     } catch (error) {
       console.error('Error al obtener NFTs coleccionados:', error);
       setCollectedNFTs([]);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [address]);
 
   useEffect(() => {
     if (address) {
       fetchCollectedNFTs();
     }
-  }, [address]);
+  }, [address, fetchCollectedNFTs]);
 
   const handleViewDetails = (nft: NFT) => {
-    setSelectedNFT(nft);
+    setListingNFT(nft);
     setIsDialogOpen(true);
   };
 
   const handleListNFT = (nft: NFT) => {
     setListingNFT(nft);
     setIsDialogOpen(true);
-  };
-
-  const handleConfirmListing = () => {
-    if (!listingNFT || !listingPrice) return;
-    setIsDialogOpen(false);
   };
 
   return (
@@ -199,12 +206,18 @@ export default function Profile() {
           <div className="mt-2">
             {listingNFT && (
               <>
-                <img src={listingNFT.image} alt={listingNFT.name} className="w-full h-auto" />
+                <Image
+                  src={listingNFT.image || "/placeholder.svg"}
+                  alt={listingNFT.name || "NFT Image"}
+                  width={300}
+                  height={300}
+                  layout="responsive"
+                />
                 <input
                   type="text"
                   value={listingPrice}
                   onChange={(e) => setListingPrice(e.target.value)}
-                  placeholder="Enter listing price in wei"
+                  placeholder="Ingrese el precio de listado en wei"
                   className="mt-2 w-full p-2 border rounded"
                 />
                 {!isApproved ? (
@@ -214,8 +227,23 @@ export default function Profile() {
                     onStatus={handleApprovalStatus}
                   >
                     <TransactionButton
-                      text="Approve NFT"
+                      text="Aprobar NFT"
                       className="mt-2 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors"
+                    />
+                    <TransactionStatus>
+                      <TransactionStatusLabel className="text-gray-300" />
+                      <TransactionStatusAction className="text-blue-500" />
+                    </TransactionStatus>
+                  </Transaction>
+                ) : !isListed ? (
+                  <Transaction
+                    chainId={8453}
+                    contracts={getListingContract(listingPrice, listingDuration)}
+                    onStatus={handleListingStatus}
+                  >
+                    <TransactionButton
+                      text="Listar NFT"
+                      className="mt-2 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors"
                     />
                     <TransactionStatus>
                       <TransactionStatusLabel className="text-gray-300" />
@@ -225,12 +253,12 @@ export default function Profile() {
                 ) : (
                   <Transaction
                     chainId={8453}
-                    contracts={getListingContract(listingPrice)}
-                    onStatus={handleListingStatus}
+                    contracts={getCancelListingContract()}
+                    onStatus={handleCancelListingStatus}
                   >
                     <TransactionButton
-                      text="List NFT"
-                      className="mt-2 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors"
+                      text="Cancelar Listado"
+                      className="mt-2 bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition-colors"
                     />
                     <TransactionStatus>
                       <TransactionStatusLabel className="text-gray-300" />
@@ -241,12 +269,12 @@ export default function Profile() {
                 {error && <p className="text-red-500 mt-2">{error}</p>}
                 {approvalTxHash && (
                   <p className="text-sm text-gray-600 mt-2">
-                    Approval Transaction: <Address address={approvalTxHash as `0x${string}`} />
+                    Transacción de Aprobación: {approvalTxHash}
                   </p>
                 )}
                 {listingTxHash && (
                   <p className="text-sm text-gray-600 mt-2">
-                    Listing Transaction: <Address address={listingTxHash as `0x${string}`} />
+                    Transacción de Listado: {listingTxHash}
                   </p>
                 )}
               </>

@@ -1,7 +1,27 @@
+import { MarketItem } from '@/hooks/useFetchMarketItems';
 import { createClient } from '@libsql/client';
-import { OwnedNft, AcquiredAt } from 'alchemy-sdk';
+import { OwnedNft } from 'alchemy-sdk';
+
+interface RawMetadata {
+  metadata?: {
+    attributes?: unknown[];
+  };
+}
 
 const DEFAULT_IMAGE = '/placeholder.png';
+
+interface ExistingNFT {
+  contractAddress: string;
+  tokenId: string;
+  name: string;
+  image: string;
+  description: string;
+  tokenURI: string;
+  attributes: any[];
+  acquiredAt: string;
+}
+
+type AcquiredAt = string | Date | { blockTimestamp: string | number | Date } | { timestamp: string | number | Date };
 
 export class NFTDatabaseManager {
   private client;
@@ -25,7 +45,7 @@ export class NFTDatabaseManager {
     };
   }
 
-  async getNFTsFromDatabase(address: string) {
+  async getNFTsFromDatabase(address: string): Promise<ExistingNFT[]> {
     const nftsResult = await this.client.execute({
       sql: 'SELECT * FROM NFTs WHERE owner_address = ?',
       args: [address]
@@ -43,32 +63,91 @@ export class NFTDatabaseManager {
     }));
   }
 
-  async updateNFTsInDatabase(address: string, nfts: OwnedNft[], currentBlock: number) {
-    for (const nft of nfts) {
-      await this.client.execute({
-        sql: `INSERT OR REPLACE INTO NFTs (
-          owner_address, token_id, contract_address, name, image, description, 
-          token_uri, attributes, acquired_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        args: [
-          address,
-          nft.tokenId,
-          nft.contract.address,
-          nft.name || `NFT #${nft.tokenId}`,
-          nft.image?.cachedUrl || nft.image?.originalUrl || DEFAULT_IMAGE,
-          nft.description || '',
-          this.getTokenUri(nft.tokenUri),
-          JSON.stringify(nft.raw?.metadata?.attributes || []),
-          this.getAcquiredAtTime(nft.acquiredAt),
-          currentBlock
-        ]
-      });
+  async updateNFTsInDatabase(address: string, nfts: OwnedNft | OwnedNft[], currentBlock: number) {
+    const nftArray = Array.isArray(nfts) ? nfts : [nfts];
+
+    if (nftArray.length === 0) {
+      console.log('No hay NFTs para actualizar');
+      return;
     }
+
+    try {
+      for (const nft of nftArray) {
+        const {
+          tokenId,
+          contract,
+          name,
+          description,
+        } = nft;
+
+        const contractAddress = contract.address;
+        const image = nft.image?.cachedUrl || nft.image?.originalUrl || '';
+        
+        // Manejo seguro de tokenUri
+        let tokenUriValue = '';
+        if (typeof nft.tokenUri === 'string') {
+          tokenUriValue = nft.tokenUri;
+        } else if (nft.tokenUri && typeof nft.tokenUri === 'object' && 'raw' in nft.tokenUri) {
+          tokenUriValue = (nft.tokenUri as { raw: string }).raw;
+        }
+
+        // Manejo seguro de attributes
+        let attributes = '[]';
+        const rawData = (nft as unknown as { raw?: RawMetadata }).raw;
+        if (rawData && rawData.metadata && Array.isArray(rawData.metadata.attributes)) {
+          attributes = JSON.stringify(rawData.metadata.attributes);
+        }
+
+        if (!tokenId || !contractAddress) {
+          console.warn(`NFT con datos incompletos será omitido:`, nft);
+          continue;
+        }
+
+        console.log('Inserting/Updating NFT:', { address, tokenId, contractAddress, name, image, description, tokenUriValue, attributes });
+
+        await this.client.execute({
+          sql: `
+            INSERT INTO NFTs (owner_address, token_id, contract_address, name, image, description, token_uri, attributes, acquired_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON CONFLICT(owner_address, token_id, contract_address) DO UPDATE SET
+              name = ?,
+              image = ?,
+              description = ?,
+              token_uri = ?,
+              attributes = ?,
+              updated_at = ?
+          `,
+          args: [
+            address, tokenId, contractAddress, name || '', image, description || '', tokenUriValue, attributes, Date.now(), currentBlock,
+            name || '', image, description || '', tokenUriValue, attributes, currentBlock
+          ]
+        });
+      }
+
+      console.log(`${nftArray.length} NFTs actualizados en la base de datos.`);
+    } catch (error) {
+      console.error('Error durante la actualización de NFTs:', error);
+      if (error instanceof Error) {
+        console.error('Detalles del error:', error.message);
+        console.error('Stack trace:', error.stack);
+      }
+      throw error;
+    }
+  }
+
+  private hasNFTChanged(existingNFT: ExistingNFT, newNFT: OwnedNft): boolean {
+    return (
+      existingNFT.name !== (newNFT.name || `NFT #${newNFT.tokenId}`) ||
+      existingNFT.image !== (newNFT.image?.cachedUrl || newNFT.image?.originalUrl || DEFAULT_IMAGE) ||
+      existingNFT.description !== (newNFT.description || '') ||
+      existingNFT.tokenURI !== this.getTokenUri(newNFT.tokenUri) ||
+      JSON.stringify(existingNFT.attributes) !== JSON.stringify(newNFT.raw?.metadata?.attributes || [])
+    );
   }
 
   async updateLastUpdate(address: string, currentBlock: number) {
     await this.client.execute({
-      sql: 'INSERT OR REPLACE INTO LastUpdate (owner_address, last_update_block, last_update_time) VALUES (?, ?, ?)',
+      sql: 'INSERT OR REPLACE INTO LastUpdate (owner_address, last_update_block, last_update_time) VALUES (?, ?, ?);',
       args: [address, currentBlock, Date.now()]
     });
   }
@@ -146,4 +225,42 @@ export class NFTDatabaseManager {
     }
     return '';
   }
-}
+
+  // Método auxiliar para obtener la dirección del propietario
+  private getOwnerAddress(nft: OwnedNft): string {
+    // Asumimos que la dirección del propietario está en alguna parte del objeto nft
+    // Puede que necesites ajustar esto según la estructura real de OwnedNft
+    if (nft.contract && nft.contract.address) {
+      return nft.contract.address;
+    }
+    // Si no puedes obtener la dirección del propietario del objeto nft,
+    // considera pasar la dirección como un parámetro separado a este método
+    return '';
+  }
+
+  async updateNFTListingStatus(nfts: MarketItem[]) {
+    for (const nft of nfts) {
+      await this.client.execute({
+        sql: `
+          UPDATE NFTs
+          SET is_listed = ?, listed_price = ?
+          WHERE contract_address = ? AND token_id = ?
+        `,
+        args: [true, nft.price.toString(), nft.nftContractAddress, nft.tokenId.toString()]
+      });
+    }
+    console.log(`${nfts.length} NFTs actualizados con estado de listado.`);
+  }
+
+  async resetListingStatus() {
+    await this.client.execute({
+      sql: `
+        UPDATE NFTs
+        SET is_listed = FALSE, listed_price = NULL
+      `,
+      args: []
+    });
+    console.log('Estado de listado reiniciado para todos los NFTs.');
+  }
+
+} // Añade esta llave de cierre aquí
