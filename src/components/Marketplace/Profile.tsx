@@ -272,7 +272,6 @@ const Profile: React.FC = () => {
                         {nft.isListed && (
                           <p className="text-sm mt-1">
                             Precio listado: {weiToEth(nft.listedPrice || null)} ETH
-                            {nft.marketItemId && ` (ID: ${nft.marketItemId.toString()})`}
                           </p>
                         )}
                         {cancelError && <p className="text-red-500 text-sm mt-1">{cancelError}</p>}
