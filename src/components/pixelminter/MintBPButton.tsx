@@ -4,14 +4,23 @@ import {
   TransactionButton, 
   TransactionStatus, 
   TransactionStatusLabel,
-  TransactionStatusAction,
+  TransactionStatusAction
 } from '@coinbase/onchainkit/transaction';
 import type { LifeCycleStatus } from '@coinbase/onchainkit/transaction';
 import { useAccount } from 'wagmi';
-import { BasePaintAbi } from '../../abi/BasePaintAbi';
+import BasePaintAbi from '../../abi/BasePaintAbi';
 import { State } from '../../types/types';
 import { calculateDay } from '../../utils/dateUtils';
 import { Button } from '../ui/button';
+import { Abi } from 'viem';
+
+// Definimos el tipo ContractFunctionParameters
+type ContractFunctionParameters = {
+  address: `0x${string}`;
+  abi: any[]; // Cambiamos Abi a any[] para ser menos estrictos
+  functionName: string;
+  args: unknown[];
+};
 
 interface MintBPButtonProps {
   state: State;
@@ -53,10 +62,10 @@ const MintBPButton: React.FC<MintBPButtonProps> = ({
     }
   }, [resetEncodedState]);
 
-  const contracts = currentDay && encodedData ? [
+  const contracts: ContractFunctionParameters[] = currentDay && encodedData ? [
     {
       address: '0xBa5e05cb26b78eDa3A2f8e3b3814726305dcAc83' as `0x${string}`,
-      abi: BasePaintAbi,
+      abi: BasePaintAbi as any[], // Aseguramos que BasePaintAbi se trate como any[]
       functionName: 'paint',
       args: [
         BigInt(currentDay).toString(), 
