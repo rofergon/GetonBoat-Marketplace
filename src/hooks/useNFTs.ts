@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { NFT } from '../types/nft'; // Asegúrate de tener definido el tipo NFT
+import { NFT } from '../types/types'; // Cambiamos la importación a '../types/types'
 
 export function useNFTs(address: string | undefined) {
   const [nfts, setNfts] = useState<NFT[]>([]);
