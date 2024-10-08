@@ -4,6 +4,7 @@
 
 @import 'header.css';
 @import 'wallet.css';
+@import 'painter.css';
 
 @layer base {
   * {
