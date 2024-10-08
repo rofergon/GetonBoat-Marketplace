@@ -13,6 +13,7 @@ import { Transaction, TransactionButton, TransactionStatus, TransactionStatusLab
 import { useNFTListing } from '../../hooks/useNFTListing';
 import { useFetchMarketItems } from '../../hooks/useFetchMarketItems';
 import { useNFTs } from '../../hooks/useNFTs'; // Asumiendo que tienes un hook para obtener los NFTs del usuario
+import { ethers } from 'ethers';
 
 interface NFT {
   id?: string;
@@ -40,7 +41,7 @@ const mockCollections: Collection[] = [
   { name: "SimpPunks", items: 10000, floorPrice: "0.01 ETH" },
 ];
 
-export default function Profile() {
+const Profile: React.FC = () => {
   const [collectedNFTs, setCollectedNFTs] = useState<NFT[]>([]);
   const { address } = useAccount();
 
@@ -71,10 +72,15 @@ export default function Profile() {
   });
 
   const [currentPage] = useState(0);
-  const { marketItems, totalItems, isLoading: isLoadingMarket, error: marketError, hasMore } = useFetchMarketItems(currentPage);
-  const { nfts, isLoading: isLoadingNFTs, error: nftsError } = useNFTs(address);
+  const { marketItems, totalItems } = useFetchMarketItems(currentPage);
+  const { nfts } = useNFTs(address);
 
-  const [listedNFTs, setListedNFTs] = useState<Set<string>>(new Set());
+  const [, setListedNFTs] = useState<Set<string>>(new Set());
+
+  const weiToEth = (weiAmount: string | null): string => {
+    if (!weiAmount) return '0';
+    return ethers.utils.formatEther(weiAmount);
+  };
 
   const fetchCollectedNFTs = useCallback(async () => {
     if (!address) return;
@@ -230,14 +236,14 @@ export default function Profile() {
                           <Button variant="outline" size="sm" onClick={() => handleViewDetails(nft)}>Detalles</Button>
                           {nft.isListed ? (
                             <Button variant="outline" size="sm" onClick={() => handleCancelListingClick(nft)}>
-                              Cancelar listado ({nft.listedPrice} wei)
+                              Cancelar listado ({weiToEth(nft.listedPrice || null)}) ETH)
                             </Button>
                           ) : (
                             <Button variant="outline" size="sm" onClick={() => handleListNFT(nft)}>Listar</Button>
                           )}
                         </div>
                         {nft.isListed && (
-                          <p className="text-sm mt-1">Precio listado: {nft.listedPrice} wei</p>
+                          <p className="text-sm mt-1">Precio listado: {weiToEth(nft.listedPrice || null)} ETH</p>
                         )}
                       </CardContent>
                     </Card>
@@ -337,3 +343,5 @@ export default function Profile() {
     </div>
   );
 }
+
+export default Profile;
