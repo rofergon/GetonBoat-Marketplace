@@ -14,4 +14,24 @@
     }
   }
 
+  .btn-tool {
+    width: 35px;
+    height: 35px;
+    padding: 8px;
+    background: none !important;
+  }
+
+  .color-picker {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 2px solid gray;
+    background: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
 }
