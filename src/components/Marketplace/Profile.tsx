@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useCallback } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -10,6 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Transaction, TransactionButton, TransactionStatus, TransactionStatusLabel, TransactionStatusAction, LifeCycleStatus } from '@coinbase/onchainkit/transaction';
 
 import { useNFTListing } from '../../hooks/useNFTListing';
+import { useFetchMarketItems } from '../../hooks/useFetchMarketItems';
+import { useNFTs } from '../../hooks/useNFTs'; // Asumiendo que tienes un hook para obtener los NFTs del usuario
 
 interface NFT {
   id?: string;
@@ -20,6 +23,8 @@ interface NFT {
   tokenURI?: string;
   attributes?: { trait_type: string; value: string }[];
   contractAddress?: string;
+  isListed?: boolean;
+  listedPrice?: string | null;
 }
 
 interface Collection {
@@ -57,6 +62,64 @@ export default function Profile() {
     handleCancelListing,
   } = useNFTListing(listingNFT?.contractAddress as `0x${string}`, listingNFT?.tokenId || '');
 
+  console.log('useNFTListing hook ejecutado:', {
+    isApproved,
+    isListed,
+    approvalTxHash,
+    listingTxHash,
+    error
+  });
+
+  const [currentPage] = useState(0);
+  const { marketItems, totalItems, isLoading: isLoadingMarket, error: marketError, hasMore } = useFetchMarketItems(currentPage);
+  const { nfts, isLoading: isLoadingNFTs, error: nftsError } = useNFTs(address);
+
+  const [listedNFTs, setListedNFTs] = useState<Set<string>>(new Set());
+
+  const fetchCollectedNFTs = useCallback(async () => {
+    if (!address) return;
+    try {
+      const response = await fetch(`/api/collected-nfts?userAddress=${address}`);
+      const data = await response.json();
+      
+      const nftsWithListingInfo = data.nfts.map((nft: NFT) => {
+        const listedItem = marketItems.find(item => 
+          item.nftContractAddress.toLowerCase() === (nft.contractAddress?.toLowerCase() ?? '') &&
+          item.tokenId.toString() === nft.tokenId
+        );
+        
+        return {
+          ...nft,
+          isListed: !!listedItem,
+          listedPrice: listedItem ? listedItem.price.toString() : null
+        };
+      });
+      
+      setCollectedNFTs(nftsWithListingInfo);
+      
+      const listedIds = new Set(nftsWithListingInfo
+        .filter((nft: NFT) => nft.isListed)
+        .map((nft: NFT) => nft.id?.toString() || '')
+      );
+      setListedNFTs(listedIds as Set<string>);
+    } catch (error) {
+      console.error('Error al obtener NFTs coleccionados:', error);
+      setCollectedNFTs([]);
+    }
+  }, [address, marketItems]);
+
+  useEffect(() => {
+    if (address) {
+      fetchCollectedNFTs();
+    }
+  }, [address, fetchCollectedNFTs]);
+
+  useEffect(() => {
+    console.log('Market items actualizados:', marketItems);
+    console.log('Total de items en el mercado:', totalItems);
+    console.log('NFTs del usuario:', nfts);
+  }, [marketItems, totalItems, nfts]);
+
   const handleApprovalStatus = useCallback((status: LifeCycleStatus) => {
     console.log('Estado de aprobación:', status);
     // Lógica adicional para manejar el estado de aprobación
@@ -83,30 +146,14 @@ export default function Profile() {
     handleCancelListing();
   }, [handleCancelListing]);
 
-  const fetchCollectedNFTs = useCallback(async () => {
-    if (!address) return;
-    try {
-      const response = await fetch(`/api/collected-nfts?userAddress=${address}`);
-      const data = await response.json();
-      setCollectedNFTs(data.nfts || []);
-    } catch (error) {
-      console.error('Error al obtener NFTs coleccionados:', error);
-      setCollectedNFTs([]);
-    }
-  }, [address]);
-
-  useEffect(() => {
-    if (address) {
-      fetchCollectedNFTs();
-    }
-  }, [address, fetchCollectedNFTs]);
-
   const handleViewDetails = (nft: NFT) => {
-    setListingNFT(nft);
-    setIsDialogOpen(true);
+    // Implementa la lógica para mostrar los detalles del NFT
+    console.log('Ver detalles de:', nft);
   };
 
   const handleListNFT = (nft: NFT) => {
+    // Implementa la lógica para listar el NFT
+    console.log('Listar NFT:', nft);
     setListingNFT(nft);
     setIsDialogOpen(true);
   };
@@ -181,12 +228,17 @@ export default function Profile() {
                         <h4 className="text-sm font-medium truncate">{nft.name || `NFT #${nft.tokenId || i}`}</h4>
                         <div className="flex justify-between mt-2">
                           <Button variant="outline" size="sm" onClick={() => handleViewDetails(nft)}>Detalles</Button>
-                          {isListed ? (
-                            <Button variant="outline" size="sm" onClick={() => handleCancelListingClick(nft)}>Cancelar listado</Button>
+                          {nft.isListed ? (
+                            <Button variant="outline" size="sm" onClick={() => handleCancelListingClick(nft)}>
+                              Cancelar listado ({nft.listedPrice} wei)
+                            </Button>
                           ) : (
                             <Button variant="outline" size="sm" onClick={() => handleListNFT(nft)}>Listar</Button>
                           )}
                         </div>
+                        {nft.isListed && (
+                          <p className="text-sm mt-1">Precio listado: {nft.listedPrice} wei</p>
+                        )}
                       </CardContent>
                     </Card>
                   ))}

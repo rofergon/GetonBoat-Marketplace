@@ -12,7 +12,6 @@ import BasePaintAbi from '../../abi/BasePaintAbi';
 import { State } from '../../types/types';
 import { calculateDay } from '../../utils/dateUtils';
 import { Button } from '../ui/button';
-import { Abi } from 'viem';
 
 // Definimos el tipo ContractFunctionParameters
 type ContractFunctionParameters = {

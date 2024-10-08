@@ -19,10 +19,9 @@ export interface MarketItem {
 }
 
 export const useFetchMarketItems = (page: number = 0) => {
+  console.log('Hook useFetchMarketItems llamado con página:', page);
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [totalItems, setTotalItems] = useState<number>(0);
-
-  console.log('useFetchMarketItems llamado con página:', page);
 
   const { data: totalItemsData, isLoading: isTotalItemsLoading, error: totalItemsError } = useContractRead({
     address: MARKETPLACE_ADDRESS,
@@ -30,20 +29,12 @@ export const useFetchMarketItems = (page: number = 0) => {
     functionName: 'getTotalAvailableMarketItems',
   });
 
-  console.log('Total de items disponibles:', totalItemsData);
-  console.log('Cargando total de items:', isTotalItemsLoading);
-  console.log('Error al cargar total de items:', totalItemsError);
-
   const { data: fetchedItems, isLoading, error } = useContractRead({
     address: MARKETPLACE_ADDRESS,
     abi: marketplaceAbi,
     functionName: 'fetchAvailableMarketItems',
     args: [BigInt(page * ITEMS_PER_PAGE), BigInt(ITEMS_PER_PAGE)],
   });
-
-  console.log('Items obtenidos:', fetchedItems);
-  console.log('Cargando items:', isLoading);
-  console.log('Error al cargar items:', error);
 
   useEffect(() => {
     if (totalItemsData) {

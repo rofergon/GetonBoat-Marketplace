@@ -27,9 +27,17 @@ export class NFTDatabaseManager {
   private client;
 
   constructor() {
+    const url = process.env.TURSO_DATABASE_URL;
+    const authToken = process.env.TURSO_AUTH_TOKEN;
+
+    if (!url || !authToken) {
+      console.error('Las variables de entorno TURSO_DATABASE_URL o TURSO_AUTH_TOKEN no están definidas');
+      throw new Error('Configuración de base de datos incompleta');
+    }
+
     this.client = createClient({
-      url: process.env.TURSO_DATABASE_URL!,
-      authToken: process.env.TURSO_AUTH_TOKEN!,
+      url: url,
+      authToken: authToken,
     });
     console.log('Cliente de base de datos inicializado');
   }
@@ -102,8 +110,6 @@ export class NFTDatabaseManager {
           console.warn(`NFT con datos incompletos será omitido:`, nft);
           continue;
         }
-
-        console.log('Inserting/Updating NFT:', { address, tokenId, contractAddress, name, image, description, tokenUriValue, attributes });
 
         await this.client.execute({
           sql: `
@@ -239,27 +245,40 @@ export class NFTDatabaseManager {
   }
 
   async updateNFTListingStatus(nfts: MarketItem[]) {
+    console.log('Iniciando updateNFTListingStatus con', nfts.length, 'NFTs');
     for (const nft of nfts) {
-      await this.client.execute({
-        sql: `
-          UPDATE NFTs
-          SET is_listed = ?, listed_price = ?
-          WHERE contract_address = ? AND token_id = ?
-        `,
-        args: [true, nft.price.toString(), nft.nftContractAddress, nft.tokenId.toString()]
-      });
+      console.log('Actualizando NFT:', nft);
+      try {
+        const result = await this.client.execute({
+          sql: `
+            UPDATE NFTs
+            SET is_listed = ?, listed_price = ?
+            WHERE contract_address = ? AND token_id = ?
+          `,
+          args: [true, nft.price.toString(), nft.nftContractAddress, nft.tokenId.toString()]
+        });
+        console.log('Resultado de la actualización:', result);
+      } catch (error) {
+        console.error('Error al actualizar NFT:', nft, error);
+      }
     }
     console.log(`${nfts.length} NFTs actualizados con estado de listado.`);
   }
 
   async resetListingStatus() {
-    await this.client.execute({
-      sql: `
-        UPDATE NFTs
-        SET is_listed = FALSE, listed_price = NULL
-      `,
-      args: []
-    });
+    console.log('Iniciando resetListingStatus');
+    try {
+      const result = await this.client.execute({
+        sql: `
+          UPDATE NFTs
+          SET is_listed = FALSE, listed_price = NULL
+        `,
+        args: []
+      });
+      console.log('Resultado del reset de listado:', result);
+    } catch (error) {
+      console.error('Error al resetear el estado de listado:', error);
+    }
     console.log('Estado de listado reiniciado para todos los NFTs.');
   }
 

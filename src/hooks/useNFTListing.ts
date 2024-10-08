@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAccount, useContractReads, useContractRead, useWalletClient, usePublicClient } from 'wagmi';
 import { Address, encodeFunctionData } from 'viem';
-import { Transaction } from '@coinbase/onchainkit/transaction';
 import { BasePaintBrushAbi } from '../abi/BasePaintBrushAbi';
 import { marketplaceAbi } from '../abi/marketplace.abi';
 
@@ -19,7 +18,6 @@ interface MarketItem {
   expirationTime: bigint;
 }
 
-// Definir el tipo LifeCycleStatus
 type LifeCycleStatus = {
   statusName: 'success' | 'error';
   statusData: any;
