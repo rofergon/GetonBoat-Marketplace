@@ -236,7 +236,7 @@ const Profile: React.FC = () => {
                           <Button variant="outline" size="sm" onClick={() => handleViewDetails(nft)}>Detalles</Button>
                           {nft.isListed ? (
                             <Button variant="outline" size="sm" onClick={() => handleCancelListingClick(nft)}>
-                              Cancelar listado ({weiToEth(nft.listedPrice || null)}) ETH)
+                              Cancelar listado 
                             </Button>
                           ) : (
                             <Button variant="outline" size="sm" onClick={() => handleListNFT(nft)}>Listar</Button>

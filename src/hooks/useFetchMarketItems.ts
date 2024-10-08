@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { NFTDatabaseManager } from '../../pages/api/nftDatabaseManager';
 
 const MARKETPLACE_ADDRESS = process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS as `0x${string}`;
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 50;
 
 export interface MarketItem {
   marketItemId: bigint;
@@ -23,7 +23,7 @@ export const useFetchMarketItems = (page: number = 0) => {
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [totalItems, setTotalItems] = useState<number>(0);
 
-  const { data: totalItemsData, isLoading: isTotalItemsLoading, error: totalItemsError } = useContractRead({
+  const { data: totalItemsData } = useContractRead({
     address: MARKETPLACE_ADDRESS,
     abi: marketplaceAbi,
     functionName: 'getTotalAvailableMarketItems',
