@@ -60,7 +60,7 @@ export default function NFTMarketplace() {
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <header className="fixed top-0 left-0 right-0 z-50 bg-background shadow-md">
-        <div className="max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 py-4 flex justify-between items-center">
+        <div className="max-w-[1920px] h-full mx-auto px-2 sm:px-4 lg:px-6 flex justify-between items-center">
           <Link className="" href="#" onClick={() => setCurrentPage("home")}>
             <div className="brand my-2"></div>
           </Link>
@@ -104,7 +104,7 @@ export default function NFTMarketplace() {
           </nav>
         </div>
       </header>
-      <main className="flex-1 mt-16"> {/* Añadimos margen superior para compensar el header fijo */}
+      <main className={`flex-1 ${currentPage}`}>
         {currentPage === "home" && <Home />}
         {currentPage === "profile" && <Profile />}
         {currentPage === "painter" && <PainterPage updateBrushData={updateBrushData} />}

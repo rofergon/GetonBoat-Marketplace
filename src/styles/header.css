@@ -1,9 +1,13 @@
-.brand {
-  height: 2.5rem;
-  width: 6rem;
-  background-image: url('/logo.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
+header {
+  height: 60px;
+  .brand {
+    height: 2.5rem;
+    width: 6rem;
+    background-image: url('/logo.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+  }
+
 }
 
 .dark .brand {

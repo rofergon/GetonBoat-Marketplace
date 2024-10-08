@@ -12,4 +12,8 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  main {
+    padding-top: 60px;
+  }
 }
