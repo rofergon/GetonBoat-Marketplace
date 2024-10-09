@@ -1,8 +1,8 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { 
-  Transaction, 
-  TransactionButton, 
-  TransactionStatus, 
+import {
+  Transaction,
+  TransactionButton,
+  TransactionStatus,
   TransactionStatusLabel,
   TransactionStatusAction,
 } from '@coinbase/onchainkit/transaction';
@@ -58,8 +58,8 @@ const MintBPButton: React.FC<MintBPButtonProps> = ({
       abi: BasePaintAbi,
       functionName: 'paint',
       args: [
-        BigInt(currentDay).toString(), 
-        BigInt(state.brushData?.tokenId || 0).toString(), 
+        BigInt(currentDay).toString(),
+        BigInt(state.brushData?.tokenId || 0).toString(),
         `0x${encodedData}` as `0x${string}`
       ],
     },
@@ -72,7 +72,7 @@ const MintBPButton: React.FC<MintBPButtonProps> = ({
       {!encodedData ? (
         <button
           onClick={onEncode}
-          className="bg-purple-600 text-white py-2 px-4 rounded"
+          className="h-8 w-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center p-2 rounded-md shadow-sm text-sm"
         >
           Encode BP
         </button>

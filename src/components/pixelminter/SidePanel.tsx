@@ -142,11 +142,20 @@ const SidePanel: React.FC<SidePanelProps> = ({
 
             <Button
               onClick={handleEncode}
-              className="h-8 my-2 w-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center p-2 rounded-md shadow-sm text-sm"
+              className="h-8 mt-2 w-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center p-2 rounded-md shadow-sm text-sm"
             >
               <Save className="mr-1" size={12} aria-hidden="true" />
-              Mint
+              Prepare to Mint
             </Button>
+
+            {encodedData && (
+              <MintBPButton
+                state={state}
+                encodedData={encodedData}
+                resetEncodedState={resetEncodedState}
+                onEncode={handleEncode}
+              />
+            )}
           </div>
         )}
       </div>
@@ -219,15 +228,6 @@ const SidePanel: React.FC<SidePanelProps> = ({
           </div>
         )}
       </div>
-
-      {encodedData && (
-        <MintBPButton
-          state={state}
-          encodedData={encodedData}
-          resetEncodedState={resetEncodedState}
-          onEncode={handleEncode}
-        />
-      )}
 
       <MintPixelminterButton state={state} fps={fps} />
     </div>

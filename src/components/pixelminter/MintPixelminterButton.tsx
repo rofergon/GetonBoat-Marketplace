@@ -139,7 +139,7 @@ const MintPixelminterButton: React.FC<MintPixelminterButtonProps> = ({ state, fp
       {!ipfsHash ? (
         <Button
           onClick={prepareAndMint}
-          className="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition-colors"
+          className="h-8 w-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center p-2 rounded-md shadow-sm text-sm"
           disabled={isExporting || uploading}
         >
           {isExporting ? 'Exporting GIF...' : uploading ? 'Loading...' : 'Mint animation WIP'}
