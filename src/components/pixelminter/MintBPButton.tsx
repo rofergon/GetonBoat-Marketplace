@@ -4,22 +4,13 @@ import {
   TransactionButton, 
   TransactionStatus, 
   TransactionStatusLabel,
-  TransactionStatusAction
+  TransactionStatusAction,
 } from '@coinbase/onchainkit/transaction';
 import type { LifeCycleStatus } from '@coinbase/onchainkit/transaction';
 import { useAccount } from 'wagmi';
-import BasePaintAbi from '../../abi/BasePaintAbi';
+import { BasePaintAbi } from '../../abi/BasePaintAbi';
 import { State } from '../../types/types';
 import { calculateDay } from '../../utils/dateUtils';
-import { Button } from '../ui/button';
-
-// Definimos el tipo ContractFunctionParameters
-type ContractFunctionParameters = {
-  address: `0x${string}`;
-  abi: any[]; // Cambiamos Abi a any[] para ser menos estrictos
-  functionName: string;
-  args: unknown[];
-};
 
 interface MintBPButtonProps {
   state: State;
@@ -61,10 +52,10 @@ const MintBPButton: React.FC<MintBPButtonProps> = ({
     }
   }, [resetEncodedState]);
 
-  const contracts: ContractFunctionParameters[] = currentDay && encodedData ? [
+  const contracts = currentDay && encodedData ? [
     {
       address: '0xBa5e05cb26b78eDa3A2f8e3b3814726305dcAc83' as `0x${string}`,
-      abi: BasePaintAbi as any[], // Aseguramos que BasePaintAbi se trate como any[]
+      abi: BasePaintAbi,
       functionName: 'paint',
       args: [
         BigInt(currentDay).toString(), 
@@ -79,12 +70,12 @@ const MintBPButton: React.FC<MintBPButtonProps> = ({
   return (
     <div className="flex flex-col items-center gap-2">
       {!encodedData ? (
-        <Button
+        <button
           onClick={onEncode}
-          className="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition-colors"
+          className="bg-purple-600 text-white py-2 px-4 rounded"
         >
           Encode BP
-        </Button>
+        </button>
       ) : !isTransactionComplete ? (
         <Transaction
           key={key}
@@ -92,10 +83,10 @@ const MintBPButton: React.FC<MintBPButtonProps> = ({
           contracts={contracts}
           onStatus={handleOnStatus}
         >
-          <TransactionButton text="Mint BP" className="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition-colors" />
+          <TransactionButton text="Mint BP" />
           <TransactionStatus>
-            <TransactionStatusLabel className="text-gray-300" />
-            {transactionStatus !== 'success' && <TransactionStatusAction className="text-blue-500" />}
+            <TransactionStatusLabel />
+            {transactionStatus !== 'success' && <TransactionStatusAction />}
           </TransactionStatus>
         </Transaction>
       ) : (
