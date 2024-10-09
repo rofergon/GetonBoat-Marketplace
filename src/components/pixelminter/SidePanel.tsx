@@ -9,7 +9,7 @@ import CustomPalette from './CustomPalette';
 import ConnectWalletButton from './ConnectWalletButton';
 import LayerManager from './LayerPanel';
 import { State, BrushData } from '../../types/types';
-import { Palette, Grid, Image, Code, Droplet, Layers, Plus } from 'lucide-react';
+import { Palette, Grid, Save, Droplet, Layers, Plus } from 'lucide-react';
 import { useSidePanelLogic } from '../../hooks/useSidePanelLogic';
 import { usePixelCountAndDroplets } from '../../hooks/usePixelCount';
 import MintBPButton from './MintBPButton';
@@ -83,7 +83,12 @@ const SidePanel: React.FC<SidePanelProps> = ({
           onClick={() => setIsBasepaintOpen(!isBasepaintOpen)}
           className="w-full p-2 flex justify-between items-center text-left"
         >
-          <h3 className="text-xs font-semibold flex items-center"><Palette className="mr-2" size={16} />Basepaint</h3>
+          <h3 className="text-xs font-semibold flex items-center"><Palette className="mr-2" size={16} />
+            Basepaint
+            {isClient && state.palette.length > 0 && (
+              `: ${state.theme}`
+            )}
+          </h3>
           {isBasepaintOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
         {isBasepaintOpen && (
@@ -97,18 +102,14 @@ const SidePanel: React.FC<SidePanelProps> = ({
               <Button
                 onClick={handleExtractPalette}
                 disabled={state.isPaletteLoading || isExporting}
-                className="h-8 w-full bg-blue-600 hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center py-1 px-2 rounded-md shadow-sm text-sm"
+                className="h-8 w-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center py-1 px-2 rounded-md shadow-sm text-sm"
               >
-                <Palette className="mr-1" size={14} aria-hidden="true" />
-                {state.isPaletteLoading ? 'Loading...' : 'Get Daily Palette'}
+                {state.isPaletteLoading ? 'Loading...' : 'Get Today\'s Palette'}
               </Button>
             </div>
 
             {isClient && state.palette.length > 0 && (
-              <div className="p-2 rounded-md shadow-sm">
-                <h3 className="text-base font-semibold mb-1 flex items-center">
-                  <Palette className="mr-1" size={15} aria-hidden="true" /> Theme: {state.theme}
-                </h3>
+              <div className="mt-4">
                 <ColorPalette
                   onColorSelect={(color: string) => updateState({ color })}
                   palette={state.palette}
@@ -117,7 +118,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
               </div>
             )}
 
-            <div className="my-3">
+            <div className="mt-3">
               <h4 className="text-xs font-semibold mb-1">Background Opacity</h4>
               <Slider
                 id="backgroundOpacity"
@@ -133,19 +134,19 @@ const SidePanel: React.FC<SidePanelProps> = ({
               </p>
             </div>
 
-            <Button
-              onClick={handleEncode}
-              className="my-2 w-full bg-purple-600 hover:bg-purple-700 transition-colors duration-300 flex items-center justify-center p-2 rounded-md shadow-sm text-sm"
-            >
-              Commit to Basepaint
-            </Button>
-
-            <div className="bg-muted p-2 rounded-md shadow-sm">
+            <div className="mt-3 bg-muted p-2 rounded-md shadow-sm">
               <p className="text-xs font-semibold flex items-center">
-                <Palette className="mr-1" size={12} aria-hidden="true" />
                 Pixels used: <span className="font-variant-numeric tabular-nums ml-1">{pixelCount}</span>
               </p>
             </div>
+
+            <Button
+              onClick={handleEncode}
+              className="h-8 my-2 w-full bg-blue-600 text-white hover:bg-blue-700 transition-colors duration-300 flex items-center justify-center p-2 rounded-md shadow-sm text-sm"
+            >
+              <Save className="mr-1" size={12} aria-hidden="true" />
+              Mint
+            </Button>
           </div>
         )}
       </div>
@@ -159,7 +160,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
           {isCustomPaletteOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
         {isCustomPaletteOpen && (
-          <div className="p-2">
+          <div className="px-2 pb-2">
             <CustomPalette
               customPalette={state.customPalette}
               onAddColor={handleAddCustomColor}

@@ -9,13 +9,13 @@ interface ColorPaletteProps {
 
 const ColorPalette: React.FC<ColorPaletteProps> = ({ onColorSelect, palette, theme }) => {
   return (
-    <div className="w-full max-w-md mb-4">
-      <div className="flex flex-wrap justify-center gap-2">
+    <div className="w-full max-w-md">
+      <div className="flex flex-wrap">
         {palette.map((color, index) => (
           <button
             key={index}
             onClick={() => onColorSelect(color)}
-            className="w-8 h-8 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-transform hover:scale-110"
+            className="w-8 h-8 rounded border border-muted focus:outline-none focus:ring-1 focus:ring-blue-500 focus:ring-opacity-50 transition-transform hover:scale-110"
             style={{ backgroundColor: color }}
             title={color}
             aria-label={`Select color ${color}`}
