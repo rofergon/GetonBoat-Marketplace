@@ -46,6 +46,7 @@ async function createTables() {
         contract_address TEXT NOT NULL,
         name TEXT,
         image TEXT,
+        imageurl TEXT,
         description TEXT,
         token_uri TEXT,
         attributes TEXT,

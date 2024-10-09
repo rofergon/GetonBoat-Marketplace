@@ -130,6 +130,16 @@ const Profile: React.FC = () => {
     }
   }, [address, fetchCollectedNFTs]);
 
+  // Añade este nuevo useEffect
+  useEffect(() => {
+    collectedNFTs.forEach(nft => {
+      console.log(`NFT cargado:
+        Imagen URL: ${nft.image}
+        Token ID: ${nft.tokenId}
+        Dirección del contrato: ${nft.contractAddress}`);
+    });
+  }, [collectedNFTs]);
+
   useEffect(() => {
     console.log('Market items actualizados:', marketItems);
     console.log('Total de items en el mercado:', totalItems);

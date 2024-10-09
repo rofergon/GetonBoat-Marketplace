@@ -90,6 +90,7 @@ export class NFTDatabaseManager {
 
         const contractAddress = contract.address;
         const image = nft.image?.cachedUrl || nft.image?.originalUrl || '';
+        const imageurl = nft.image?.originalUrl || nft.image?.cachedUrl || '';
         
         // Manejo seguro de tokenUri
         let tokenUriValue = '';
@@ -113,19 +114,20 @@ export class NFTDatabaseManager {
 
         await this.client.execute({
           sql: `
-            INSERT INTO NFTs (owner_address, token_id, contract_address, name, image, description, token_uri, attributes, acquired_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO NFTs (owner_address, token_id, contract_address, name, image, imageurl, description, token_uri, attributes, acquired_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(owner_address, token_id, contract_address) DO UPDATE SET
               name = ?,
               image = ?,
+              imageurl = ?,
               description = ?,
               token_uri = ?,
               attributes = ?,
               updated_at = ?
           `,
           args: [
-            address, tokenId, contractAddress, name || '', image, description || '', tokenUriValue, attributes, Date.now(), currentBlock,
-            name || '', image, description || '', tokenUriValue, attributes, currentBlock
+            address, tokenId, contractAddress, name || '', image, imageurl, description || '', tokenUriValue, attributes, Date.now(), currentBlock,
+            name || '', image, imageurl, description || '', tokenUriValue, attributes, currentBlock
           ]
         });
       }
@@ -280,6 +282,25 @@ export class NFTDatabaseManager {
       console.error('Error al resetear el estado de listado:', error);
     }
     console.log('Estado de listado reiniciado para todos los NFTs.');
+  }
+
+  async getNFTMetadata(contractAddress: string, tokenId: string) {
+    const result = await this.client.execute({
+      sql: 'SELECT name, imageurl, description, attributes FROM NFTs WHERE contract_address = ? AND token_id = ?',
+      args: [contractAddress, tokenId]
+    });
+
+    if (result.rows.length > 0) {
+      const nft = result.rows[0];
+      return {
+        name: nft.name,
+        imageurl: nft.imageurl,
+        description: nft.description,
+        attributes: JSON.parse(String(nft.attributes ?? '[]'))
+      };
+    }
+
+    return null;
   }
 
 } // Añade esta llave de cierre aquí

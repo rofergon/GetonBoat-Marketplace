@@ -10,10 +10,15 @@ const nextConfig = {
         'res.cloudinary.com', 
         'ipfs.io', 
         'base.org',
-        'nft-cdn.alchemy.com'  // Añadimos el nuevo dominio aquí
+        'nft-cdn.alchemy.com',
+        'ipfs.dweb.link',  // Gateway IPFS alternativo
+        'gateway.pinata.cloud',  // Otro gateway IPFS alternativo
       ], 
       dangerouslyAllowSVG: true,
       contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+      minimumCacheTTL: 1500,  // Aumenta el tiempo de caché mínimo
+      deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+      imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     },
     async headers() {
       return [
