@@ -132,7 +132,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
           canRedo={canRedo}
         />
 
-        <div className={`flex-1 flex flex-col bg-gray-900 overflow-hidden transition-all duration-300 relative`}>
+        <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 relative`}>
           <CanvasComponent
             state={state}
             containerRef={containerRef}
@@ -187,7 +187,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
         </div>
       </div>
 
-      <div className="w-full bg-gray-800 border-t border-gray-700">
+      <div className="w-full">
         <AnimationControls
           state={state}
           fps={fps}

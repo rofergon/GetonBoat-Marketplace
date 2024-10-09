@@ -181,7 +181,7 @@ const CanvasComponent: React.FC<CanvasComponentProps> = ({
     <div id="canvas" className="overflow-auto max-w-full max-h-full">
       <div
         ref={containerRef}
-        className={`relative ${state.touchEnabled ? '' : 'touch-none'}`}
+        className={`bg-muted relative ${state.touchEnabled ? '' : 'touch-none'}`}
         style={canvasStyle}
         onContextMenu={(e) => e.preventDefault()}
       >

@@ -84,12 +84,12 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
     updateCanvasDisplay();
   }, [updateState, updateCanvasDisplay]);
 
-  const buttonStyle = useMemo(() => "w-9 h-9 p-2 bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded", []);
+  const buttonStyle = useMemo(() => "btn-tool bg-muted", []);
 
   const isLargeScreen = useMediaQuery({ minWidth: 1024 });
 
   const renderControls = useMemo(() => (
-    <div className="flex items-center justify-between gap-2 mb-2">
+    <div className="flex items-center justify-between gap-2 mb-2 bg-muted">
       <div className="flex items-center space-x-2">
         <Button onClick={addFrame} className={`${buttonStyle} flex`}>
           <Plus className="w-full h-full" />
@@ -121,7 +121,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
                 onValueChange={value => setFps(value[0])}
                 className="w-32"
               />
-              <span className="text-sm font-medium text-white">{fps} FPS</span>
+              <span className="text-sm font-medium">{fps} FPS</span>
             </div>
             <div className="flex items-center gap-2 font-roboto ml-4">
               <span className="flex items-center gap-1 text-red-600 animate-pulse">
@@ -130,7 +130,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
                   <circle cx={1} cy={1} r={1} />
                 </svg>
               </span>
-              <span className="text-sm text-white">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
+              <span className="text-sm">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
             </div>
           </>
         )}
@@ -144,7 +144,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
                 <circle cx={1} cy={1} r={1} />
               </svg>
             </span>
-            <span className="text-sm text-white">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
+            <span className="text-sm">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
           </div>
         )}
         <Button onClick={handleDownloadGif} className={`${buttonStyle} flex`}>
@@ -155,13 +155,13 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
           onCheckedChange={setShowFrames}
           className="data-[state=checked]:bg-blue-500"
         />
-        <span className="text-sm hidden sm:inline text-white">Show Frames</span>
+        <span className="text-sm hidden sm:inline">Show Frames</span>
       </div>
     </div>
   ), [isPlaying, setIsPlaying, changeFrame, state.frames.length, state.currentFrameIndex, fps, setFps, isLargeScreen, seconds, frame, handleDownloadGif, showFrames, setShowFrames]);
 
   const renderFrameThumbnails = useMemo(() => (
-    <div className="overflow-x-auto whitespace-nowrap mt-2 w-full">
+    <div className="overflow-x-auto whitespace-nowrap px-2 w-full">
       {state.frames.map((frame, index) => (
         <FrameThumbnail
           key={index}
@@ -178,7 +178,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
   ), [state.frames, state, updateState, deleteFrame, handleFrameSelect]);
 
   return (
-    <div className="p-2 bg-gray-800 text-gray-200">
+    <div className="border-t border-background">
       {renderControls}
       {showFrames && renderFrameThumbnails}
     </div>
