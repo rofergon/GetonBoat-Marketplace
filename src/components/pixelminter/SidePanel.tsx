@@ -77,7 +77,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
   };
 
   return (
-    <div className="w-full max-w-xs flex-grow p-3 bg-muted space-y-3 h-full overflow-y-auto text-white ">
+    <div id='side-panel' className="w-full max-w-xs flex-grow p-3 bg-muted space-y-3 h-full overflow-y-auto text-white ">
       <div className="tool-container rounded-md shadow-sm overflow-hidden">
         <button
           onClick={() => setIsBasepaintOpen(!isBasepaintOpen)}

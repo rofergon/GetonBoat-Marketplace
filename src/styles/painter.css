@@ -60,7 +60,7 @@
 }
 
 .painter {
-  #canvas {
+  #canvas, #side-panel, #tool-panel {
     &::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -72,6 +72,12 @@
 
     &::-webkit-scrollbar-track, &::-webkit-scrollbar-corner {
       background-color: rgba(31, 41, 55, 0.1);
+    }
+  }
+
+  #tool-panel {
+    &::-webkit-scrollbar {
+      display: none;
     }
   }
 

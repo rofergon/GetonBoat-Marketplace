@@ -48,7 +48,7 @@ const ToolPanel: React.FC<ToolPanelProps> = ({
   );
 
   return (
-    <div className="w-10 bg-muted flex flex-col items-center py-3 space-y-2 shadow">
+    <div id='tool-panel' className="w-10 bg-muted flex flex-col overflow-y-auto items-center py-3 space-y-2 shadow">
       <div className={`relative ${feedback['colorPicker'] ? 'scale-95' : ''} transition-all duration-200`}>
         <input
           type="color"
