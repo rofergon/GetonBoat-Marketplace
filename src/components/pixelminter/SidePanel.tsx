@@ -77,8 +77,8 @@ const SidePanel: React.FC<SidePanelProps> = ({
   };
 
   return (
-    <div className="w-full max-w-xs flex flex-col p-3 space-y-3 border-l border-gray-800 h-full overflow-y-auto text-white">
-      <div className="bg-muted rounded-md shadow-sm overflow-hidden">
+    <div className="w-full max-w-xs flex flex-col p-3 space-y-3 h-full overflow-y-auto text-white bg-muted">
+      <div className="tool-container rounded-md shadow-sm overflow-hidden">
         <button
           onClick={() => setIsBasepaintOpen(!isBasepaintOpen)}
           className="w-full p-2 flex justify-between items-center text-left"
@@ -150,7 +150,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
         )}
       </div>
 
-      <div className="bg-muted rounded-md shadow-sm overflow-hidden">
+      <div className="tool-container rounded-md shadow-sm overflow-hidden">
         <button
           onClick={() => setIsCustomPaletteOpen(!isCustomPaletteOpen)}
           className="w-full p-2 flex justify-between items-center text-left"
@@ -171,7 +171,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
         )}
       </div>
 
-      <div className="bg-muted rounded-md shadow-sm overflow-hidden">
+      <div className="tool-container rounded-md shadow-sm overflow-hidden">
         <button
           onClick={() => setIsLayersOpen(!isLayersOpen)}
           className="w-full p-2 flex justify-between items-center text-left"
@@ -194,7 +194,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
         )}
       </div>
 
-      <div className="bg-muted rounded-md shadow-sm overflow-hidden">
+      <div className="tool-container rounded-md shadow-sm overflow-hidden">
         <button
           onClick={() => setIsGridSizeOpen(!isGridSizeOpen)}
           className="w-full p-2 flex justify-between items-center text-left"
