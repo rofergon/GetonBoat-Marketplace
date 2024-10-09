@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { createPublicClient, http } from 'viem';
 import { base } from 'viem/chains';
-import BasePaintAbi from '../abi/BasePaintAbi';
+import { BasePaintAbi } from '../abi/BasePaintAbi';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 

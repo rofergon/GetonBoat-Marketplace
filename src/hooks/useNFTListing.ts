@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAccount, useContractReads, useContractRead, useWalletClient, usePublicClient } from 'wagmi';
 import { Address, encodeFunctionData } from 'viem';
-import { Transaction } from '@coinbase/onchainkit/transaction';
 import { BasePaintBrushAbi } from '../abi/BasePaintBrushAbi';
 import { marketplaceAbi } from '../abi/marketplace.abi';
 
@@ -19,7 +18,6 @@ interface MarketItem {
   expirationTime: bigint;
 }
 
-// Definir el tipo LifeCycleStatus
 type LifeCycleStatus = {
   statusName: 'success' | 'error';
   statusData: any;
@@ -110,7 +108,7 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
   const handleCancelListing = useCallback(async () => {
     try {
       console.log('Cancelando listado para:', nftAddress, tokenId);
-      // Aquí iría la lógica para cancelar el listado
+     
       setIsListed(false);
     } catch (error) {
       console.error('Error al cancelar el listado:', error);
@@ -134,7 +132,7 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
       return BigInt(value.toString()).toString();
     };
 
-    // Asegúrate de que el precio no sea demasiado bajo
+    
     const minimumPrice = '1000000000000000'; // 0.001 ETH en wei
     const safePrice = BigInt(price) < BigInt(minimumPrice) ? minimumPrice : safeBigInt(price);
 
@@ -156,7 +154,7 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
         nftAddress,
         safeBigInt(tokenId),
         safePrice,
-        listingDurationInSeconds // Ahora pasamos la duración correcta en segundos
+        listingDurationInSeconds 
       ],
     }];
   }, [nftAddress, tokenId]);
@@ -247,16 +245,61 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
       if (!isApproved) {
         throw new Error('El NFT no está aprobado para listar');
       }
+      if (!walletClient || !publicClient || !address) {
+        throw new Error('Wallet client, public client o dirección no disponible');
+      }
+
       const listingContract = getListingContract(price, durationInDays);
       console.log('Contrato de listado:', listingContract);
-      // Aquí iría la lógica para ejecutar la transacción de listado
+      
+      const [nftAddress, tokenId, listingPrice, duration] = listingContract[0].args as [`0x${string}`, bigint, bigint, bigint];
+
+      // Obtener el gas estimado y el precio del gas actual
+      const gasEstimate = await publicClient.estimateContractGas({
+        address: MARKETPLACE_ADDRESS,
+        abi: marketplaceAbi,
+        functionName: 'createMarketItem',
+        args: [nftAddress, tokenId, listingPrice, duration],
+        account: address,
+      });
+
+      const gasPrice = await publicClient.getGasPrice();
+
+      // Calcular el gas fee total
+      const gasFee = gasEstimate * gasPrice;
+
+      // Agregar un 10% extra al gas fee para asegurar que la transacción se procese
+      const adjustedGasFee = gasFee * BigInt(110) / BigInt(100);
+
       console.log('Listando NFT:', nftAddress, tokenId, price, durationInDays);
-      // ... resto del código
+      console.log('Gas estimado:', gasEstimate.toString());
+      console.log('Precio del gas:', gasPrice.toString());
+      console.log('Gas fee ajustado:', adjustedGasFee.toString());
+
+      const hash = await walletClient.writeContract({
+        address: MARKETPLACE_ADDRESS,
+        abi: marketplaceAbi,
+        functionName: 'createMarketItem',
+        args: [nftAddress, tokenId, listingPrice, duration],
+        gas: gasEstimate,
+        maxFeePerGas: adjustedGasFee / gasEstimate,
+      });
+
+      setListingTxHash(hash);
+      
+      const receipt = await publicClient.waitForTransactionReceipt({ hash });
+      
+      if (receipt.status === 'success') {
+        setIsListed(true);
+        console.log('Listado exitoso');
+      } else {
+        throw new Error('La transacción de listado falló');
+      }
     } catch (error) {
       console.error('Error al listar el NFT:', error);
       setError(`Error al listar el NFT: ${(error as Error).message || 'Desconocido'}`);
     }
-  }, [isApproved, nftAddress, tokenId, getListingContract]);
+  }, [isApproved, getListingContract, walletClient, publicClient, address]);
 
   return {
     isApproved,

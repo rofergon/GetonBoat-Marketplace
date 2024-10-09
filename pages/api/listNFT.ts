@@ -37,9 +37,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       transport: http()
     });
 
-    // Eliminamos la simulación de aprobación
-
-    // Simulamos la creación del item en el marketplace
+   
     const listData = await publicClient.simulateContract({
       address: MARKETPLACE_ADDRESS,
       abi: MARKETPLACE_ABI,
@@ -49,9 +47,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     console.log('Listado simulado:', listData);
-
-    // En un entorno real, aquí se ejecutaría la transacción
-    // y se esperaría por el recibo
 
     return res.status(200).json({ 
       success: true, 

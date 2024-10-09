@@ -144,3 +144,11 @@ export interface PixelArtUIProps {
   onionSkinningCanvas: RefObject<HTMLCanvasElement>;
   drawGrid: () => void;
 }
+
+// Añade esta interfaz al final del archivo
+export interface NFT {
+  id: string;
+  name: string;
+  image: string;
+  // Añade más propiedades según sea necesario para tu NFT
+}

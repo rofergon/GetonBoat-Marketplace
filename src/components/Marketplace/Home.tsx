@@ -3,10 +3,49 @@ import React from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+
 import { ArrowRight, Search } from "lucide-react";
+import { useFetchMarketItems } from '../../hooks/useFetchMarketItems';
+import CustomImage from '../pixelminter/CustomImage';
+import { ethers } from 'ethers';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
+  const { marketItems, isLoading, error } = useFetchMarketItems(0); // Obtener la primera página
+  const [nftMetadata, setNftMetadata] = useState<{ [key: string]: any }>({});
+
+  const weiToEth = (weiAmount: bigint): string => {
+    return ethers.utils.formatEther(weiAmount);
+  };
+
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      const metadata: { [key: string]: any } = {};
+      for (const item of marketItems) {
+        if (item.tokenId) {
+          try {
+            // Cambiamos la URL para incluir la dirección del contrato
+            const response = await fetch(`/api/nft-metadata?tokenId=${item.tokenId.toString()}&contractAddress=${item.nftContractAddress}`);
+            const data = await response.json();
+            metadata[item.marketItemId.toString()] = data;
+          } catch (error) {
+            console.error('Error al obtener metadatos:', error);
+          }
+        }
+      }
+      setNftMetadata(metadata);
+    };
+
+    if (marketItems.length > 0) {
+      fetchMetadata();
+    }
+  }, [marketItems]);
+
+  // Ordenar los marketItems por marketItemId de forma descendente
+  const sortedMarketItems = [...marketItems].sort((a, b) => 
+    Number(b.marketItemId) - Number(a.marketItemId)
+  );
+
   return (
     <>
       <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
@@ -37,71 +76,44 @@ export default function Home() {
       </section>
       <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
         <div className="container px-4 md:px-6">
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">Colección Destacada</h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i}>
-                <CardHeader>
-                  <img
-                    alt="NFT artwork"
-                    className="aspect-square object-cover rounded-lg"
-                    height="200"
-                    src={`/placeholder.svg?height=200&width=200&text=NFT+${i + 1}`}
-                    width="200"
-                  />
-                </CardHeader>
-                <CardContent>
-                  <CardTitle>NFT #{i + 1}</CardTitle>
-                  <p className="text-sm text-muted-foreground">Por Artista {i + 1}</p>
-                </CardContent>
-                <CardFooter>
-                  <Button className="w-full">Ver detalles</Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-8">Últimos Listados</h2>
+          {isLoading ? (
+            <p>Cargando...</p>
+          ) : error ? (
+            <p>Error al cargar los items: {error.message}</p>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {sortedMarketItems.slice(0, 8).map((item) => {
+                const metadata = nftMetadata[item.marketItemId.toString()];
+                return (
+                  <Card key={item.marketItemId.toString()}>
+                    <CardHeader>
+                      <div className="aspect-square relative">
+                        <CustomImage
+                          alt={`NFT ${item.tokenId.toString()}`}
+                          src={metadata?.imageurl || "/placeholder.png"}
+                          layout="fill"
+                          objectFit="cover"
+                        />
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <CardTitle>{metadata?.name || `NFT #${item.tokenId.toString()}`}</CardTitle>
+                      <p className="text-sm text-muted-foreground">Precio: {weiToEth(item.price)} ETH</p>
+                    </CardContent>
+                    <CardFooter>
+                      <Button className="w-full">Ver detalles</Button>
+                    </CardFooter>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
           <div className="mt-12 text-center">
             <Button>
               Ver más <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
-        </div>
-      </section>
-      <section className="w-full py-12 md:py-24 lg:py-32">
-        <div className="container px-4 md:px-6">
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">NFTs Populares</h2>
-          <Tabs className="mt-8" defaultValue="all">
-            <TabsList>
-              <TabsTrigger value="all">Todos</TabsTrigger>
-              <TabsTrigger value="art">Arte</TabsTrigger>
-              <TabsTrigger value="collectibles">Coleccionables</TabsTrigger>
-              <TabsTrigger value="music">Música</TabsTrigger>
-            </TabsList>
-            <TabsContent className="mt-6" value="all">
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <Card key={i}>
-                    <CardHeader>
-                      <img
-                        alt="NFT artwork"
-                        className="aspect-square object-cover rounded-lg"
-                        height="200"
-                        src={`/placeholder.svg?height=200&width=200&text=Popular+${i + 1}`}
-                        width="200"
-                      />
-                    </CardHeader>
-                    <CardContent>
-                      <CardTitle>NFT Popular #{i + 1}</CardTitle>
-                      <p className="text-sm text-muted-foreground">Precio: 0.5 ETH</p>
-                    </CardContent>
-                    <CardFooter>
-                      <Button className="w-full">Comprar ahora</Button>
-                    </CardFooter>
-                  </Card>
-                ))}
-              </div>
-            </TabsContent>
-          </Tabs>
         </div>
       </section>
     </>

@@ -1,12 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
-
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
-import "@openzeppelin/contracts/utils/Address.sol";
+import "../../node_modules/@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "../../node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "../../node_modules/@openzeppelin/contracts/access/Ownable.sol";
+import "../../node_modules/@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "../../node_modules/@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "../../node_modules/@openzeppelin/contracts/utils/Address.sol";
 
 contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
     using EnumerableSet for EnumerableSet.UintSet;

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState, useCallback } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
@@ -10,6 +11,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Transaction, TransactionButton, TransactionStatus, TransactionStatusLabel, TransactionStatusAction, LifeCycleStatus } from '@coinbase/onchainkit/transaction';
 
 import { useNFTListing } from '../../hooks/useNFTListing';
+import { useFetchMarketItems } from '../../hooks/useFetchMarketItems';
+import { useNFTs } from '../../hooks/useNFTs'; // Asumiendo que tienes un hook para obtener los NFTs del usuario
+import { ethers } from 'ethers';
+import { useCancelNFTListing } from '../../hooks/useCancelNFTListing';
 
 interface NFT {
   id?: string;
@@ -20,6 +25,9 @@ interface NFT {
   tokenURI?: string;
   attributes?: { trait_type: string; value: string }[];
   contractAddress?: string;
+  isListed?: boolean;
+  listedPrice?: string | null;
+  marketItemId?: bigint;
 }
 
 interface Collection {
@@ -35,7 +43,7 @@ const mockCollections: Collection[] = [
   { name: "SimpPunks", items: 10000, floorPrice: "0.01 ETH" },
 ];
 
-export default function Profile() {
+const Profile: React.FC = () => {
   const [collectedNFTs, setCollectedNFTs] = useState<NFT[]>([]);
   const { address } = useAccount();
 
@@ -56,6 +64,87 @@ export default function Profile() {
     getCancelListingContract,
     handleCancelListing,
   } = useNFTListing(listingNFT?.contractAddress as `0x${string}`, listingNFT?.tokenId || '');
+
+  console.log('useNFTListing hook ejecutado:', {
+    isApproved,
+    isListed,
+    approvalTxHash,
+    listingTxHash,
+    error
+  });
+
+  const [currentPage] = useState(0);
+  const { marketItems, totalItems } = useFetchMarketItems(currentPage);
+  const { nfts } = useNFTs(address);
+
+  const [, setListedNFTs] = useState<Set<string>>(new Set());
+
+  const {
+    handleCancelListing: handleCancelListingHook,
+    isCancelling,
+    isSuccess: isCancelSuccess,
+    error: cancelError
+  } = useCancelNFTListing();
+
+  const weiToEth = (weiAmount: string | null): string => {
+    if (!weiAmount) return '0';
+    return ethers.utils.formatEther(weiAmount);
+  };
+
+  const fetchCollectedNFTs = useCallback(async () => {
+    if (!address) return;
+    try {
+      const response = await fetch(`/api/collected-nfts?userAddress=${address}`);
+      const data = await response.json();
+      
+      const nftsWithListingInfo = data.nfts.map((nft: NFT) => {
+        const listedItem = marketItems.find(item => 
+          item.nftContractAddress.toLowerCase() === (nft.contractAddress?.toLowerCase() ?? '') &&
+          item.tokenId.toString() === nft.tokenId
+        );
+        
+        return {
+          ...nft,
+          isListed: !!listedItem,
+          listedPrice: listedItem ? listedItem.price.toString() : null,
+          marketItemId: listedItem ? listedItem.marketItemId : undefined
+        };
+      });
+      
+      setCollectedNFTs(nftsWithListingInfo);
+      
+      const listedIds = new Set(nftsWithListingInfo
+        .filter((nft: NFT) => nft.isListed)
+        .map((nft: NFT) => nft.id?.toString() || '')
+      );
+      setListedNFTs(listedIds as Set<string>);
+    } catch (error) {
+      console.error('Error al obtener NFTs coleccionados:', error);
+      setCollectedNFTs([]);
+    }
+  }, [address, marketItems]);
+
+  useEffect(() => {
+    if (address) {
+      fetchCollectedNFTs();
+    }
+  }, [address, fetchCollectedNFTs]);
+
+  // Añade este nuevo useEffect
+  useEffect(() => {
+    collectedNFTs.forEach(nft => {
+      console.log(`NFT cargado:
+        Imagen URL: ${nft.image}
+        Token ID: ${nft.tokenId}
+        Dirección del contrato: ${nft.contractAddress}`);
+    });
+  }, [collectedNFTs]);
+
+  useEffect(() => {
+    console.log('Market items actualizados:', marketItems);
+    console.log('Total de items en el mercado:', totalItems);
+    console.log('NFTs del usuario:', nfts);
+  }, [marketItems, totalItems, nfts]);
 
   const handleApprovalStatus = useCallback((status: LifeCycleStatus) => {
     console.log('Estado de aprobación:', status);
@@ -79,34 +168,30 @@ export default function Profile() {
   }, []);
 
   const handleCancelListingClick = useCallback((nft: NFT) => {
-    setListingNFT(nft);
-    handleCancelListing();
-  }, [handleCancelListing]);
-
-  const fetchCollectedNFTs = useCallback(async () => {
-    if (!address) return;
-    try {
-      const response = await fetch(`/api/collected-nfts?userAddress=${address}`);
-      const data = await response.json();
-      setCollectedNFTs(data.nfts || []);
-    } catch (error) {
-      console.error('Error al obtener NFTs coleccionados:', error);
-      setCollectedNFTs([]);
+    if (nft.marketItemId) {
+      // Convertimos el marketItemId a un número, eliminando la 'n' al final
+      const marketItemIdNumber = Number(nft.marketItemId.toString());
+      handleCancelListingHook(BigInt(marketItemIdNumber));
+    } else {
+      console.error('No se pudo cancelar el listado: marketItemId no disponible');
     }
-  }, [address]);
+  }, [handleCancelListingHook]);
 
   useEffect(() => {
-    if (address) {
-      fetchCollectedNFTs();
+    if (isCancelSuccess) {
+      console.log('Listado cancelado con éxito');
+      fetchCollectedNFTs(); // Actualizar la lista de NFTs después de cancelar
     }
-  }, [address, fetchCollectedNFTs]);
+  }, [isCancelSuccess, fetchCollectedNFTs]);
 
   const handleViewDetails = (nft: NFT) => {
-    setListingNFT(nft);
-    setIsDialogOpen(true);
+    // Implementa la lógica para mostrar los detalles del NFT
+    console.log('Ver detalles de:', nft);
   };
 
   const handleListNFT = (nft: NFT) => {
+    // Implementa la lógica para listar el NFT
+    console.log('Listar NFT:', nft);
     setListingNFT(nft);
     setIsDialogOpen(true);
   };
@@ -181,12 +266,25 @@ export default function Profile() {
                         <h4 className="text-sm font-medium truncate">{nft.name || `NFT #${nft.tokenId || i}`}</h4>
                         <div className="flex justify-between mt-2">
                           <Button variant="outline" size="sm" onClick={() => handleViewDetails(nft)}>Detalles</Button>
-                          {isListed ? (
-                            <Button variant="outline" size="sm" onClick={() => handleCancelListingClick(nft)}>Cancelar listado</Button>
+                          {nft.isListed ? (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              onClick={() => handleCancelListingClick(nft)}
+                              disabled={isCancelling}
+                            >
+                              {isCancelling ? 'Cancelando...' : 'Cancelar listado'}
+                            </Button>
                           ) : (
                             <Button variant="outline" size="sm" onClick={() => handleListNFT(nft)}>Listar</Button>
                           )}
                         </div>
+                        {nft.isListed && (
+                          <p className="text-sm mt-1">
+                            Precio listado: {weiToEth(nft.listedPrice || null)} ETH
+                          </p>
+                        )}
+                        {cancelError && <p className="text-red-500 text-sm mt-1">{cancelError}</p>}
                       </CardContent>
                     </Card>
                   ))}
@@ -285,3 +383,5 @@ export default function Profile() {
     </div>
   );
 }
+
+export default Profile;
