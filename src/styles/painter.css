@@ -1,3 +1,52 @@
+:root {
+  .bg-muted,
+  .bg-background .bg-card {
+    background-color: #e7e7e7;
+    color: #4c4e52;
+  }
+
+  .bg-background,
+  .bg-muted .bg-card {
+    background-color: #d6d6d6;
+  }
+
+  .painter .slider {
+    background-color: rgba(214, 214, 214, 0.5);
+
+    .slider-range {
+      background-color:  rgba(214, 214, 214);
+    }
+    .slider-thumb {
+      border-color: rgba(231, 231, 231);
+      background-color: rgb(214, 214, 214);
+    }
+  }
+}
+
+.dark {
+  .bg-muted,
+  .bg-background .bg-card {
+    color: #9ca3af;
+  }
+
+  .bg-background,
+  .bg-muted .bg-card {
+    color: #9ca3af;
+  }
+
+  .painter .slider {
+    background-color: rgba(55, 65, 81, 0.5);
+
+    .slider-range {
+      background-color:  rgba(55, 65, 81);
+    }
+    .slider-thumb {
+      border-color: rgba(55, 65, 81);
+      background-color: rgb(17, 24, 39);
+    }
+  }
+}
+
 .painter {
   #canvas {
     &::-webkit-scrollbar {
