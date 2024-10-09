@@ -41,6 +41,11 @@ export default function Home() {
     }
   }, [marketItems]);
 
+  // Ordenar los marketItems por marketItemId de forma descendente
+  const sortedMarketItems = [...marketItems].sort((a, b) => 
+    Number(b.marketItemId) - Number(a.marketItemId)
+  );
+
   return (
     <>
       <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
@@ -78,7 +83,7 @@ export default function Home() {
             <p>Error al cargar los items: {error.message}</p>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {marketItems.slice(0, 8).map((item) => {
+              {sortedMarketItems.slice(0, 8).map((item) => {
                 const metadata = nftMetadata[item.marketItemId.toString()];
                 return (
                   <Card key={item.marketItemId.toString()}>
