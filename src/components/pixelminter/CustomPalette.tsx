@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Plus } from 'lucide-react';
 
 interface CustomPaletteProps {
   customPalette: string[];
@@ -11,30 +10,27 @@ interface CustomPaletteProps {
   onClearPalette: () => void;
 }
 
-const CustomPalette: React.FC<CustomPaletteProps> = ({ 
-  customPalette, 
-  onAddColor, 
-  onColorSelect, 
+const CustomPalette: React.FC<CustomPaletteProps> = ({
+  customPalette,
+  onAddColor,
+  onColorSelect,
   currentColor,
   onClearPalette
 }) => {
   return (
     <div className="w-full">
-      <h3 className="text-sm font-semibold mb-2 flex items-center text-white">
-        <Plus className="mr-2" size={16} /> Custom Palette
-      </h3>
       <div className="flex mb-2 items-center">
-        <div 
+        <div
           className="w-8 h-8 rounded-l-md border border-gray-600"
           style={{ backgroundColor: currentColor }}
         />
-        <Button 
+        <Button
           onClick={onAddColor}
           className="rounded-none h-8 px-2 py-0 text-xs bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white"
         >
           Add Color
         </Button>
-        <Button 
+        <Button
           onClick={onClearPalette}
           className="rounded-r-md h-8 px-2 py-0 text-xs bg-red-600 hover:bg-red-700 text-white"
         >

@@ -119,7 +119,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
   }, [handleShiftFrame]);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-gray-500">
+    <div className="flex flex-col h-screen text-gray-500">
       <div className="flex flex-1 overflow-hidden relative">
         <ToolPanel
           state={state}
@@ -164,14 +164,14 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
         </div>
 
         <div
-          className={`transition-all duration-300 bg-gray-800 relative ${
+          className={`transition-all duration-300 relative ${
             isSidePanelOpen ? 'w-72' : 'w-0'
           } overflow-hidden`}
         >
           <SidePanel
             state={state}
             updateState={updateState}
-            handleExtractPalette={handleExtractPalette}          
+            handleExtractPalette={handleExtractPalette}
             onGridSizeChange={onGridSizeChange}
             isExporting={false}
             addLayer={addLayer}
@@ -197,7 +197,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
           updateCanvasDisplay={updateCanvasDisplay}
           day={day}
         />
-        
+
         <div className="flex items-center p-2">
           <div className="flex items-center space-x-2">
             <label htmlFor="onionSkinningToggle" className="text-white">
@@ -244,7 +244,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
         />
       )}
 
-      <div 
+      <div
         className="absolute inset-0 z-40 pointer-events-none"
         onPointerDown={(e) => {
           if (e.target === e.currentTarget) {

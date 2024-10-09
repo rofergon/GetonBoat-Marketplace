@@ -1,8 +1,8 @@
 import React, { useCallback, useState, useEffect } from 'react';
-import { 
-  Transaction, 
-  TransactionButton, 
-  TransactionStatus, 
+import {
+  Transaction,
+  TransactionButton,
+  TransactionStatus,
   TransactionStatusLabel,
   TransactionStatusAction,
 } from '@coinbase/onchainkit/transaction';
@@ -139,7 +139,7 @@ const MintPixelminterButton: React.FC<MintPixelminterButtonProps> = ({ state, fp
       {!ipfsHash ? (
         <Button
           onClick={prepareAndMint}
-          className="bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition-colors"
+          className="w-full bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700 transition-colors"
           disabled={isExporting || uploading}
         >
           {isExporting ? 'Exporting GIF...' : uploading ? 'Loading...' : 'Mint animation WIP'}

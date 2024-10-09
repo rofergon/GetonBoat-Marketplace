@@ -31,11 +31,8 @@ const LayerManager: React.FC<LayerManagerProps> = ({
   const [editingLayerId, setEditingLayerId] = useState<string | null>(null);
 
   return (
-    <div className="bg-gray-800 p-4 rounded-md shadow-sm">
+    <div className="">
       <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-700">
-        <h3 className="text-xs font-semibold flex items-center text-white">
-          <Layers className="mr-1" size={14} aria-hidden="true" /> Layers
-        </h3>
         <Button onClick={addLayer} className="text-xs py-0 px-2 h-6 bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white">
           Add Layer
         </Button>
@@ -52,7 +49,7 @@ const LayerManager: React.FC<LayerManagerProps> = ({
               className="flex-grow mr-2 h-6 text-xs bg-gray-700 text-white border-gray-600 focus:border-blue-500 focus:ring-blue-500"
             />
           ) : (
-            <span 
+            <span
               className={`flex-grow mr-2 truncate cursor-pointer ${layer.id === state.activeLayerId ? 'font-bold text-blue-400' : 'text-gray-300'}`}
               onClick={() => setActiveLayerId(layer.id)}
               onDoubleClick={() => setEditingLayerId(layer.id)}
@@ -74,7 +71,7 @@ const LayerManager: React.FC<LayerManagerProps> = ({
               onValueChange={(value) => updateLayerOpacity(layer.id, value[0])}
               className="w-14"
             />
-            <Button 
+            <Button
               onClick={() => removeLayer(layer.id)}
               disabled={layers.length === 1}
               variant="destructive"
