@@ -19,6 +19,7 @@ interface AnimationControlsProps {
   saveState: () => void;
   updateCanvasDisplay: () => void;
   day: number;
+  showFrames: boolean;
 }
 
 const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
@@ -29,10 +30,10 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
   saveState,
   updateCanvasDisplay,
   day,
+  showFrames,
 }) => {
   const { isPlaying, setIsPlaying, changeFrame } = useAnimationControl(state, fps, updateState, updateCanvasDisplay);
   const { exportGif, isExporting } = useExportGif(state, fps);
-  const [showFrames, setShowFrames] = useState(true);
   const { seconds, frame } = useAnimationStatus(day);
 
   const handleDownloadGif = useCallback(async () => {
@@ -150,15 +151,10 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
         <Button onClick={handleDownloadGif} className={`${buttonStyle} flex`}>
           <Download className="w-full h-full" />
         </Button>
-        <Switch
-          checked={showFrames}
-          onCheckedChange={setShowFrames}
-          className="data-[state=checked]:bg-blue-500"
-        />
-        <span className="text-sm hidden sm:inline">Show Frames</span>
+
       </div>
     </div>
-  ), [isPlaying, setIsPlaying, changeFrame, state.frames.length, state.currentFrameIndex, fps, setFps, isLargeScreen, seconds, frame, handleDownloadGif, showFrames, setShowFrames]);
+  ), [isPlaying, setIsPlaying, changeFrame, state.frames.length, state.currentFrameIndex, fps, setFps, isLargeScreen, seconds, frame, handleDownloadGif]);
 
   const renderFrameThumbnails = useMemo(() => (
     <div className="overflow-x-auto whitespace-nowrap px-2 w-full">

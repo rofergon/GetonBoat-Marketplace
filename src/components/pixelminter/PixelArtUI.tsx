@@ -77,6 +77,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
   const [fps, setFps] = useState(30);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(true);
   const [isClient, setIsClient] = useState(false);
+  const [showFrames, setShowFrames] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
@@ -186,6 +187,8 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
             updateOnionSkinningOpacity={updateOnionSkinningOpacity}
             onionSkinningCanvas={onionSkinningCanvas}
             fps={fps}
+            showFrames={showFrames}
+            setShowFrames={setShowFrames}
           />
         </div>
       </div>
@@ -199,6 +202,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
           saveState={saveState}
           updateCanvasDisplay={updateCanvasDisplay}
           day={day}
+          showFrames={showFrames}
         />
       </div>
 

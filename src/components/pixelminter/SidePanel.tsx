@@ -35,6 +35,8 @@ interface SidePanelProps {
   toggleOnionSkinning: () => void;
   updateOnionSkinningOpacity: (opacity: number) => void;
   onionSkinningCanvas: React.RefObject<HTMLCanvasElement>;
+  showFrames: boolean;
+  setShowFrames: (show: boolean) => void;
 }
 
 const SidePanel: React.FC<SidePanelProps> = ({
@@ -54,7 +56,9 @@ const SidePanel: React.FC<SidePanelProps> = ({
   toggleOnionSkinning,
   updateOnionSkinningOpacity,
   onionSkinningCanvas,
-  fps
+  fps,
+  showFrames,
+  setShowFrames
 }) => {
   const [encodedData, setEncodedData] = useState<string | null>(null);
 
@@ -69,7 +73,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
   const [isCustomPaletteOpen, setIsCustomPaletteOpen] = useState(false);
   const [isLayersOpen, setIsLayersOpen] = useState(false);
   const [isGridSizeOpen, setIsGridSizeOpen] = useState(false);
-  const [isAnimationOpen, setIsAnimationOpen] = useState(false);
+  const [isTimelineOpen, setIsTimelineOpen] = useState(false);
   const initialDroplets = useMemo(() => brushData?.pixelsPerDay || state.pixelsPerDay || 0, [brushData, state.pixelsPerDay]);
 
   const { pixelCount, droplets } = usePixelCountAndDroplets(state, initialDroplets);
@@ -244,17 +248,26 @@ const SidePanel: React.FC<SidePanelProps> = ({
 
       <div className="tool-container rounded-md shadow-sm overflow-hidden">
         <button
-          onClick={() => setIsAnimationOpen(!isAnimationOpen)}
+          onClick={() => setIsTimelineOpen(!isTimelineOpen)}
           className="w-full p-2 flex justify-between items-center text-left"
         >
-          <h3 className="text-xs font-semibold flex items-center"><Play className="mr-2" size={16} />Animations</h3>
-          {isAnimationOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          <h3 className="text-xs font-semibold flex items-center"><Play className="mr-2" size={16} />Timeline</h3>
+          {isTimelineOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
-        {isAnimationOpen && (
+        {isTimelineOpen && (
           <div className="p-2">
-            <div className="flex flex-col space-y-2">
-              <label htmlFor="onionSkinningOpacity" className="text-xs">
-                Onion Skinning Opacity:
+            <div className="border-t py-1 flex justify-between items-center">
+              <span className="text-xs font-semibold mb-1">Show Frames</span>
+              <Switch
+                checked={showFrames}
+                onCheckedChange={setShowFrames}
+                className="scale-75 data-[state=checked]:bg-blue-500"
+              />
+            </div>
+
+            <div className="border-t py-1 flex flex-col space-y-2">
+              <label htmlFor="onionSkinningOpacity" className="text-xs font-semibold mb-1">
+                Onion Skinning Opacity
               </label>
               <Slider
                 id="onionSkinningOpacity"
@@ -267,6 +280,9 @@ const SidePanel: React.FC<SidePanelProps> = ({
               />
             </div>
           </div>
+
+
+
         )}
       </div>
 
