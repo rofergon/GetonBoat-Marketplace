@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useCallback, useMemo } from 'react';
-import { Plus, Play, Pause, SkipForward, SkipBack, Download } from 'lucide-react';
+import { Plus, Play, Pause, SkipForward, SkipBack } from 'lucide-react';
 import { Button } from "../ui/button";
 import { Slider } from "../ui/slider";
-import { Switch } from "../ui/switch";
 import FrameThumbnail from './FrameThumbnail';
 import { State, Frame } from '../../types/types';
 import { useExportGif } from '../../hooks/useExportGif';
@@ -35,22 +34,6 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
   const { isPlaying, setIsPlaying, changeFrame } = useAnimationControl(state, fps, updateState, updateCanvasDisplay);
   const { exportGif, isExporting } = useExportGif(state, fps);
   const { seconds, frame } = useAnimationStatus(day);
-
-  const handleDownloadGif = useCallback(async () => {
-    try {
-      const gifBlob = await exportGif();
-      const url = URL.createObjectURL(gifBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'animation.gif';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error al descargar el GIF:', error);
-    }
-  }, [exportGif]);
 
   const addFrame = useCallback(() => {
     updateState(prev => {
@@ -148,13 +131,10 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
             <span className="text-sm">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
           </div>
         )}
-        <Button onClick={handleDownloadGif} className={`${buttonStyle} flex`}>
-          <Download className="w-full h-full" />
-        </Button>
 
       </div>
     </div>
-  ), [isPlaying, setIsPlaying, changeFrame, state.frames.length, state.currentFrameIndex, fps, setFps, isLargeScreen, seconds, frame, handleDownloadGif]);
+  ), [isPlaying, setIsPlaying, changeFrame, state.frames.length, state.currentFrameIndex, fps, setFps, isLargeScreen, seconds, frame]);
 
   const renderFrameThumbnails = useMemo(() => (
     <div className="overflow-x-auto whitespace-nowrap px-2 w-full">

@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable no-unused-vars */
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
@@ -9,13 +9,14 @@ import CustomPalette from './CustomPalette';
 import ConnectWalletButton from './ConnectWalletButton';
 import LayerManager from './LayerPanel';
 import { State, BrushData } from '../../types/types';
-import { Palette, Grid, Save, Droplet, Layers, Plus, Play } from 'lucide-react';
+import { Palette, Grid, Save, Droplet, Layers, Plus, Play, Download } from 'lucide-react';
 import { useSidePanelLogic } from '../../hooks/useSidePanelLogic';
 import { usePixelCountAndDroplets } from '../../hooks/usePixelCount';
 import MintBPButton from './MintBPButton';
 import MintPixelminterButton from './MintPixelminterButton';
 import { encodePixelData } from '../../utils/encodingUtils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useExportGif } from '../../hooks/useExportGif';
 
 interface SidePanelProps {
   state: State;
@@ -86,6 +87,23 @@ const SidePanel: React.FC<SidePanelProps> = ({
     const data = encodePixelData(state);
     setEncodedData(data);
   };
+
+  const { exportGif } = useExportGif(state, fps);
+  const handleDownloadGif = useCallback(async () => {
+    try {
+      const gifBlob = await exportGif();
+      const url = URL.createObjectURL(gifBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'animation.gif';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error al descargar el GIF:', error);
+    }
+  }, [exportGif]);
 
   return (
     <div
@@ -279,6 +297,11 @@ const SidePanel: React.FC<SidePanelProps> = ({
                 className="w-full"
               />
             </div>
+
+            <Button onClick={handleDownloadGif} className="mt-3 w-full inline-flex items-center justify-center whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 text-primary-foreground text-xs py-0 px-2 h-6 bg-muted hover:bg-gray-300">
+              <Download className="mr-2" size={14} />
+              Download GIF
+            </Button>
           </div>
 
 
