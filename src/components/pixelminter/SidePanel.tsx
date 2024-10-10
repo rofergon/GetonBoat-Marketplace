@@ -32,7 +32,8 @@ interface SidePanelProps {
   updateLayerName: (id: string, name: string) => void;
   brushData: BrushData | null;
   updateBrushData: (data: BrushData | null) => void;
-  fps: number; // Asegúrate de añadir esta prop
+  fps: number;
+  setFps: (fps: number) => void;
   toggleOnionSkinning: () => void;
   updateOnionSkinningOpacity: (opacity: number) => void;
   onionSkinningCanvas: React.RefObject<HTMLCanvasElement>;
@@ -58,6 +59,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
   updateOnionSkinningOpacity,
   onionSkinningCanvas,
   fps,
+  setFps,
   showFrames,
   setShowFrames
 }) => {
@@ -112,7 +114,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
       onionSkinningCanvas={onionSkinningCanvas}
       toggleOnionSkinning={toggleOnionSkinning}
       updateOnionSkinningOpacity={updateOnionSkinningOpacity}
-  >
+    >
       <div className="tool-container rounded-md shadow-sm overflow-hidden">
         <button
           onClick={() => setIsBasepaintOpen(!isBasepaintOpen)}
@@ -283,7 +285,18 @@ const SidePanel: React.FC<SidePanelProps> = ({
               />
             </div>
 
-            <div className="border-t py-1 flex flex-col space-y-2">
+            <div className="border-t pt-2 pb-3 flex flex-col space-y-2">
+              <label htmlFor="onionSkinningOpacity" className="text-xs font-semibold mb-1">
+                {fps} FPS
+              </label>
+              <Slider
+                min={1} max={30} step={1} value={[fps]}
+                onValueChange={value => setFps(value[0])}
+                className="w-full"
+              />
+            </div>
+
+            <div className="border-t py-2 flex flex-col space-y-2">
               <label htmlFor="onionSkinningOpacity" className="text-xs font-semibold mb-1">
                 Onion Skinning Opacity
               </label>

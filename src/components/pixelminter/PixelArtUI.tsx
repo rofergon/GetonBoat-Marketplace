@@ -186,6 +186,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
             updateOnionSkinningOpacity={updateOnionSkinningOpacity}
             onionSkinningCanvas={onionSkinningCanvas}
             fps={fps}
+            setFps={setFps}
             showFrames={showFrames}
             setShowFrames={setShowFrames}
           />
@@ -196,7 +197,6 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
         <AnimationControls
           state={state}
           fps={fps}
-          setFps={setFps}
           updateState={updateState}
           saveState={saveState}
           updateCanvasDisplay={updateCanvasDisplay}

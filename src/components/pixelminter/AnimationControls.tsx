@@ -13,7 +13,7 @@ import { useMediaQuery } from 'react-responsive';
 interface AnimationControlsProps {
   state: State;
   fps: number;
-  setFps: (fps: number) => void; // Actualizamos el tipo de setFps
+  setFps: (fps: number) => void;
   updateState: (newState: Partial<State> | ((prevState: State) => Partial<State>)) => void;
   saveState: () => void;
   updateCanvasDisplay: () => void;
@@ -24,7 +24,6 @@ interface AnimationControlsProps {
 const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
   state,
   fps,
-  setFps,
   updateState,
   saveState,
   updateCanvasDisplay,
@@ -70,8 +69,6 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
 
   const buttonStyle = useMemo(() => "btn-tool bg-muted", []);
 
-  const isLargeScreen = useMediaQuery({ minWidth: 1024 });
-
   const renderControls = useMemo(() => (
     <div className="flex items-center justify-between gap-2 bg-muted">
       <div className="flex items-center space-x-2">
@@ -97,44 +94,20 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
         >
           <SkipForward className="w-full h-full" />
         </Button>
-        {isLargeScreen && (
-          <>
-            <div className="flex items-center space-x-2 ml-4">
-              <Slider
-                min={1} max={30} step={1} value={[fps]}
-                onValueChange={value => setFps(value[0])}
-                className="w-32"
-              />
-              <span className="text-sm font-medium">{fps} FPS</span>
-            </div>
-            <div className="flex items-center gap-2 font-roboto ml-4">
-              <span className="flex items-center gap-1 text-red-600 animate-pulse">
-                REC
-                <svg viewBox="0 0 2 2" className="h-3 w-3 fill-current">
-                  <circle cx={1} cy={1} r={1} />
-                </svg>
-              </span>
-              <span className="text-sm">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
-            </div>
-          </>
-        )}
       </div>
       <div className="flex items-center space-x-2">
-        {!isLargeScreen && (
-          <div className="flex items-center gap-2 font-roboto text-xs mr-2">
-            <span className="flex items-center gap-1 text-red-600 animate-pulse">
-              REC
-              <svg viewBox="0 0 2 2" className="h-2 w-2 fill-current">
-                <circle cx={1} cy={1} r={1} />
-              </svg>
-            </span>
-            <span className="text-sm">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
-          </div>
-        )}
-
+        <div className="flex items-center gap-2 font-roboto text-xs mr-2">
+          <span className="flex items-center gap-1 text-red-600 animate-pulse">
+            REC
+            <svg viewBox="0 0 2 2" className="h-2 w-2 fill-current">
+              <circle cx={1} cy={1} r={1} />
+            </svg>
+          </span>
+          <span className="text-sm">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
+        </div>
       </div>
     </div>
-  ), [isPlaying, setIsPlaying, changeFrame, state.frames.length, state.currentFrameIndex, fps, setFps, isLargeScreen, seconds, frame]);
+  ), [isPlaying, setIsPlaying, changeFrame, state.frames.length, state.currentFrameIndex, fps, seconds, frame]);
 
   const renderFrameThumbnails = useMemo(() => (
     <div className="overflow-x-auto whitespace-nowrap p-2 pb-1 w-full">
