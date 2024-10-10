@@ -197,6 +197,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
         <AnimationControls
           state={state}
           fps={fps}
+          setFps={setFps}
           updateState={updateState}
           saveState={saveState}
           updateCanvasDisplay={updateCanvasDisplay}
