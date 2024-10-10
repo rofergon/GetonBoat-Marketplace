@@ -151,16 +151,15 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
 
           <button
             onClick={toggleSidePanel}
-            className="p-1 bg-gray-700 text-gray-500 hover:bg-gray-600 focus:outline-none rounded-full absolute top-1/2 transform -translate-y-1/2 z-50"
+            className="p-1 bg-muted hover:bg-muted focus:outline-none rounded absolute bottom-3"
             style={{
               width: '32px',
               height: '32px',
               left: isSidePanelOpen ? 'auto' : 'calc(100% - 15px)',
-              right: isSidePanelOpen ? '-16px' : 'auto',
+              right: isSidePanelOpen ? '-22px' : 'auto',
               transition: 'left 0.3s ease-in-out, right 0.3s ease-in-out',
             }}
           >
-            {isSidePanelOpen ? '>' : '<'}
           </button>
         </div>
 
