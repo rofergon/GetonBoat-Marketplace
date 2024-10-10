@@ -111,9 +111,6 @@ const SidePanel: React.FC<SidePanelProps> = ({
     <div
       id='side-panel'
       className="w-full max-w-xs flex-grow p-3 bg-muted space-y-3 h-full overflow-y-auto text-white "
-      onionSkinningCanvas={onionSkinningCanvas}
-      toggleOnionSkinning={toggleOnionSkinning}
-      updateOnionSkinningOpacity={updateOnionSkinningOpacity}
     >
       <div className="tool-container rounded-md shadow-sm overflow-hidden">
         <button
