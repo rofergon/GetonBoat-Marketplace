@@ -73,7 +73,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
   const isLargeScreen = useMediaQuery({ minWidth: 1024 });
 
   const renderControls = useMemo(() => (
-    <div className="flex items-center justify-between gap-2 mb-2 bg-muted">
+    <div className="flex items-center justify-between gap-2 bg-muted">
       <div className="flex items-center space-x-2">
         <Button onClick={addFrame} className={`${buttonStyle} flex`}>
           <Plus className="w-full h-full" />
@@ -137,7 +137,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
   ), [isPlaying, setIsPlaying, changeFrame, state.frames.length, state.currentFrameIndex, fps, setFps, isLargeScreen, seconds, frame]);
 
   const renderFrameThumbnails = useMemo(() => (
-    <div className="overflow-x-auto whitespace-nowrap px-2 w-full">
+    <div className="overflow-x-auto whitespace-nowrap p-2 pb-1 w-full">
       {state.frames.map((frame, index) => (
         <FrameThumbnail
           key={index}
