@@ -182,6 +182,9 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
             updateLayerName={updateLayerName}
             brushData={brushData}
             updateBrushData={updateBrushData}
+            toggleOnionSkinning={toggleOnionSkinning}
+            updateOnionSkinningOpacity={updateOnionSkinningOpacity}
+            onionSkinningCanvas={onionSkinningCanvas}
             fps={fps}
           />
         </div>
@@ -197,40 +200,6 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
           updateCanvasDisplay={updateCanvasDisplay}
           day={day}
         />
-
-        <div className="flex items-center p-2">
-          <div className="flex items-center space-x-2">
-            <label htmlFor="onionSkinningToggle" className="text-white">
-              Onion Skinning:
-            </label>
-            <input
-              id="onionSkinningToggle"
-              type="checkbox"
-              checked={state.onionSkinning}
-              onChange={toggleOnionSkinning}
-              aria-label="Toggle onion skinning"
-              className="h-4 w-4 text-blue-600 bg-gray-700 rounded focus:ring-blue-500"
-            />
-            {state.onionSkinning && (
-              <>
-                <label htmlFor="onionSkinningOpacity" className="text-white">
-                  Opacity:
-                </label>
-                <input
-                  id="onionSkinningOpacity"
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={state.onionSkinningOpacity}
-                  onChange={(e) => updateOnionSkinningOpacity(parseFloat(e.target.value))}
-                  aria-label="Adjust onion skinning opacity"
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                />
-              </>
-            )}
-          </div>
-        </div>
       </div>
 
       {state.showReferenceImage && (

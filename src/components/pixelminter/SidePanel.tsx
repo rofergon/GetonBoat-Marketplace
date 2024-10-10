@@ -9,7 +9,7 @@ import CustomPalette from './CustomPalette';
 import ConnectWalletButton from './ConnectWalletButton';
 import LayerManager from './LayerPanel';
 import { State, BrushData } from '../../types/types';
-import { Palette, Grid, Save, Droplet, Layers, Plus } from 'lucide-react';
+import { Palette, Grid, Save, Droplet, Layers, Plus, Play } from 'lucide-react';
 import { useSidePanelLogic } from '../../hooks/useSidePanelLogic';
 import { usePixelCountAndDroplets } from '../../hooks/usePixelCount';
 import MintBPButton from './MintBPButton';
@@ -32,6 +32,9 @@ interface SidePanelProps {
   brushData: BrushData | null;
   updateBrushData: (data: BrushData | null) => void;
   fps: number; // Asegúrate de añadir esta prop
+  toggleOnionSkinning: () => void;
+  updateOnionSkinningOpacity: (opacity: number) => void;
+  onionSkinningCanvas: React.RefObject<HTMLCanvasElement>;
 }
 
 const SidePanel: React.FC<SidePanelProps> = ({
@@ -48,6 +51,9 @@ const SidePanel: React.FC<SidePanelProps> = ({
   updateLayerName,
   brushData,
   updateBrushData,
+  toggleOnionSkinning,
+  updateOnionSkinningOpacity,
+  onionSkinningCanvas,
   fps
 }) => {
   const [encodedData, setEncodedData] = useState<string | null>(null);
@@ -63,6 +69,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
   const [isCustomPaletteOpen, setIsCustomPaletteOpen] = useState(false);
   const [isLayersOpen, setIsLayersOpen] = useState(false);
   const [isGridSizeOpen, setIsGridSizeOpen] = useState(false);
+  const [isAnimationOpen, setIsAnimationOpen] = useState(false);
   const initialDroplets = useMemo(() => brushData?.pixelsPerDay || state.pixelsPerDay || 0, [brushData, state.pixelsPerDay]);
 
   const { pixelCount, droplets } = usePixelCountAndDroplets(state, initialDroplets);
@@ -77,7 +84,13 @@ const SidePanel: React.FC<SidePanelProps> = ({
   };
 
   return (
-    <div id='side-panel' className="w-full max-w-xs flex-grow p-3 bg-muted space-y-3 h-full overflow-y-auto text-white ">
+    <div
+      id='side-panel'
+      className="w-full max-w-xs flex-grow p-3 bg-muted space-y-3 h-full overflow-y-auto text-white "
+      onionSkinningCanvas={onionSkinningCanvas}
+      toggleOnionSkinning={toggleOnionSkinning}
+      updateOnionSkinningOpacity={updateOnionSkinningOpacity}
+  >
       <div className="tool-container rounded-md shadow-sm overflow-hidden">
         <button
           onClick={() => setIsBasepaintOpen(!isBasepaintOpen)}
@@ -225,6 +238,34 @@ const SidePanel: React.FC<SidePanelProps> = ({
             <p className="text-center text-xs mt-1 font-medium">
               <span className="font-variant-numeric tabular-nums">{state.gridSize}</span>x<span className="font-variant-numeric tabular-nums">{state.gridSize}</span>
             </p>
+          </div>
+        )}
+      </div>
+
+      <div className="tool-container rounded-md shadow-sm overflow-hidden">
+        <button
+          onClick={() => setIsAnimationOpen(!isAnimationOpen)}
+          className="w-full p-2 flex justify-between items-center text-left"
+        >
+          <h3 className="text-xs font-semibold flex items-center"><Play className="mr-2" size={16} />Animations</h3>
+          {isAnimationOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+        {isAnimationOpen && (
+          <div className="p-2">
+            <div className="flex flex-col space-y-2">
+              <label htmlFor="onionSkinningOpacity" className="text-xs">
+                Onion Skinning Opacity:
+              </label>
+              <Slider
+                id="onionSkinningOpacity"
+                min={0}
+                max={1}
+                step={0.1}
+                value={[state.onionSkinningOpacity]}
+                onValueChange={(value) => updateOnionSkinningOpacity(value[0])}
+                className="w-full"
+              />
+            </div>
           </div>
         )}
       </div>
