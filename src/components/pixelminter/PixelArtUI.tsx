@@ -120,7 +120,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
   }, [handleShiftFrame]);
 
   return (
-    <div className="flex flex-col h-screen text-gray-500">
+    <div className="flex flex-col h-[calc(100vh-60px)] text-gray-500">
       <div className="flex flex-1 overflow-hidden relative">
         <ToolPanel
           state={state}
