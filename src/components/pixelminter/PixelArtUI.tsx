@@ -151,7 +151,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
 
           <button
             onClick={toggleSidePanel}
-            className="p-1 bg-muted hover:bg-muted focus:outline-none rounded absolute bottom-3"
+            className="p-1 bg-muted hover:bg-muted focus:outline-none rounded absolute bottom-3 z-50"
             style={{
               width: '32px',
               height: '32px',
