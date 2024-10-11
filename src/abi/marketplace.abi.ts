@@ -47,7 +47,7 @@ export const marketplaceAbi = [
 			},
 			{
 				"internalType": "uint256",
-				"name": "expirationDuration",
+				"name": "listingDuration",
 				"type": "uint256"
 			}
 		],
@@ -132,6 +132,16 @@ export const marketplaceAbi = [
 			{
 				"internalType": "uint256",
 				"name": "marketItemId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "nftContractAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
 				"type": "uint256"
 			}
 		],
