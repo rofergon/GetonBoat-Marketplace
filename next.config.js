@@ -13,6 +13,7 @@ const nextConfig = {
         'nft-cdn.alchemy.com',
         'ipfs.dweb.link',  // Gateway IPFS alternativo
         'gateway.pinata.cloud',  // Otro gateway IPFS alternativo
+        'img.dot.fan', // Añadimos el nuevo dominio aquí
       ], 
       dangerouslyAllowSVG: true,
       contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
