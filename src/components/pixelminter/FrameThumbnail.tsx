@@ -2,6 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { State, Frame, Layer } from '../../types/types';
+import { X } from 'lucide-react';
 
 interface FrameThumbnailProps {
   frame: Frame;
@@ -13,11 +14,11 @@ interface FrameThumbnailProps {
   onFrameSelect: (index: number) => void;
 }
 
-const FrameThumbnail: React.FC<FrameThumbnailProps> = ({ 
-  frame, 
-  index, 
-  state, 
-  onDelete, 
+const FrameThumbnail: React.FC<FrameThumbnailProps> = ({
+  frame,
+  index,
+  state,
+  onDelete,
   canDelete,
   onFrameSelect
 }) => {
@@ -28,7 +29,7 @@ const FrameThumbnail: React.FC<FrameThumbnailProps> = ({
     if (canvas) {
       canvas.width = canvas.height = 64;
       const ctx = canvas.getContext('2d');
-      
+
       if (ctx) {
         const cellSize = 64 / state.gridSize;
         ctx.clearRect(0, 0, 64, 64);
@@ -36,7 +37,7 @@ const FrameThumbnail: React.FC<FrameThumbnailProps> = ({
         frame.layers.forEach((layer: Layer) => {
           if (layer.visible) {
             ctx.globalAlpha = layer.opacity;
-            
+
             // Manejar diferentes tipos de estructuras de datos para layer.pixels
             if (layer.pixels instanceof Map) {
               layer.pixels.forEach((color, key) => {
@@ -65,7 +66,7 @@ const FrameThumbnail: React.FC<FrameThumbnailProps> = ({
 
   return (
     <div
-      className={`inline-block relative mr-2 ${index === state.currentFrameIndex ? 'border-2 border-blue-500' : ''}`}
+      className={`inline-block relative mr-2 border-2 border-background rounded ${index === state.currentFrameIndex ? 'border-blue-500' : ''}`}
       onClick={handleFrameClick}
     >
       <canvas ref={canvasRef} className="w-16 h-16 object-cover cursor-pointer" />
@@ -77,9 +78,9 @@ const FrameThumbnail: React.FC<FrameThumbnailProps> = ({
           }}
           variant="destructive"
           size="sm"
-          className="absolute top-0 right-0 h-6 w-6 p-0 rounded-full"
+          className="absolute top-0 right-0 h-5 w-5 p-0 rounded opacity-20 hover:opacity-100"
         >
-          X
+          <X size={15} aria-hidden="true" />
         </Button>
       )}
     </div>

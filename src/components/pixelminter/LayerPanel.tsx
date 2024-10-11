@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Layers, X } from 'lucide-react';
+import { Trash } from 'lucide-react';
 import { State, Layer } from '../../types/types';
 import { Input } from "@/components/ui/input";
 import { getCurrentLayers } from '../../hooks/layerStateManager';
@@ -31,17 +31,14 @@ const LayerManager: React.FC<LayerManagerProps> = ({
   const [editingLayerId, setEditingLayerId] = useState<string | null>(null);
 
   return (
-    <div className="bg-gray-800 p-4 rounded-md shadow-sm">
-      <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-700">
-        <h3 className="text-xs font-semibold flex items-center text-white">
-          <Layers className="mr-1" size={14} aria-hidden="true" /> Layers
-        </h3>
-        <Button onClick={addLayer} className="text-xs py-0 px-2 h-6 bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white">
+    <div className="">
+      <div className="flex items-center justify-between mb pb-2">
+        <Button onClick={addLayer} className="text-xs py-0 px-2 h-6 bg-muted hover:bg-gray-300">
           Add Layer
         </Button>
       </div>
       {layers.map((layer: Layer) => (
-        <div key={layer.id} className="flex items-center justify-between mb-3 pb-2 border-b border-gray-700 text-xs">
+        <div key={layer.id} className="flex items-center justify-between p border-t text-xs">
           {editingLayerId === layer.id ? (
             <Input
               value={layer.name}
@@ -49,22 +46,22 @@ const LayerManager: React.FC<LayerManagerProps> = ({
               onBlur={() => setEditingLayerId(null)}
               onKeyDown={(e) => e.key === 'Enter' && setEditingLayerId(null)}
               autoFocus
-              className="flex-grow mr-2 h-6 text-xs bg-gray-700 text-white border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+              className="flex-grow mr-2 h-6 text-xs bg-muted text-white focus:border-blue-500 [&:focus]:shadow-none [&:focus-visible]:ring-0 [&:focus-visible]:ring-offset-0"
             />
           ) : (
-            <span 
-              className={`flex-grow mr-2 truncate cursor-pointer ${layer.id === state.activeLayerId ? 'font-bold text-blue-400' : 'text-gray-300'}`}
+            <span
+              className={`flex-grow mr-2 truncate cursor-pointer ${layer.id === state.activeLayerId ? 'font-bold text-blue-400' : ''}`}
               onClick={() => setActiveLayerId(layer.id)}
               onDoubleClick={() => setEditingLayerId(layer.id)}
             >
               {layer.name}
             </span>
           )}
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-2">
             <Switch
               checked={layer.visible}
               onCheckedChange={(checked) => updateLayerVisibility(layer.id, checked)}
-              className="h-4 w-7"
+              className="scale-75"
             />
             <Slider
               min={0}
@@ -74,14 +71,13 @@ const LayerManager: React.FC<LayerManagerProps> = ({
               onValueChange={(value) => updateLayerOpacity(layer.id, value[0])}
               className="w-14"
             />
-            <Button 
+            <Button
               onClick={() => removeLayer(layer.id)}
               disabled={layers.length === 1}
-              variant="destructive"
               size="icon"
-              className="h-6 w-6 p-0 bg-red-600 hover:bg-red-700 text-white rounded-full"
+              className="h-6 w-6 hover:text-red-600 rounded bg-transparent hover:bg-transparent text-muted-foreground"
             >
-              <X size={10} />
+              <Trash size={12} />
             </Button>
           </div>
         </div>

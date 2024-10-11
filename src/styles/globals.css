@@ -4,8 +4,23 @@
 
 @import 'header.css';
 @import 'wallet.css';
+@import 'painter.css';
 
 @layer base {
+  /* :root { } this is the root of the theme */
+
+  .dark {
+    .bg-muted,
+    .bg-background .bg-card {
+      background-color: #1f2937;
+    }
+
+    .bg-background,
+    .bg-muted .bg-card {
+      background-color: #111827;
+    }
+  }
+
   * {
     @apply border-border;
   }

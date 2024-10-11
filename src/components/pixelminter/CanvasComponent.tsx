@@ -178,17 +178,17 @@ const CanvasComponent: React.FC<CanvasComponentProps> = ({
   }, [state.onionSkinning, state.currentFrameIndex, state.frames, renderOnionSkin, state.canvasSize, onionSkinningCanvas, state.zoom]);
 
   return (
-    <div className="overflow-auto max-w-full max-h-full">
+    <div id="canvas" className="overflow-auto max-w-full max-h-full">
       <div
         ref={containerRef}
-        className={`relative ${state.touchEnabled ? '' : 'touch-none'}`}
+        className={`bg-muted relative ${state.touchEnabled ? '' : 'touch-none'}`}
         style={canvasStyle}
         onContextMenu={(e) => e.preventDefault()}
       >
         {state.dailyImageUrl && state.showBackgroundImage && (
           <div
             className="absolute inset-0 z-0 w-full h-full bg-cover bg-center"
-            style={{ 
+            style={{
               backgroundImage: `url(${state.dailyImageUrl})`,
               opacity: state.backgroundOpacity
             }}

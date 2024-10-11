@@ -1,9 +1,8 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useCallback, useMemo } from 'react';
-import { Plus, Play, Pause, SkipForward, SkipBack, Download } from 'lucide-react';
+import { Plus, Play, Pause, SkipForward, SkipBack } from 'lucide-react';
 import { Button } from "../ui/button";
 import { Slider } from "../ui/slider";
-import { Switch } from "../ui/switch";
 import FrameThumbnail from './FrameThumbnail';
 import { State, Frame } from '../../types/types';
 import { useExportGif } from '../../hooks/useExportGif';
@@ -14,42 +13,26 @@ import { useMediaQuery } from 'react-responsive';
 interface AnimationControlsProps {
   state: State;
   fps: number;
-  setFps: (fps: number) => void; // Actualizamos el tipo de setFps
+  setFps: (fps: number) => void;
   updateState: (newState: Partial<State> | ((prevState: State) => Partial<State>)) => void;
   saveState: () => void;
   updateCanvasDisplay: () => void;
   day: number;
+  showFrames: boolean;
 }
 
 const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
   state,
   fps,
-  setFps,
   updateState,
   saveState,
   updateCanvasDisplay,
   day,
+  showFrames,
 }) => {
   const { isPlaying, setIsPlaying, changeFrame } = useAnimationControl(state, fps, updateState, updateCanvasDisplay);
   const { exportGif, isExporting } = useExportGif(state, fps);
-  const [showFrames, setShowFrames] = useState(true);
   const { seconds, frame } = useAnimationStatus(day);
-
-  const handleDownloadGif = useCallback(async () => {
-    try {
-      const gifBlob = await exportGif();
-      const url = URL.createObjectURL(gifBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'animation.gif';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Error al descargar el GIF:', error);
-    }
-  }, [exportGif]);
 
   const addFrame = useCallback(() => {
     updateState(prev => {
@@ -84,12 +67,10 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
     updateCanvasDisplay();
   }, [updateState, updateCanvasDisplay]);
 
-  const buttonStyle = useMemo(() => "w-9 h-9 p-2 bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded", []);
-
-  const isLargeScreen = useMediaQuery({ minWidth: 1024 });
+  const buttonStyle = useMemo(() => "btn-tool bg-muted", []);
 
   const renderControls = useMemo(() => (
-    <div className="flex items-center justify-between gap-2 mb-2">
+    <div className="flex items-center justify-between gap-2 bg-muted">
       <div className="flex items-center space-x-2">
         <Button onClick={addFrame} className={`${buttonStyle} flex`}>
           <Plus className="w-full h-full" />
@@ -113,55 +94,23 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
         >
           <SkipForward className="w-full h-full" />
         </Button>
-        {isLargeScreen && (
-          <>
-            <div className="flex items-center space-x-2 ml-4">
-              <Slider
-                min={1} max={30} step={1} value={[fps]}
-                onValueChange={value => setFps(value[0])}
-                className="w-32"
-              />
-              <span className="text-sm font-medium text-white">{fps} FPS</span>
-            </div>
-            <div className="flex items-center gap-2 font-roboto ml-4">
-              <span className="flex items-center gap-1 text-red-600 animate-pulse">
-                REC
-                <svg viewBox="0 0 2 2" className="h-3 w-3 fill-current">
-                  <circle cx={1} cy={1} r={1} />
-                </svg>
-              </span>
-              <span className="text-sm text-white">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
-            </div>
-          </>
-        )}
       </div>
       <div className="flex items-center space-x-2">
-        {!isLargeScreen && (
-          <div className="flex items-center gap-2 font-roboto text-xs mr-2">
-            <span className="flex items-center gap-1 text-red-600 animate-pulse">
-              REC
-              <svg viewBox="0 0 2 2" className="h-2 w-2 fill-current">
-                <circle cx={1} cy={1} r={1} />
-              </svg>
-            </span>
-            <span className="text-sm text-white">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
-          </div>
-        )}
-        <Button onClick={handleDownloadGif} className={`${buttonStyle} flex`}>
-          <Download className="w-full h-full" />
-        </Button>
-        <Switch
-          checked={showFrames}
-          onCheckedChange={setShowFrames}
-          className="data-[state=checked]:bg-blue-500"
-        />
-        <span className="text-sm hidden sm:inline text-white">Show Frames</span>
+        <div className="flex items-center gap-2 font-roboto text-xs mr-2">
+          <span className="flex items-center gap-1 text-red-600 animate-pulse">
+            REC
+            <svg viewBox="0 0 2 2" className="h-2 w-2 fill-current">
+              <circle cx={1} cy={1} r={1} />
+            </svg>
+          </span>
+          <span className="text-sm">00:{seconds.toString().padStart(2, '0')}.{frame.toString().padStart(2, '0')}</span>
+        </div>
       </div>
     </div>
-  ), [isPlaying, setIsPlaying, changeFrame, state.frames.length, state.currentFrameIndex, fps, setFps, isLargeScreen, seconds, frame, handleDownloadGif, showFrames, setShowFrames]);
+  ), [isPlaying, setIsPlaying, changeFrame, state.frames.length, state.currentFrameIndex, fps, seconds, frame]);
 
   const renderFrameThumbnails = useMemo(() => (
-    <div className="overflow-x-auto whitespace-nowrap mt-2 w-full">
+    <div className="overflow-x-auto whitespace-nowrap p-2 pb-1 w-full">
       {state.frames.map((frame, index) => (
         <FrameThumbnail
           key={index}
@@ -178,7 +127,7 @@ const AnimationControls: React.FC<AnimationControlsProps> = React.memo(({
   ), [state.frames, state, updateState, deleteFrame, handleFrameSelect]);
 
   return (
-    <div className="p-2 bg-gray-800 text-gray-200">
+    <div className="border-t border-background">
       {renderControls}
       {showFrames && renderFrameThumbnails}
     </div>

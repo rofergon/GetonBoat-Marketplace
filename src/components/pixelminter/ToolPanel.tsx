@@ -39,24 +39,22 @@ const ToolPanel: React.FC<ToolPanelProps> = ({
   ) => (
     <Button
       onClick={onClick}
-      className={`w-[35px] h-[35px] p-[9px] relative ${feedback[title] ? 'scale-100' : ''} transition-all duration-200 ${
-        isActive ? 'bg-blue-600 text-white ring-2 ring-blue-500' : 'bg-gray-700 text-gray-400'
-      }`}
+      className={`btn-tool relative ${feedback[title] ? 'scale-100' : ''} `}
       title={title}
       disabled={isClient ? isDisabled : undefined}
     >
-      {React.createElement(icon, { className: `h-full w-full ${isActive ? 'text-white' : 'text-gray-400'}` })}
+      {React.createElement(icon, { className: `h-full w-full ${isActive ? 'text-blue-500' : 'text-gray-400'}` })}
     </Button>
   );
 
   return (
-    <div className="w-12 bg-gray-800 flex flex-col items-center py-3 space-y-2 border-r border-gray-700">
+    <div id='tool-panel' className="w-10 bg-muted flex flex-col overflow-y-auto items-center py-3 space-y-2 shadow">
       <div className={`relative ${feedback['colorPicker'] ? 'scale-95' : ''} transition-all duration-200`}>
         <input
           type="color"
           value={state.color}
           onChange={(e) => updateState({ color: e.target.value })}
-          className="w-[35px] h-[35px] p-0 border-2 border-gray-600 bg-transparent rounded-full cursor-pointer transition-transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="color-picker"
           title="Choose Color"
         />
         <div

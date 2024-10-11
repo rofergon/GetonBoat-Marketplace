@@ -77,6 +77,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
   const [fps, setFps] = useState(30);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(true);
   const [isClient, setIsClient] = useState(false);
+  const [showFrames, setShowFrames] = useState(true);
 
   useEffect(() => {
     setIsClient(true);
@@ -119,7 +120,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
   }, [handleShiftFrame]);
 
   return (
-    <div className="flex flex-col h-screen bg-gray-900 text-gray-500">
+    <div className="flex flex-col h-[calc(100vh-60px)] text-gray-500">
       <div className="flex flex-1 overflow-hidden relative">
         <ToolPanel
           state={state}
@@ -132,7 +133,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
           canRedo={canRedo}
         />
 
-        <div className={`flex-1 flex flex-col bg-gray-900 overflow-hidden transition-all duration-300 relative`}>
+        <div className={`flex-1 flex flex-col overflow-hidden transition-all duration-300 relative`}>
           <CanvasComponent
             state={state}
             containerRef={containerRef}
@@ -150,28 +151,27 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
 
           <button
             onClick={toggleSidePanel}
-            className="p-1 bg-gray-700 text-gray-500 hover:bg-gray-600 focus:outline-none rounded-full absolute top-1/2 transform -translate-y-1/2 z-50"
+            className="p-1 bg-muted hover:bg-muted focus:outline-none rounded absolute bottom-3 z-50"
             style={{
               width: '32px',
               height: '32px',
               left: isSidePanelOpen ? 'auto' : 'calc(100% - 15px)',
-              right: isSidePanelOpen ? '-16px' : 'auto',
+              right: isSidePanelOpen ? '-22px' : 'auto',
               transition: 'left 0.3s ease-in-out, right 0.3s ease-in-out',
             }}
           >
-            {isSidePanelOpen ? '>' : '<'}
           </button>
         </div>
 
         <div
-          className={`transition-all duration-300 bg-gray-800 relative ${
+          className={`transition-all duration-300 relative ${
             isSidePanelOpen ? 'w-72' : 'w-0'
           } overflow-hidden`}
         >
           <SidePanel
             state={state}
             updateState={updateState}
-            handleExtractPalette={handleExtractPalette}          
+            handleExtractPalette={handleExtractPalette}
             onGridSizeChange={onGridSizeChange}
             isExporting={false}
             addLayer={addLayer}
@@ -182,12 +182,18 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
             updateLayerName={updateLayerName}
             brushData={brushData}
             updateBrushData={updateBrushData}
+            toggleOnionSkinning={toggleOnionSkinning}
+            updateOnionSkinningOpacity={updateOnionSkinningOpacity}
+            onionSkinningCanvas={onionSkinningCanvas}
             fps={fps}
+            setFps={setFps}
+            showFrames={showFrames}
+            setShowFrames={setShowFrames}
           />
         </div>
       </div>
 
-      <div className="w-full bg-gray-800 border-t border-gray-700">
+      <div className="w-full">
         <AnimationControls
           state={state}
           fps={fps}
@@ -196,41 +202,8 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
           saveState={saveState}
           updateCanvasDisplay={updateCanvasDisplay}
           day={day}
+          showFrames={showFrames}
         />
-        
-        <div className="flex items-center p-2">
-          <div className="flex items-center space-x-2">
-            <label htmlFor="onionSkinningToggle" className="text-white">
-              Onion Skinning:
-            </label>
-            <input
-              id="onionSkinningToggle"
-              type="checkbox"
-              checked={state.onionSkinning}
-              onChange={toggleOnionSkinning}
-              aria-label="Toggle onion skinning"
-              className="h-4 w-4 text-blue-600 bg-gray-700 rounded focus:ring-blue-500"
-            />
-            {state.onionSkinning && (
-              <>
-                <label htmlFor="onionSkinningOpacity" className="text-white">
-                  Opacity:
-                </label>
-                <input
-                  id="onionSkinningOpacity"
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.1"
-                  value={state.onionSkinningOpacity}
-                  onChange={(e) => updateOnionSkinningOpacity(parseFloat(e.target.value))}
-                  aria-label="Adjust onion skinning opacity"
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
-                />
-              </>
-            )}
-          </div>
-        </div>
       </div>
 
       {state.showReferenceImage && (
@@ -244,7 +217,7 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
         />
       )}
 
-      <div 
+      <div
         className="absolute inset-0 z-40 pointer-events-none"
         onPointerDown={(e) => {
           if (e.target === e.currentTarget) {
