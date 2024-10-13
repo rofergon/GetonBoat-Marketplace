@@ -225,7 +225,7 @@ const Profile: React.FC = () => {
         </div>
 
         <Tabs defaultValue="collected" className="w-full">
-          <TabsList className="w-full justify-start border-b overflow-x-auto">
+          <TabsList className="w-full justify-start overflow-x-auto">
             <TabsTrigger value="collected">Collected 4.7K</TabsTrigger>
             <TabsTrigger value="created">Created</TabsTrigger>
             <TabsTrigger value="favorited">Favorited 505</TabsTrigger>
@@ -238,7 +238,7 @@ const Profile: React.FC = () => {
               <h3 className="font-semibold mb-2">Collections</h3>
               <div className="space-y-2">
                 {mockCollections.map((collection, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 bg-secondary rounded-lg">
+                  <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-xl">
                     <div>
                       <p className="font-medium">{collection.name}</p>
                       <p className="text-sm text-muted-foreground">{collection.items} items</p>
