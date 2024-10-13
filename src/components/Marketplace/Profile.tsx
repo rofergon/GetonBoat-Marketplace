@@ -197,7 +197,7 @@ const Profile: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-background">
+    <div className="w-full min-h-screen bg-i">
       <div className="relative w-full h-48">
         <Image
           alt="Banner de perfil"
@@ -273,7 +273,7 @@ const Profile: React.FC = () => {
                               {isCancelling ? 'Cancelando...' : 'Cancelar listado'}
                             </Button>
                           ) : (
-                            <Button variant="outline" size="sm" className="w-full"
+                            <Button variant="outline" size="sm" className="card-btn"
                               onClick={(e) => { e.stopPropagation(); handleListNFT(nft); }}
                             >
                               Listar

@@ -5,6 +5,7 @@
 @import 'header.css';
 @import 'wallet.css';
 @import 'painter.css';
+@import 'card.css';
 
 @layer base {
   /* :root { } this is the root of the theme */
