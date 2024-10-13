@@ -23,6 +23,8 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
     uint256 private constant MIN_LISTING_DURATION = 6 days;
     uint256 private constant MAX_LISTING_DURATION = 180 days; // 6 meses
 
+    uint256 private cleanupIterationLimit = 20;
+
     mapping(uint256 => MarketItem) private marketItemIdToMarketItem;
 
     struct MarketItem {
@@ -56,6 +58,7 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
         address nftContractAddress
     );
     event MarketItemExpired(uint256 indexed marketItemId);
+    event CleanupIterationLimitUpdated(uint256 oldLimit, uint256 newLimit);
 
     constructor() Ownable(msg.sender) {}
 
@@ -63,12 +66,34 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
     mapping(address => mapping(uint256 => bool)) private nftListed;
     EnumerableSet.UintSet private availableMarketItemIds;
 
+    function _cleanUpExpiredMarketItems(uint256 maxIterations) internal {
+        uint256 totalAvailable = availableMarketItemIds.length();
+        uint256 iterations = 0;
+        uint256 i = 0;
+
+        while (i < totalAvailable && iterations < maxIterations) {
+            uint256 marketItemId = availableMarketItemIds.at(i);
+            MarketItem storage item = marketItemIdToMarketItem[marketItemId];
+
+            if (block.timestamp > item.expirationTime && !item.sold && !item.canceled) {
+                _expireMarketItem(marketItemId, item);
+                totalAvailable--;
+            } else {
+                i++;
+            }
+
+            iterations++;
+        }
+    }
+
     function createMarketItem(
         address nftContractAddress,
         uint256 tokenId,
         uint256 price,
         uint256 listingDuration
     ) external nonReentrant returns (uint256) {
+        _cleanUpExpiredMarketItems(20); // Limita a 20 iteraciones
+
         require(price > 0, "Precio invalido");
         require(
             IERC721(nftContractAddress).ownerOf(tokenId) == msg.sender,
@@ -326,5 +351,16 @@ contract Marketplace is ReentrancyGuard, Ownable, IERC721Receiver {
     // Nueva función auxiliar para verificar la validez del MarketItem
     function _isMarketItemValid(MarketItem storage item) internal view returns (bool) {
         return item.price > 0 && !item.sold && !item.canceled && block.timestamp <= item.expirationTime;
+    }
+
+    function setCleanupIterationLimit(uint256 newLimit) external onlyOwner {
+        require(newLimit > 0 && newLimit <= 100, "Limite de iteraciones invalido");
+        uint256 oldLimit = cleanupIterationLimit;
+        cleanupIterationLimit = newLimit;
+        emit CleanupIterationLimitUpdated(oldLimit, newLimit);
+    }
+
+    function getCleanupIterationLimit() external view returns (uint256) {
+        return cleanupIterationLimit;
     }
 }
