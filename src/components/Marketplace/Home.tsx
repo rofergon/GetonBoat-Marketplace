@@ -3,19 +3,19 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 import { ArrowRight, Search } from "lucide-react";
 import { useFetchMarketItems } from '../../hooks/useFetchMarketItems';
 import CustomImage from '../ui/CustomImage';
 import { useCreateMarketSale } from '../../hooks/useCreateMarketSale';
 import { toast } from 'react-hot-toast';
-import { parseEther, formatEther } from 'viem';
+import { formatEther } from 'viem';
 
 export default function Home() {
   const { marketItems, isLoading, error: fetchError } = useFetchMarketItems(0);
   const [nftMetadata, setNftMetadata] = useState<{ [key: string]: any }>({});
-  const { handleCreateMarketSale, isBuying, isSuccess, error: buyError } = useCreateMarketSale();
+  const { handleCreateMarketSale, isBuying, isSuccess } = useCreateMarketSale();
   const [selectedNFT, setSelectedNFT] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 

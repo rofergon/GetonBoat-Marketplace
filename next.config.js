@@ -10,6 +10,7 @@ const nextConfig = {
         'res.cloudinary.com', 
         'ipfs.io', 
         'base.org',
+        'www.base.org', // Añadimos el nuevo dominio aquí
         'nft-cdn.alchemy.com',
         'ipfs.dweb.link',  // Gateway IPFS alternativo
         'gateway.pinata.cloud',  // Otro gateway IPFS alternativo
