@@ -5,9 +5,13 @@
 @import 'header.css';
 @import 'wallet.css';
 @import 'painter.css';
+@import 'card.css';
 
 @layer base {
   /* :root { } this is the root of the theme */
+  [data-state="active"] {
+    background-color: #ffffff;
+  }
 
   .dark {
     .bg-muted,
@@ -16,7 +20,8 @@
     }
 
     .bg-background,
-    .bg-muted .bg-card {
+    .bg-muted .bg-card,
+    [data-state="active"] {
       background-color: #111827;
     }
   }
