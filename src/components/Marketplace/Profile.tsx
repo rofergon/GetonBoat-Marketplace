@@ -312,13 +312,6 @@ const Profile: React.FC = () => {
                   height={300}
                   layout="responsive"
                 />
-                <input
-                  type="text"
-                  value={listingPrice}
-                  onChange={(e) => setListingPrice(e.target.value)}
-                  placeholder="Ingrese el precio de listado en wei"
-                  className="mt-2 w-full p-2 border rounded"
-                />
                 {!isApproved ? (
                   <Transaction
                     chainId={8453}
@@ -340,6 +333,13 @@ const Profile: React.FC = () => {
                     contracts={getListingContract(listingPrice, listingDuration)}
                     onStatus={handleListingStatus}
                   >
+                    <input
+                      type="number"
+                      value={listingPrice}
+                      onChange={(e) => setListingPrice(e.target.value)}
+                      placeholder="Ingrese el precio de listado en wei"
+                      className="mt-2 w-full p-2 border rounded"
+                    />
                     <TransactionButton
                       text="Listar NFT"
                       className="mt-2 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition-colors"
