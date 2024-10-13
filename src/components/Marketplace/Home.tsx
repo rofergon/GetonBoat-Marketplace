@@ -120,7 +120,7 @@ export default function Home() {
                         className="w-full" 
                         variant="secondary" 
                         onClick={() => handleBuy(item)}
-                        disabled={isBuying || !item.tokenId}
+                        disabled={isBuying}
                       >
                         {isBuying ? 'Comprando...' : `Comprar por ${formatEther(BigInt(item.price))} ETH`}
                       </Button>

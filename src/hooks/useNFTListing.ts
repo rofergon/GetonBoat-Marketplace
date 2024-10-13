@@ -132,9 +132,8 @@ export const useNFTListing = (nftAddress: Address, tokenId: string) => {
       return BigInt(value.toString()).toString();
     };
 
-    
-    const minimumPrice = '1000000000000000'; // 0.001 ETH en wei
-    const safePrice = BigInt(price) < BigInt(minimumPrice) ? minimumPrice : safeBigInt(price);
+    // Eliminar la comprobación del precio mínimo
+    const safePrice = safeBigInt(price);
 
     // Calcula la duración en segundos
     const listingDurationInSeconds = BigInt(durationInDays * 24 * 60 * 60).toString();
