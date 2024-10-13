@@ -17,9 +17,10 @@ const PixelArt = dynamic<PixelArtProps>(() => import('../pixelminter/PixelArt'),
   loading: () => <div>Loading PixelArt...</div>
 });
 
-interface ConnectWalletButtonProps {
+type ConnectWalletButtonProps = {
   updateBrushData: (data: BrushData | null) => void;
-}
+  setCurrentPage: (page: string) => void;
+};
 
 const ConnectWalletButton = dynamic<ConnectWalletButtonProps>(() => import('../pixelminter/ConnectWalletButton'), {
   ssr: false,
