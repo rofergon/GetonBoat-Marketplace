@@ -22,6 +22,7 @@ import { getContract, ContractFunctionExecutionError } from 'viem';
 import { BrushData } from '../../types/types';
 import { useBrushData } from '../../hooks/useBrushData';
 import { Moon, Sun, CircleUserIcon } from "lucide-react";
+import Link from 'next/link';
 
 const DefaultAvatar = () => (
   <div className="h-6 w-6 bg-gray-300 rounded-full flex items-center justify-center">
@@ -33,7 +34,7 @@ const LoadingAvatar = () => (
   <div className="h-6 w-6 bg-gray-200 rounded-full animate-pulse"></div>
 );
 
-const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) => void }> = ({ updateBrushData }) => {
+const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) => void, setCurrentPage: (page: string) => void }> = ({ updateBrushData, setCurrentPage }) => {
   const { userTokenIds, brushData, isLoading, balance } = useBrushData();
   const [theme, setTheme] = useState("dark");
 
@@ -70,9 +71,9 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
           <Name className="text-[var(--text-ock-inverse)]" />
         </ConnectWallet>
 
-        <WalletDropdown className="rounded-xl shadow">
+        <WalletDropdown className="rounded-xl shadow hover:bg-background">
           <Identity
-            className="px-4 pt-3 pb-2 hover:bg-[var(--bg-ock-default-hover)]"
+            className="px-4 pt-3 pb-2"
             hasCopyAddressOnClick
             schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
           >
@@ -104,11 +105,12 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
 
           <WalletDropdownBasename />
 
-          {/* Custom Theme Toggle */}
-          <div
-            className="px-4 py-2 flex items-center custom-btn-wallet cursor-pointer hover:bg-[var(--bg-ock-default-hover)]"
-            onClick={toggleTheme}
-          >
+          <div className="px-4 py-2 flex items-center cursor-pointer hover:bg-[var(--bg-ock-default-hover)]" onClick={() => setCurrentPage("profile")}>
+            <CircleUserIcon className="h-5 w-5 mr-1" />
+            Cuenta
+          </div>
+
+          <div className="px-4 py-2 flex items-center cursor-pointer hover:bg-[var(--bg-ock-default-hover)]" onClick={toggleTheme}>
             {theme === "light" ? (
               <Moon className="h-5 w-5 mr-1" />
             ) : (

@@ -87,18 +87,11 @@ export default function NFTMarketplace() {
             <Link
               className="text-sm font-medium hover:underline underline-offset-4"
               href="#"
-              onClick={() => setCurrentPage("profile")}
-            >
-              Perfil
-            </Link>
-            <Link
-              className="text-sm font-medium hover:underline underline-offset-4"
-              href="#"
               onClick={() => setCurrentPage("painter")}
             >
               Painter
             </Link>
-            <ConnectWalletButton updateBrushData={updateBrushData} />
+            <ConnectWalletButton updateBrushData={updateBrushData} setCurrentPage={setCurrentPage} />
           </nav>
         </div>
       </header>
