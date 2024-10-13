@@ -15,6 +15,7 @@ import { useFetchMarketItems } from '../../hooks/useFetchMarketItems';
 import { useNFTs } from '../../hooks/useNFTs'; // Asumiendo que tienes un hook para obtener los NFTs del usuario
 import { ethers } from 'ethers';
 import { useCancelNFTListing } from '../../hooks/useCancelNFTListing';
+import { parseEther } from 'ethers/lib/utils';
 
 interface NFT {
   id?: string;
@@ -51,6 +52,7 @@ const Profile: React.FC = () => {
 
   const [listingNFT, setListingNFT] = useState<NFT | null>(null);
   const [listingPrice, setListingPrice] = useState<string>('');
+  const [listingPriceWei, setListingPriceWei] = useState<string>('');
   const [listingDuration] = useState<number>(7);
 
   const {
@@ -62,7 +64,6 @@ const Profile: React.FC = () => {
     getApprovalContract,
     getListingContract,
     getCancelListingContract,
-    handleCancelListing,
   } = useNFTListing(listingNFT?.contractAddress as `0x${string}`, listingNFT?.tokenId || '');
 
   console.log('useNFTListing hook ejecutado:', {
@@ -196,6 +197,18 @@ const Profile: React.FC = () => {
     setIsDialogOpen(true);
   };
 
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const ethValue = e.target.value;
+    setListingPrice(ethValue);
+    try {
+      const weiValue = parseEther(ethValue);
+      setListingPriceWei(weiValue.toString());
+    } catch (error) {
+      console.error('Error al convertir ETH a Wei:', error);
+      setListingPriceWei('');
+    }
+  };
+
   return (
     <div className="w-full min-h-screen bg-background">
       <div className="relative w-full h-48">
@@ -314,8 +327,8 @@ const Profile: React.FC = () => {
                 <input
                   type="text"
                   value={listingPrice}
-                  onChange={(e) => setListingPrice(e.target.value)}
-                  placeholder="Ingrese el precio de listado en wei"
+                  onChange={handlePriceChange}
+                  placeholder="Ingrese el precio de listado en ETH"
                   className="mt-2 w-full p-2 border rounded"
                 />
                 {!isApproved ? (
@@ -336,7 +349,7 @@ const Profile: React.FC = () => {
                 ) : !isListed ? (
                   <Transaction
                     chainId={8453}
-                    contracts={getListingContract(listingPrice, listingDuration)}
+                    contracts={getListingContract(listingPriceWei, listingDuration)}
                     onStatus={handleListingStatus}
                   >
                     <TransactionButton
