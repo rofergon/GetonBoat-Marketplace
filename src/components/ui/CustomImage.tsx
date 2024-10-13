@@ -7,20 +7,20 @@ interface CustomImageProps {
   layout: "fill" | "fixed" | "intrinsic" | "responsive";
   objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
   onError?: () => void;
-  className?: string; // Añadimos className a la interfaz
+  className?: string;
 }
 
 const CustomImage: React.FC<CustomImageProps> = ({ src, alt, layout, objectFit, onError, className }) => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
-  const [isAnimated, setIsAnimated] = useState(false);
+  const [isGif, setIsGif] = useState(false);
 
   useEffect(() => {
     if (src) {
       setImageSrc(src);
-      setIsAnimated(src.toLowerCase().endsWith('.gif') || src.toLowerCase().includes('animated'));
+      setIsGif(src.toLowerCase().endsWith('.gif'));
     } else {
       setImageSrc(null);
-      setIsAnimated(false);
+      setIsGif(false);
     }
   }, [src]);
 
@@ -39,10 +39,10 @@ const CustomImage: React.FC<CustomImageProps> = ({ src, alt, layout, objectFit, 
     },
     width: layout === 'fill' ? undefined : 100,
     height: layout === 'fill' ? undefined : 100,
-    className, // Añadimos className a las props de Image
+    className,
   };
 
-  if (isAnimated) {
+  if (isGif) {
     return <Image {...imageProps} unoptimized />;
   }
 
