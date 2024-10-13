@@ -96,13 +96,13 @@ const Profile: React.FC = () => {
     try {
       const response = await fetch(`/api/collected-nfts?userAddress=${address}`);
       const data = await response.json();
-      
+
       const nftsWithListingInfo = data.nfts.map((nft: NFT) => {
-        const listedItem = marketItems.find(item => 
+        const listedItem = marketItems.find(item =>
           item.nftContractAddress.toLowerCase() === (nft.contractAddress?.toLowerCase() ?? '') &&
           item.tokenId.toString() === nft.tokenId
         );
-        
+
         return {
           ...nft,
           isListed: !!listedItem,
@@ -110,9 +110,9 @@ const Profile: React.FC = () => {
           marketItemId: listedItem ? listedItem.marketItemId : undefined
         };
       });
-      
+
       setCollectedNFTs(nftsWithListingInfo);
-      
+
       const listedIds = new Set(nftsWithListingInfo
         .filter((nft: NFT) => nft.isListed)
         .map((nft: NFT) => nft.id?.toString() || '')
@@ -214,9 +214,9 @@ const Profile: React.FC = () => {
           />
           <div className="mt-4 sm:mt-0 sm:ml-4 mb-2">
             <h2 className="text-2xl font-bold">Unnamed</h2>
-            <Address 
-              address={address || '0x0'} 
-              className="text-sm text-muted-foreground" 
+            <Address
+              address={address || '0x0'}
+              className="text-sm text-muted-foreground"
             />
             <div className="mt-1">
               <span className="text-sm">Joined April 2022</span>
@@ -232,7 +232,7 @@ const Profile: React.FC = () => {
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="more">More</TabsTrigger>
           </TabsList>
-          
+
           <div className="flex flex-col lg:flex-row mt-6">
             <div className="w-full lg:w-56 xl:w-64 mb-6 lg:mb-0 lg:pr-4">
               <h3 className="font-semibold mb-2">Collections</h3>
@@ -248,12 +248,12 @@ const Profile: React.FC = () => {
                 ))}
               </div>
             </div>
-            
+
             <div className="flex-1">
               <TabsContent value="collected">
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
                   {collectedNFTs.map((nft, i) => (
-                    <Card key={nft.id || i} className="overflow-hidden">
+                    <Card key={nft.id || i} className="overflow-hidden" onClick={() => handleViewDetails(nft)}>
                       <div className="aspect-square relative">
                         <CustomImage
                           alt={`NFT ${nft.name || i}`}
@@ -262,21 +262,22 @@ const Profile: React.FC = () => {
                           objectFit="cover"
                         />
                       </div>
-                      <CardContent className="p-2">
+                      <CardContent className="p-2 cursor-pointer">
                         <h4 className="text-sm font-medium truncate">{nft.name || `NFT #${nft.tokenId || i}`}</h4>
-                        <div className="flex justify-between mt-2">
-                          <Button variant="outline" size="sm" onClick={() => handleViewDetails(nft)}>Detalles</Button>
+                        <div className="flex justify-end mt-2">
                           {nft.isListed ? (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              onClick={() => handleCancelListingClick(nft)}
+                            <Button variant="outline" size="sm"
+                              onClick={(e) => { e.stopPropagation(); handleCancelListingClick(nft); }}
                               disabled={isCancelling}
                             >
                               {isCancelling ? 'Cancelando...' : 'Cancelar listado'}
                             </Button>
                           ) : (
-                            <Button variant="outline" size="sm" onClick={() => handleListNFT(nft)}>Listar</Button>
+                            <Button variant="outline" size="sm" className="w-full"
+                              onClick={(e) => { e.stopPropagation(); handleListNFT(nft); }}
+                            >
+                              Listar
+                            </Button>
                           )}
                         </div>
                         {nft.isListed && (
