@@ -5,11 +5,14 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { Upload, Plus, Image as ImageIcon } from "lucide-react";
+import { useMintNFT } from "../../hooks/useMintNFT";
+import { toast } from "react-hot-toast";
 
 export default function Create() {
-  const [collectionName, setCollectionName] = useState("");
+  const [nftName, setNftName] = useState("");
   const [description, setDescription] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const { mintNFT, isMinting, isUploading, error } = useMintNFT();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -17,32 +20,42 @@ export default function Create() {
     }
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Aquí iría la lógica para crear la colección y subir la imagen
-    console.log("Creando colección:", { collectionName, description, selectedFile });
-    // Resetear el formulario
-    setCollectionName("");
-    setDescription("");
-    setSelectedFile(null);
+    
+    if (!selectedFile) {
+      toast.error("Por favor, selecciona una imagen");
+      return;
+    }
+
+    try {
+      await mintNFT(nftName, description, selectedFile);
+      
+      // Resetear el formulario
+      setNftName("");
+      setDescription("");
+      setSelectedFile(null);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Crear Nueva Colección</h1>
+      <h1 className="text-3xl font-bold mb-8">Crear Nuevo NFT</h1>
       <Card className="max-w-2xl mx-auto">
         <form onSubmit={handleSubmit}>
           <CardHeader>
-            <CardTitle>Detalles de la Colección</CardTitle>
+            <CardTitle>Detalles del NFT</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="collectionName">Nombre de la Colección</Label>
+              <Label htmlFor="nftName">Nombre</Label>
               <Input
-                id="collectionName"
-                placeholder="Ingrese el nombre de su colección"
-                value={collectionName}
-                onChange={(e) => setCollectionName(e.target.value)}
+                id="nftName"
+                placeholder="Ingrese el nombre de su NFT"
+                value={nftName}
+                onChange={(e) => setNftName(e.target.value)}
                 required
               />
             </div>
@@ -50,14 +63,14 @@ export default function Create() {
               <Label htmlFor="description">Descripción</Label>
               <Textarea
                 id="description"
-                placeholder="Describa su colección"
+                placeholder="Describa su NFT"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="image">Imagen de Portada</Label>
+              <Label htmlFor="image">Imagen</Label>
               <div className="flex items-center space-x-2">
                 <Input
                   id="image"
@@ -90,36 +103,18 @@ export default function Create() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">
-              <Plus className="mr-2 h-4 w-4" /> Crear Colección
+            <Button type="submit" className="w-full" disabled={isMinting || isUploading}>
+              {isMinting || isUploading ? (
+                "Procesando..."
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" /> Crear y Mintear NFT
+                </>
+              )}
             </Button>
           </CardFooter>
         </form>
       </Card>
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-4">Mis Colecciones</h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Aquí irían las tarjetas de las colecciones creadas */}
-          <Card>
-            <CardHeader>
-              <img
-                alt="Colección de ejemplo"
-                className="aspect-square object-cover rounded-lg"
-                height="200"
-                src="/placeholder.svg?height=200&width=200&text=Colección"
-                width="200"
-              />
-            </CardHeader>
-            <CardContent>
-              <CardTitle>Colección de Ejemplo</CardTitle>
-              <p className="text-sm text-muted-foreground">Creada el 01/01/2024</p>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" className="w-full">Ver Detalles</Button>
-            </CardFooter>
-          </Card>
-        </div>
-      </div>
     </div>
   );
 }
