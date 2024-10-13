@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 
 import { ArrowRight, Search } from "lucide-react";
 import { useFetchMarketItems } from '../../hooks/useFetchMarketItems';
-import CustomImage from '../pixelminter/CustomImage';
+import CustomImage from '../ui/CustomImage';
 import { useCreateMarketSale } from '../../hooks/useCreateMarketSale';
 import { toast } from 'react-hot-toast';
 import { parseEther, formatEther } from 'viem';
@@ -107,10 +107,10 @@ export default function Home() {
               {sortedMarketItems.slice(0, 8).map((item) => {
                 const metadata = nftMetadata[item.marketItemId.toString()];
                 return (
-                  <Card key={item.marketItemId.toString()}>
-                    <CardHeader>
+                  <Card key={item.marketItemId.toString()} className="overflow-hidden">
+                    <CardHeader className="p-0">
                       <div 
-                        className="aspect-square relative cursor-pointer" 
+                        className="aspect-square relative cursor-pointer w-full h-0 pb-[100%]" 
                         onClick={() => handleOpenDialog(item)}
                       >
                         <CustomImage
@@ -118,6 +118,7 @@ export default function Home() {
                           src={metadata?.imageurl || "/placeholder.png"}
                           layout="fill"
                           objectFit="cover"
+                          className="absolute top-0 left-0 w-full h-full"
                         />
                       </div>
                     </CardHeader>

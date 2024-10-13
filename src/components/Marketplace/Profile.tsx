@@ -5,7 +5,7 @@ import { Card, CardContent } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useAccount } from 'wagmi';
 import { Address, Avatar } from '@coinbase/onchainkit/identity';
-import CustomImage from '../pixelminter/CustomImage';
+import CustomImage from '../ui/CustomImage';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Transaction, TransactionButton, TransactionStatus, TransactionStatusLabel, TransactionStatusAction, LifeCycleStatus } from '@coinbase/onchainkit/transaction';
