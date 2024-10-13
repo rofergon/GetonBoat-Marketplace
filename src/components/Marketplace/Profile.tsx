@@ -7,7 +7,7 @@ import { useAccount } from 'wagmi';
 import { Address, Avatar } from '@coinbase/onchainkit/identity';
 import CustomImage from '../pixelminter/CustomImage';
 import Image from 'next/image';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 import { Transaction, TransactionButton, TransactionStatus, TransactionStatusLabel, TransactionStatusAction, LifeCycleStatus } from '@coinbase/onchainkit/transaction';
 
 import { useNFTListing } from '../../hooks/useNFTListing';
@@ -86,6 +86,9 @@ const Profile: React.FC = () => {
     isSuccess: isCancelSuccess,
     error: cancelError
   } = useCancelNFTListing();
+
+  const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
 
   const weiToEth = (weiAmount: string | null): string => {
     if (!weiAmount) return '0';
@@ -186,8 +189,8 @@ const Profile: React.FC = () => {
   }, [isCancelSuccess, fetchCollectedNFTs]);
 
   const handleViewDetails = (nft: NFT) => {
-    // Implementa la lógica para mostrar los detalles del NFT
-    console.log('Ver detalles de:', nft);
+    setSelectedNFT(nft);
+    setIsDetailsDialogOpen(true);
   };
 
   const handleListNFT = (nft: NFT) => {
@@ -266,8 +269,11 @@ const Profile: React.FC = () => {
               <TabsContent value="collected">
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
                   {collectedNFTs.map((nft, i) => (
-                    <Card key={nft.id || i} className="overflow-hidden" onClick={() => handleViewDetails(nft)}>
-                      <div className="aspect-square relative">
+                    <Card key={nft.id || i} className="overflow-hidden">
+                      <div 
+                        className="aspect-square relative cursor-pointer" 
+                        onClick={() => handleViewDetails(nft)}
+                      >
                         <CustomImage
                           alt={`NFT ${nft.name || i}`}
                           src={nft.image || "/placeholder.svg"}
@@ -275,7 +281,7 @@ const Profile: React.FC = () => {
                           objectFit="cover"
                         />
                       </div>
-                      <CardContent className="p-2 cursor-pointer">
+                      <CardContent className="p-2">
                         <h4 className="text-sm font-medium truncate">{nft.name || `NFT #${nft.tokenId || i}`}</h4>
                         <div className="flex justify-end mt-2">
                           {nft.isListed ? (
@@ -388,6 +394,46 @@ const Profile: React.FC = () => {
                   <p className="text-sm text-gray-600 mt-2">
                     Transacción de Listado: {listingTxHash}
                   </p>
+                )}
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Diálogo para mostrar detalles del NFT */}
+      <Dialog open={isDetailsDialogOpen} onOpenChange={setIsDetailsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedNFT?.name || 'Detalles del NFT'}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            {selectedNFT && (
+              <>
+                <div className="w-full h-auto">
+                  <CustomImage
+                    alt={`NFT ${selectedNFT.name || selectedNFT.tokenId}`}
+                    src={selectedNFT.image || "/placeholder.svg"}
+                    layout="responsive"
+                    width={300}
+                    height={300}
+                  />
+                </div>
+                <p className="mt-2">{selectedNFT.description}</p>
+                <p className="mt-2">ID del Token: {selectedNFT.tokenId}</p>
+                <p>Dirección del Contrato: {selectedNFT.contractAddress}</p>
+                {selectedNFT.isListed && (
+                  <p className="mt-2">Precio listado: {weiToEth(selectedNFT.listedPrice || null)} ETH</p>
+                )}
+                {selectedNFT.attributes && selectedNFT.attributes.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="font-semibold">Atributos:</h4>
+                    <ul className="list-disc list-inside">
+                      {selectedNFT.attributes.map((attr, index) => (
+                        <li key={index}>{attr.trait_type}: {attr.value}</li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </>
             )}
