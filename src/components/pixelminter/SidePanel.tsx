@@ -112,7 +112,8 @@ const SidePanel: React.FC<SidePanelProps> = ({
       id='side-panel'
       className="w-full max-w-xs flex-grow p-3 bg-muted space-y-3 h-full overflow-y-auto text-white "
     >
-      <div className="tool-container rounded-md shadow-sm overflow-hidden">
+      {brushData && (
+        <div className="tool-container rounded-md shadow-sm overflow-hidden">
         <button
           onClick={() => setIsBasepaintOpen(!isBasepaintOpen)}
           className="w-full p-2 flex justify-between items-center text-left"
@@ -193,6 +194,7 @@ const SidePanel: React.FC<SidePanelProps> = ({
           </div>
         )}
       </div>
+      )}
 
       <div className="tool-container rounded-md shadow-sm overflow-hidden">
         <button
