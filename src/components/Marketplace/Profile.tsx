@@ -410,13 +410,12 @@ const Profile: React.FC = () => {
           <div className="mt-4">
             {selectedNFT && (
               <>
-                <div className="w-full h-auto">
+                <div className="w-full h-auto aspect-square relative">
                   <CustomImage
                     alt={`NFT ${selectedNFT.name || selectedNFT.tokenId}`}
                     src={selectedNFT.image || "/placeholder.svg"}
-                    layout="responsive"
-                    width={300}
-                    height={300}
+                    layout="fill"
+                    objectFit="cover"
                   />
                 </div>
                 <p className="mt-2">{selectedNFT.description}</p>
