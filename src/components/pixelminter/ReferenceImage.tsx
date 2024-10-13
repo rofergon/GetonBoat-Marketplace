@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Draggable from 'react-draggable';
 import { ResizableBox } from 'react-resizable';
-import CustomImage from './CustomImage';
+import CustomImage from '../ui/CustomImage';
 
 interface ReferenceImageProps {
   url: string;

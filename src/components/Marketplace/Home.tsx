@@ -3,10 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "../ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Input } from "../ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 
 import { ArrowRight, Search } from "lucide-react";
 import { useFetchMarketItems } from '../../hooks/useFetchMarketItems';
-import CustomImage from '../pixelminter/CustomImage';
+import CustomImage from '../ui/CustomImage';
 import { useCreateMarketSale } from '../../hooks/useCreateMarketSale';
 import { toast } from 'react-hot-toast';
 import { parseEther, formatEther } from 'viem';
@@ -15,6 +16,8 @@ export default function Home() {
   const { marketItems, isLoading, error: fetchError } = useFetchMarketItems(0);
   const [nftMetadata, setNftMetadata] = useState<{ [key: string]: any }>({});
   const { handleCreateMarketSale, isBuying, isSuccess, error: buyError } = useCreateMarketSale();
+  const [selectedNFT, setSelectedNFT] = useState<any | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchMetadata = async () => {
@@ -62,6 +65,11 @@ export default function Home() {
 
   const sortedMarketItems = [...marketItems].sort((a, b) => Number(b.marketItemId) - Number(a.marketItemId));
 
+  const handleOpenDialog = (item: any) => {
+    setSelectedNFT({ ...item, metadata: nftMetadata[item.marketItemId.toString()] });
+    setIsDialogOpen(true);
+  };
+
   return (
     <>
       <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-black">
@@ -99,14 +107,18 @@ export default function Home() {
               {sortedMarketItems.slice(0, 8).map((item) => {
                 const metadata = nftMetadata[item.marketItemId.toString()];
                 return (
-                  <Card key={item.marketItemId.toString()}>
-                    <CardHeader>
-                      <div className="aspect-square relative">
+                  <Card key={item.marketItemId.toString()} className="overflow-hidden">
+                    <CardHeader className="p-0">
+                      <div 
+                        className="aspect-square relative cursor-pointer w-full h-0 pb-[100%]" 
+                        onClick={() => handleOpenDialog(item)}
+                      >
                         <CustomImage
                           alt={`NFT ${item.tokenId.toString()}`}
                           src={metadata?.imageurl || "/placeholder.png"}
                           layout="fill"
                           objectFit="cover"
+                          className="absolute top-0 left-0 w-full h-full"
                         />
                       </div>
                     </CardHeader>
@@ -115,7 +127,6 @@ export default function Home() {
                       <p className="text-sm text-muted-foreground">Precio: {formatEther(BigInt(item.price))} ETH</p>
                     </CardContent>
                     <CardFooter className="flex flex-col space-y-2">
-                      <Button className="w-full">Ver detalles</Button>
                       <Button 
                         className="w-full" 
                         variant="secondary" 
@@ -137,6 +148,26 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedNFT?.metadata?.name || `NFT #${selectedNFT?.tokenId.toString()}`}</DialogTitle>
+          </DialogHeader>
+          <div className="mt-4">
+            <div className="w-full h-auto">
+              <CustomImage
+                alt={`NFT ${selectedNFT?.tokenId.toString()}`}
+                src={selectedNFT?.metadata?.imageurl || "/placeholder.png"}
+                layout="responsive"
+              />
+            </div>
+            <p className="mt-2">{selectedNFT?.metadata?.description}</p>
+            <p className="mt-2">Precio: {formatEther(BigInt(selectedNFT?.price || 0))} ETH</p>
+            <p>ID del Token: {selectedNFT?.tokenId.toString()}</p>
+            <p>Dirección del Contrato: {selectedNFT?.nftContractAddress}</p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
