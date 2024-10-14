@@ -12,6 +12,7 @@ import { saveStateToCache } from '../../utils/cacheState';
 import useShiftFrame from '../../hooks/useShiftFrame';
 import AnimationControls from './AnimationControls';
 import MintPixelminterButton from './MintPixelminterButton';
+import ConnectWalletButton from './ConnectWalletButton';
 
 const PixelArt: React.FC = () => {
   const {
@@ -194,6 +195,7 @@ const PixelArt: React.FC = () => {
   }, [handleInteraction, state.tool]);
 
   const updateBrushData = useCallback((data: BrushData | null) => {
+    console.log('PixelArt - updateBrushData llamado con:', data);
     updateState({ brushData: data });
   }, [updateState]);
 
@@ -278,6 +280,7 @@ const PixelArt: React.FC = () => {
         onionSkinningCanvas={onionSkinningCanvasRef}
         day={state.day ?? 1} // Usa 1 como valor por defecto si state.day es null
       />
+      <ConnectWalletButton updateBrushData={updateBrushData} />
     </div>
   );
 };
