@@ -36,26 +36,16 @@ const LoadingAvatar = () => (
 const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) => void }> = ({ updateBrushData }) => {
   const { userTokenIds, brushData, isLoading, balance } = useBrushData();
   const [theme, setTheme] = useState("dark");
-  const [localBrushData, setLocalBrushData] = useState<BrushData | null>(null);
 
   useEffect(() => {
-    console.log('ConnectWalletButton - Efecto iniciado');
     const savedTheme = localStorage.getItem("theme") || "dark";
     setTheme(savedTheme);
     document.documentElement.classList.toggle("dark", savedTheme === "dark");
 
-    console.log('Datos del pincel recibidos:', brushData);
     if (brushData) {
-      console.log('Actualizando datos del pincel');
-      setLocalBrushData(brushData);
       updateBrushData(brushData);
     }
-    console.log('ConnectWalletButton - Efecto completado');
   }, [brushData, updateBrushData]);
-
-  useEffect(() => {
-    console.log('Estado local de brushData actualizado:', localBrushData);
-  }, [localBrushData]);
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";

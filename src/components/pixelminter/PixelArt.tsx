@@ -195,7 +195,6 @@ const PixelArt: React.FC = () => {
   }, [handleInteraction, state.tool]);
 
   const updateBrushData = useCallback((data: BrushData | null) => {
-    console.log('PixelArt - updateBrushData llamado con:', data);
     updateState({ brushData: data });
   }, [updateState]);
 
