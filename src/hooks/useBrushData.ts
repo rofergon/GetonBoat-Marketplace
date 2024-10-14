@@ -47,7 +47,7 @@ export const useBrushData = () => {
       client: publicClient,
     });
 
-    const batchSize = 500;
+    const batchSize = 350;
     for (let i = 1; i <= totalSupply && userTokenIds.length < balance; i += batchSize) {
       const batch = Array.from({ length: Math.min(batchSize, totalSupply - i + 1) }, (_, index) => i + index);
       
