@@ -32,79 +32,72 @@ export const useBrushData = () => {
   });
 
   const fetchUserTokenIds = useCallback(async () => {
-    if (data && data[0].result && data[1].result && publicClient) {
-      const balance = Number(data[0].result);
-      const totalSupply = Number(data[1].result);
-      const tokenIds: number[] = [];
+    if (!data || !data[0].result || !data[1].result || !publicClient || !address) return;
 
-      const contract = getContract({
-        address: contractAddress,
-        abi: BasePaintBrushAbi,
-        client: publicClient,
-      });
+    const balance = Number(data[0].result);
+    if (balance === 0) return;
 
-      const batchSize = 500;
-      for (let i = 1; i <= totalSupply && tokenIds.length < balance; i += batchSize) {
-        const batch = Array.from({ length: Math.min(batchSize, totalSupply - i + 1) }, (_, index) => i + index);
-        
-        const ownerPromises = batch.map(tokenId => 
+    const totalSupply = Number(data[1].result);
+    const contract = getContract({
+      address: contractAddress,
+      abi: BasePaintBrushAbi,
+      client: publicClient,
+    });
+
+    const batchSize = 500;
+    for (let i = 1; i <= totalSupply && userTokenIds.length < balance; i += batchSize) {
+      const batch = Array.from({ length: Math.min(batchSize, totalSupply - i + 1) }, (_, index) => i + index);
+      
+      const owners = await Promise.all(
+        batch.map(tokenId => 
           contract.read.ownerOf([BigInt(tokenId)])
-            .catch(() => {
-              return null;
-            })
-        );
+            .catch(() => null)
+        )
+      );
 
-        const owners = await Promise.all(ownerPromises);
+      const newTokenIds = batch.filter((_, index) => 
+        owners[index]?.toLowerCase() === address.toLowerCase()
+      );
 
-        owners.forEach((owner, index) => {
-          if (owner) {
-            const tokenId = batch[index];
-            if (owner.toLowerCase() === address?.toLowerCase()) {
-              tokenIds.push(tokenId);
-            }
-          }
-        });
+      if (newTokenIds.length > 0) {
+        setUserTokenIds(prev => [...prev, ...newTokenIds]);
+        return; // Salimos de la función una vez que encontramos al menos un token
       }
-
-      setUserTokenIds(tokenIds);
     }
-  }, [data, address, publicClient]);
+  }, [data, address, publicClient, userTokenIds.length]);
 
   const fetchBrushData = useCallback(async () => {
-    if (userTokenIds.length > 0) {
-      try {
-        const response = await fetch(`/api/brush/${userTokenIds[0]}`);
-        if (!response.ok) throw new Error('Error al obtener datos del pincel');
-        const data = await response.json();
-        
-        const pixelsPerDay = data.attributes.find((attr: { trait_type: string; value: any }) => 
-          attr.trait_type === 'Pixels per day'
-        )?.value;
+    if (userTokenIds.length === 0) return;
 
-        const newBrushData = {
-          tokenId: data.tokenId,
-          pixelsPerDay: pixelsPerDay ? Number(pixelsPerDay) : 0
-        };
+    try {
+      const response = await fetch(`/api/brush/${userTokenIds[0]}`);
+      if (!response.ok) throw new Error('Error al obtener datos del pincel');
+      const data = await response.json();
+      
+      const pixelsPerDay = data.attributes.find((attr: { trait_type: string; value: any }) => 
+        attr.trait_type === 'Pixels per day'
+      )?.value;
 
-        setBrushData(newBrushData);
-        return newBrushData;
-      } catch (error) {
-        console.error('Error fetching brush data:', error);
-        return null;
-      }
+      setBrushData({
+        tokenId: data.tokenId,
+        pixelsPerDay: pixelsPerDay ? Number(pixelsPerDay) : 0
+      });
+    } catch (error) {
+      console.error('Error fetching brush data:', error);
     }
-    return null;
   }, [userTokenIds]);
 
   useEffect(() => {
-    if (address) {
+    if (address && !userTokenIds.length) {
       fetchUserTokenIds();
     }
-  }, [address, fetchUserTokenIds]);
+  }, [address, fetchUserTokenIds, userTokenIds.length]);
 
   useEffect(() => {
-    fetchBrushData();
-  }, [fetchBrushData]);
+    if (userTokenIds.length > 0 && !brushData) {
+      fetchBrushData();
+    }
+  }, [userTokenIds, brushData, fetchBrushData]);
 
   return {
     userTokenIds,

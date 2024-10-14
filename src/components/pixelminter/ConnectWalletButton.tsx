@@ -95,9 +95,9 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
                 Token IDs: {userTokenIds.join(', ')}
               </div>
             )}
-            {localBrushData && (
+            {brushData && (
               <div className="text-[var(--text-ock-foreground-muted)]">
-                Token ID: {localBrushData.tokenId}, Pixels per day: {localBrushData.pixelsPerDay}
+                Token ID: {brushData.tokenId}, Pixels per day: {brushData.pixelsPerDay}
               </div>
             )}
           </Identity>
