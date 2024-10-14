@@ -9,7 +9,10 @@ const contractAddress = '0xD68fe5b53e7E1AbeB5A4d0A6660667791f39263a';
 export const useBrushData = () => {
   const { address } = useAccount();
   const [userTokenIds, setUserTokenIds] = useState<number[]>([]);
-  const [brushData, setBrushData] = useState<BrushData | null>(null);
+  const [brushData, setBrushData] = useState<BrushData | null>(() => {
+    const storedData = localStorage.getItem('brushData');
+    return storedData ? JSON.parse(storedData) : null;
+  });
   const publicClient = usePublicClient();
 
   const { data, isLoading } = useReadContracts({
@@ -67,7 +70,7 @@ export const useBrushData = () => {
   }, [data, address, publicClient, userTokenIds.length]);
 
   const fetchBrushData = useCallback(async () => {
-    if (userTokenIds.length === 0) return;
+    if (userTokenIds.length === 0 || brushData) return;
 
     try {
       const response = await fetch(`/api/brush/${userTokenIds[0]}`);
@@ -78,20 +81,23 @@ export const useBrushData = () => {
         attr.trait_type === 'Pixels per day'
       )?.value;
 
-      setBrushData({
+      const newBrushData = {
         tokenId: data.tokenId,
         pixelsPerDay: pixelsPerDay ? Number(pixelsPerDay) : 0
-      });
+      };
+
+      setBrushData(newBrushData);
+      localStorage.setItem('brushData', JSON.stringify(newBrushData));
     } catch (error) {
       console.error('Error fetching brush data:', error);
     }
-  }, [userTokenIds]);
+  }, [userTokenIds, brushData]);
 
   useEffect(() => {
-    if (address && !userTokenIds.length) {
+    if (address && !userTokenIds.length && !brushData) {
       fetchUserTokenIds();
     }
-  }, [address, fetchUserTokenIds, userTokenIds.length]);
+  }, [address, fetchUserTokenIds, userTokenIds.length, brushData]);
 
   useEffect(() => {
     if (userTokenIds.length > 0 && !brushData) {

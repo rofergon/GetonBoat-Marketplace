@@ -11,6 +11,7 @@ import usePixelArtStateManager from '../../hooks/usePixelArtStateManager';
 import { saveStateToCache } from '../../utils/cacheState';
 import useShiftFrame from '../../hooks/useShiftFrame';
 import ConnectWalletButton from './ConnectWalletButton';
+import { useBrushData } from '../../hooks/useBrushData';
 
 const PixelArt: React.FC = () => {
   const {
@@ -194,8 +195,21 @@ const PixelArt: React.FC = () => {
 
   const updateBrushData = useCallback((data: BrushData | null) => {
     updateState({ brushData: data });
+    // Si quieres guardar los datos actualizados en localStorage, puedes hacerlo aquí
+    if (data) {
+      localStorage.setItem('brushData', JSON.stringify(data));
+    } else {
+      localStorage.removeItem('brushData');
+    }
   }, [updateState]);
 
+  const { brushData } = useBrushData();
+
+  useEffect(() => {
+    if (brushData) {
+      updateBrushData(brushData);
+    }
+  }, [brushData, updateBrushData]);
 
   useEffect(() => {
     updateDay();
@@ -229,7 +243,7 @@ const PixelArt: React.FC = () => {
         syncPixelGridWithCurrentFrame={syncPixelGridWithCurrentFrame}
         updateLayerName={updateLayerName}
         updateBrushData={updateBrushData}
-        brushData={state.brushData}
+        brushData={state.brushData || brushData}
         updateDay={updateDay}
         toggleOnionSkinning={toggleOnionSkinning}
         updateOnionSkinningOpacity={updateOnionSkinningOpacity}
