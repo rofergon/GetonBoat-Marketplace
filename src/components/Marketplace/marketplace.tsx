@@ -10,6 +10,7 @@ import Collections from './Collections'
 
 interface PixelArtProps {
   updateBrushData: (data: BrushData | null) => void;
+  setCurrentPage: (page: string) => void;
 }
 
 const PixelArt = dynamic<PixelArtProps>(() => import('../pixelminter/PixelArt'), {
@@ -99,7 +100,7 @@ export default function NFTMarketplace() {
       <main className={`flex-1 ${currentPage}`}>
         {currentPage === "home" && <Home />}
         {currentPage === "profile" && <Profile />}
-        {currentPage === "painter" && <PainterPage updateBrushData={updateBrushData} />}
+        {currentPage === "painter" && <PainterPage updateBrushData={updateBrushData} setCurrentPage={setCurrentPage}/>}
         {currentPage === "create" && <Create />}
         {currentPage === "collections" && <Collections />}
       </main>
@@ -120,10 +121,10 @@ export default function NFTMarketplace() {
   )
 }
 
-function PainterPage({ updateBrushData }: { updateBrushData: (data: BrushData | null) => void }) {
+function PainterPage({ updateBrushData, setCurrentPage }: { updateBrushData: (data: BrushData | null) => void, setCurrentPage: (page: string) => void }) {
   return (
     <div>
-      <PixelArt updateBrushData={updateBrushData} />
+      <PixelArt updateBrushData={updateBrushData} setCurrentPage={setCurrentPage} />
     </div>
   )
 }

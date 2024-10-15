@@ -13,14 +13,15 @@ import useShiftFrame from '../../hooks/useShiftFrame';
 import ConnectWalletButton from './ConnectWalletButton';
 import { useBrushData } from '../../hooks/useBrushData';
 
-const PixelArt: React.FC = () => {
+const PixelArt: React.FC<{ setCurrentPage: (page: string) => void }> = ({ setCurrentPage }) => {
+
   const {
-    state, 
-    updateState, 
+    state,
+    updateState,
     saveState,
-    updatePixel, 
-    undo, 
-    redo, 
+    updatePixel,
+    undo,
+    redo,
     clearCanvas: clearCanvasFromHook,
     canUndo,
     canRedo,
@@ -73,7 +74,7 @@ const PixelArt: React.FC = () => {
         const { frames, currentFrameIndex, gridSize, canvasSize } = stateRef.current;
         const currentFrame = frames[currentFrameIndex] || { layers: [] };
         const cellSize = canvasSize / gridSize;
-        
+
         ctx.clearRect(0, 0, canvasSize, canvasSize);
         currentFrame.layers.forEach(layer => {
           if (layer.visible) {
@@ -125,15 +126,15 @@ const PixelArt: React.FC = () => {
       updateCanvasDisplay();
     }
   }, [undo, redo, canUndo, canRedo, setFeedbackWrapper, updateCanvasDisplay]);
-  
+
   const handleGridSizeChange = useCallback((newSize: number) => {
     updateState({ gridSize: newSize });
     drawGrid();
     updateCanvasDisplay();
   }, [updateState, drawGrid, updateCanvasDisplay]);
 
-  const handleExtractPaletteCallback = useCallback(() => 
-    handleExtractPalette(updateState, handleGridSizeChange), 
+  const handleExtractPaletteCallback = useCallback(() =>
+    handleExtractPalette(updateState, handleGridSizeChange),
     [updateState, handleGridSizeChange]
   );
 
@@ -177,13 +178,13 @@ const PixelArt: React.FC = () => {
     if (canvas) {
       const events = ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'touchstart', 'touchmove', 'touchend'];
       const options: AddEventListenerOptions = { passive: state.tool === 'move' };
-      
+
       events.forEach(event => {
         canvas.addEventListener(event, handleInteraction as unknown as EventListener, options);
       });
-      
+
       canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-      
+
       return () => {
         events.forEach(event => {
           canvas.removeEventListener(event, handleInteraction as unknown as EventListener);
@@ -250,7 +251,7 @@ const PixelArt: React.FC = () => {
         onionSkinningCanvas={onionSkinningCanvasRef}
         day={state.day ?? 1} // Usa 1 como valor por defecto si state.day es null
       />
-      <ConnectWalletButton updateBrushData={updateBrushData} />
+      <ConnectWalletButton updateBrushData={updateBrushData} setCurrentPage={setCurrentPage} />
     </div>
   );
 };
