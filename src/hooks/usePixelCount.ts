@@ -17,7 +17,9 @@ export const usePixelCountAndDroplets = (state: State, initialDroplets: number) 
     });
 
     setPixelCount(totalPixelCount);
-    setDroplets(Math.max(0, initialDroplets - totalPixelCount));
+    
+    const newDroplets = Math.max(0, initialDroplets - totalPixelCount);
+    setDroplets(newDroplets);
   }, [state.frames, initialDroplets]);
 
   return { pixelCount, droplets };

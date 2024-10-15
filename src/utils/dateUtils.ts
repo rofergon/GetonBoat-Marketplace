@@ -9,7 +9,11 @@ dayjs.extend(utc);
 
 const client = createPublicClient({
   chain: base,
-  transport: http(),
+  transport: http('https://mainnet.base.org', {
+    retryCount: 3,
+    retryDelay: 1000,
+    timeout: 30000,
+  }),
 });
 
 const CONTRACT_ADDRESS = '0xBa5e05cb26b78eDa3A2f8e3b3814726305dcAc83';
@@ -48,11 +52,9 @@ export function getCurrentDayUTC(): string {
  * Obtiene la cantidad total de píxeles pintados para el día actual.
  * @returns {Promise<bigint>} - Promesa que resuelve a la cantidad total de píxeles pintados.
  */
-export const getTotalPixelsPaintedToday = async (retries = 3, backoff = 1000): Promise<bigint> => {
+export const getTotalPixelsPaintedToday = async (): Promise<bigint> => {
   try {
     const today = await calculateDay();
-    
-    
     const canvas = await client.readContract({
       address: CONTRACT_ADDRESS,
       abi: BasePaintAbi,
@@ -60,26 +62,10 @@ export const getTotalPixelsPaintedToday = async (retries = 3, backoff = 1000): P
       args: [BigInt(today)],
     });
     
-    
-    
-    // Verificamos que canvas sea un array y tenga al menos un elemento
-    if (Array.isArray(canvas) && canvas.length > 0) {
-      const totalContributions = canvas[0];
-      
-      return totalContributions;
-    } else {
-      console.error('Formato de respuesta del canvas inesperado:', canvas);
-      return BigInt(0);
-    }
+    return Array.isArray(canvas) && canvas.length > 0 ? canvas[0] : BigInt(0);
   } catch (error) {
     console.error('Error al obtener los píxeles pintados:', error);
-    if (retries > 0) {
-      await delay(backoff);
-      return getTotalPixelsPaintedToday(retries - 1, backoff * 2);
-    } else {
-      console.error('Se agotaron los reintentos para obtener los píxeles pintados');
-      return BigInt(0);
-    }
+    return BigInt(0);
   }
 };
 

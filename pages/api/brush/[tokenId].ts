@@ -11,7 +11,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     const response = await fetch(brushUrl)
-    if (!response.ok) throw new Error('Error al obtener datos del pincel')
+    if (!response.ok) {
+      throw new Error('Error al obtener datos del pincel')
+    }
     const brushData = await response.json()
 
     res.status(200).json(brushData)

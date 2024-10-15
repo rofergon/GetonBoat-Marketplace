@@ -4,10 +4,10 @@ import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { useAccount } from 'wagmi';
-import { Address, Avatar } from '@coinbase/onchainkit/identity';
+import { Address, Avatar, Name, Identity, Badge } from '@coinbase/onchainkit/identity';
 import CustomImage from '../ui/CustomImage';
 import Image from 'next/image';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Transaction, TransactionButton, TransactionStatus, TransactionStatusLabel, TransactionStatusAction, LifeCycleStatus } from '@coinbase/onchainkit/transaction';
 
 import { useNFTListing } from '../../hooks/useNFTListing';
@@ -16,6 +16,7 @@ import { useNFTs } from '../../hooks/useNFTs'; // Asumiendo que tienes un hook p
 import { ethers } from 'ethers';
 import { useCancelNFTListing } from '../../hooks/useCancelNFTListing';
 import { parseEther } from 'ethers/lib/utils';
+import { base } from 'viem/chains';
 
 interface NFT {
   id?: string;
@@ -229,11 +230,17 @@ const Profile: React.FC = () => {
             className="w-32 h-32 rounded-full border-4 border-background"
           />
           <div className="mt-4 sm:mt-0 sm:ml-4 mb-2">
-            <h2 className="text-2xl font-bold">Unnamed</h2>
-            <Address
+            <Identity
               address={address || '0x0'}
-              className="text-sm text-muted-foreground"
-            />
+              schemaId="0x8d2d6cc5c0f8b3cb29b6e9f5c0c70b39a0c88a7c0e3f5d0d92f1f5e3c64c1a0b"
+            >
+              <Name className="text-2xl font-bold">
+                <Badge />
+              </Name>
+              <Address
+                className="text-sm text-muted-foreground"
+              />
+            </Identity>
             <div className="mt-1">
               <span className="text-sm">Joined April 2022</span>
             </div>
