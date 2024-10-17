@@ -17,6 +17,7 @@ import { ethers } from 'ethers';
 import { useCancelNFTListing } from '../../hooks/useCancelNFTListing';
 import { parseEther } from 'ethers/lib/utils';
 import { base } from 'viem/chains';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 
 interface NFT {
   id?: string;
@@ -48,6 +49,7 @@ const mockCollections: Collection[] = [
 const Profile: React.FC = () => {
   const [collectedNFTs, setCollectedNFTs] = useState<NFT[]>([]);
   const { address } = useAccount();
+  const { openConnectModal } = useConnectModal();
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -212,6 +214,17 @@ const Profile: React.FC = () => {
       setListingPriceWei('');
     }
   };
+
+  if (!address) {
+    return (
+      <div className="w-full min-h-screen bg-i flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Conecta tu wallet para ver tu perfil</h2>
+          <Button onClick={openConnectModal}>Conectar Wallet</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-i">
