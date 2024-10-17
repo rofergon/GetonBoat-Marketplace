@@ -7,6 +7,7 @@ import Profile from './Profile'
 import Home from './Home'
 import Create from './Create'
 import Collections from './Collections'
+import Roadmap from './Roadmap'
 
 interface PixelArtProps {
   updateBrushData: (data: BrushData | null) => void;
@@ -98,6 +99,13 @@ export default function NFTMarketplace() {
             >
               Painter
             </Link>
+            <Link
+              className="text-sm font-medium hover:underline underline-offset-4"
+              href="#"
+              onClick={() => setCurrentPage("roadmap")}
+            >
+              Roadmap
+            </Link>
             <ConnectWalletButton updateBrushData={updateBrushData} />
           </nav>
         </div>
@@ -108,6 +116,7 @@ export default function NFTMarketplace() {
         {currentPage === "painter" && <PainterPage updateBrushData={updateBrushData} />}
         {currentPage === "create" && <Create />}
         {currentPage === "collections" && <Collections />}
+        {currentPage === "roadmap" && <Roadmap />}
       </main>
       {showFooter && (
         <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t">
