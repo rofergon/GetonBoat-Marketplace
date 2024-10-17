@@ -70,9 +70,9 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
           <Name className="text-[var(--text-ock-inverse)]" />
         </ConnectWallet>
 
-        <WalletDropdown className="rounded-xl shadow">
+        <WalletDropdown className="rounded-xl shadow hover:bg-background">
           <Identity
-            className="px-4 pt-3 pb-2 hover:bg-[var(--bg-ock-default-hover)]"
+            className="px-4 pt-3 pb-2"
             hasCopyAddressOnClick
             schemaId="0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9"
           >
@@ -106,7 +106,7 @@ const ConnectWalletButton: React.FC<{ updateBrushData: (data: BrushData | null) 
 
           {/* Custom Theme Toggle */}
           <div
-            className="px-4 py-2 flex items-center custom-btn-wallet cursor-pointer hover:bg-[var(--bg-ock-default-hover)]"
+            className="px-4 py-2 flex items-center cursor-pointer hover:bg-[var(--bg-ock-default-hover)]"
             onClick={toggleTheme}
           >
             {theme === "light" ? (
