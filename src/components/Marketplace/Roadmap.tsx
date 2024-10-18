@@ -14,11 +14,22 @@ interface RoadmapSection {
 
 const roadmapData: RoadmapSection[] = [
   {
+    title: "Zona Educativa",
+    items: [
+      { title: "Guía de introducción a NFTs", description: "Crear contenido educativo sobre los fundamentos de los NFTs", status: 'in-progress' },
+      { title: "Tutoriales de minting", description: "Desarrollar tutoriales paso a paso sobre cómo crear y mintear NFTs", status: 'planned' },
+      { title: "Webinars con artistas establecidos", description: "Organizar sesiones en vivo con artistas exitosos en el espacio NFT", status: 'planned' },
+      { title: "Recursos de marketing digital", description: "Proporcionar guías sobre cómo promocionar NFTs en redes sociales", status: 'planned' },
+      { title: "Programa de mentoría", description: "Lanzar un programa de mentoría para artistas emergentes", status: 'planned' },
+    ]
+  },
+  {
     title: "NFTs",
     items: [
       { title: "Lanzamiento de colección inicial", description: "Lanzar nuestra primera colección de NFTs exclusivos", status: 'completed' },
       { title: "Integración con wallets populares", description: "Añadir soporte para MetaMask, WalletConnect, etc.", status: 'in-progress' },
       { title: "Implementar minting dinámico", description: "Permitir a los usuarios crear sus propios NFTs en la plataforma", status: 'planned' },
+      { title: "Integracion Estandar ERC 1155", description: "Permite la creación de copias de NFTs y colecciones", status: 'planned' },
     ]
   },
   {
@@ -36,47 +47,35 @@ const roadmapData: RoadmapSection[] = [
       { title: "Sistema de propuestas", description: "Implementar sistema para que los miembros puedan hacer y votar propuestas", status: 'planned' },
       { title: "Integración con Snapshot", description: "Utilizar Snapshot para votaciones off-chain", status: 'planned' },
     ]
-  },
-  {
-    title: "Plan Educativo para Artistas",
-    items: [
-      { title: "Guía de introducción a NFTs", description: "Crear contenido educativo sobre los fundamentos de los NFTs", status: 'in-progress' },
-      { title: "Tutoriales de minting", description: "Desarrollar tutoriales paso a paso sobre cómo crear y mintear NFTs", status: 'planned' },
-      { title: "Webinars con artistas establecidos", description: "Organizar sesiones en vivo con artistas exitosos en el espacio NFT", status: 'planned' },
-      { title: "Recursos de marketing digital", description: "Proporcionar guías sobre cómo promocionar NFTs en redes sociales", status: 'planned' },
-      { title: "Programa de mentoría", description: "Lanzar un programa de mentoría para artistas emergentes", status: 'planned' },
-    ]
   }
 ];
 
 const Roadmap: React.FC = () => {
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 bg-background">
       <h2 className="text-3xl font-bold mb-8 text-center">Roadmap</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {roadmapData.map((section, index) => (
-          <Card key={index} className="bg-card">
+          <Card key={index} className="bg-muted">
             <CardHeader>
               <CardTitle>{section.title}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                {section.items.map((item, itemIndex) => (
-                  <li key={itemIndex} className="border-b pb-2">
-                    <h4 className="font-semibold">{item.title}</h4>
-                    <p className="text-sm text-muted-foreground">{item.description}</p>
-                    <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      item.status === 'completed' ? 'bg-green-500 text-white' :
-                      item.status === 'in-progress' ? 'bg-yellow-500 text-black' :
-                      'bg-blue-500 text-white'
-                    }`}>
-                      {item.status === 'completed' ? 'Completado' :
-                       item.status === 'in-progress' ? 'En progreso' :
-                       'Planeado'}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {section.items.map((item, itemIndex) => (
+                <div key={itemIndex} className="border-b border-background pb-2">
+                  <span className={`text-xs font-medium px-2 py-1 mb-2 rounded-full ${
+                    item.status === 'completed' ? 'bg-green-600 text-white' :
+                    item.status === 'in-progress' ? 'bg-yellow-500 text-black' :
+                    'bg-blue-500 text-white'
+                  }`}>
+                    {item.status === 'completed' ? 'Completado' :
+                      item.status === 'in-progress' ? 'En progreso' :
+                      'Planeado'}
+                  </span>
+                  <h4 className="mt-1 font-semibold">{item.title}</h4>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                </div>
+              ))}
             </CardContent>
           </Card>
         ))}
