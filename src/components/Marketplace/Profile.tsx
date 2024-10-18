@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -16,8 +16,8 @@ import { useNFTs } from '../../hooks/useNFTs'; // Asumiendo que tienes un hook p
 import { ethers } from 'ethers';
 import { useCancelNFTListing } from '../../hooks/useCancelNFTListing';
 import { parseEther } from 'ethers/lib/utils';
-import { base } from 'viem/chains';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
+import { useUserCollections } from '../../hooks/useUserCollections';
 
 interface NFT {
   id?: string;
@@ -33,18 +33,8 @@ interface NFT {
   marketItemId?: bigint;
 }
 
-interface Collection {
-  name: string;
-  items: number;
-  floorPrice: string;
-}
 
-const mockCollections: Collection[] = [
-  { name: "BasePaint", items: 15421, floorPrice: "0.0021 ETH" },
-  { name: "Infected Rats", items: 1, floorPrice: "3.98 ETH" },
-  { name: "BASE MonkeGodz", items: 4, floorPrice: "0.5 ETH" },
-  { name: "SimpPunks", items: 10000, floorPrice: "0.01 ETH" },
-];
+
 
 const Profile: React.FC = () => {
   const [collectedNFTs, setCollectedNFTs] = useState<NFT[]>([]);
@@ -92,6 +82,19 @@ const Profile: React.FC = () => {
 
   const [selectedNFT, setSelectedNFT] = useState<NFT | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+
+  // Usar el hook useUserCollections
+  const userCollections = useUserCollections(collectedNFTs);
+
+  // Ordenar las colecciones
+  const sortedCollections = useMemo(() => {
+    return [...userCollections].sort((a, b) => {
+      if (a.items === 0 && b.items === 0) return 0;
+      if (a.items === 0) return 1;
+      if (b.items === 0) return -1;
+      return b.items - a.items;
+    });
+  }, [userCollections]);
 
   const weiToEth = (weiAmount: string | null): string => {
     if (!weiAmount) return '0';
@@ -215,6 +218,29 @@ const Profile: React.FC = () => {
     }
   };
 
+  const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
+
+  // Modificar la función para ordenar los NFTs
+  const sortedNFTs = useMemo(() => {
+    if (!selectedCollection) {
+      return collectedNFTs;
+    }
+    return [...collectedNFTs].sort((a, b) => {
+      if (a.contractAddress === selectedCollection && b.contractAddress !== selectedCollection) {
+        return -1;
+      }
+      if (a.contractAddress !== selectedCollection && b.contractAddress === selectedCollection) {
+        return 1;
+      }
+      return 0;
+    });
+  }, [collectedNFTs, selectedCollection]);
+
+  // Función para manejar el clic en una colección
+  const handleCollectionClick = (contractAddress: string) => {
+    setSelectedCollection(contractAddress);
+  };
+
   if (!address) {
     return (
       <div className="w-full min-h-screen bg-i flex items-center justify-center">
@@ -271,15 +297,21 @@ const Profile: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row mt-6">
             <div className="w-full lg:w-56 xl:w-64 mb-6 lg:mb-0 lg:pr-4">
-              <h3 className="font-semibold mb-2">Collections</h3>
+              <h3 className="font-semibold mb-2">Colecciones</h3>
               <div className="space-y-2">
-                {mockCollections.map((collection, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-secondary rounded-xl">
+                {sortedCollections.map((collection, index) => (
+                  <div 
+                    key={index} 
+                    className={`flex items-center justify-between p-3 bg-secondary rounded-xl cursor-pointer ${
+                      selectedCollection === collection.contractAddress ? 'border-2 border-primary' : ''
+                    }`}
+                    onClick={() => handleCollectionClick(collection.contractAddress)}
+                  >
                     <div>
                       <p className="font-medium">{collection.name}</p>
                       <p className="text-sm text-muted-foreground">{collection.items} items</p>
                     </div>
-                    <p className="text-sm">{collection.floorPrice}</p>
+                    <p className="text-sm">{collection.floorPrice} ETH</p>
                   </div>
                 ))}
               </div>
@@ -288,7 +320,7 @@ const Profile: React.FC = () => {
             <div className="flex-1">
               <TabsContent value="collected">
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
-                  {collectedNFTs.map((nft, i) => (
+                  {sortedNFTs.map((nft, i) => (
                     <Card key={nft.id || i} className="overflow-hidden">
                       <div 
                         className="aspect-square relative cursor-pointer" 
