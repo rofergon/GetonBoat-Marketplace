@@ -323,15 +323,30 @@ const Profile: React.FC = () => {
                     <X size={24} />
                   </Button>
                 </div>
-                <div className="relative mb-4">
+                <div className="relative mb-2">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
                   <Input
                     type="text"
                     placeholder="Buscar colecciones..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 w-full"
+                    className="pl-10 w-full rounded-xl"
                   />
+                </div>
+                <div className="flex justify-between items-center mb-2">
+                  {selectedCollection && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedCollection(null);
+                        setIsCollectionsMenuOpen(false);
+                      }}
+                      className="text-sm rounded-lg"
+                    >
+                      Limpiar selección
+                    </Button>
+                  )}
                 </div>
                 <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-5rem)] lg:max-h-none">
                   {filteredCollections.map((collection, index) => (
