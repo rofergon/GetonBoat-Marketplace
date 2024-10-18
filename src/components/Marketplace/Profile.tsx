@@ -18,6 +18,7 @@ import { useCancelNFTListing } from '../../hooks/useCancelNFTListing';
 import { parseEther } from 'ethers/lib/utils';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useUserCollections } from '../../hooks/useUserCollections';
+import { Loader2 } from "lucide-react"; // Importa el ícono de carga
 
 interface NFT {
   id?: string;
@@ -59,17 +60,9 @@ const Profile: React.FC = () => {
     getCancelListingContract,
   } = useNFTListing(listingNFT?.contractAddress as `0x${string}`, listingNFT?.tokenId || '');
 
-  console.log('useNFTListing hook ejecutado:', {
-    isApproved,
-    isListed,
-    approvalTxHash,
-    listingTxHash,
-    error
-  });
-
   const [currentPage] = useState(0);
-  const { marketItems, totalItems } = useFetchMarketItems(currentPage);
-  const { nfts } = useNFTs(address);
+  const { marketItems, totalItems: _totalItems } = useFetchMarketItems(currentPage);
+  const { nfts: _nfts } = useNFTs(address);
 
   const [, setListedNFTs] = useState<Set<string>>(new Set());
 
@@ -101,8 +94,11 @@ const Profile: React.FC = () => {
     return ethers.utils.formatEther(weiAmount);
   };
 
+  const [isLoading, setIsLoading] = useState(true); // Nuevo estado para controlar la carga
+
   const fetchCollectedNFTs = useCallback(async () => {
     if (!address) return;
+    setIsLoading(true); // Inicia la carga
     try {
       const response = await fetch(`/api/collected-nfts?userAddress=${address}`);
       const data = await response.json();
@@ -129,8 +125,9 @@ const Profile: React.FC = () => {
       );
       setListedNFTs(listedIds as Set<string>);
     } catch (error) {
-      console.error('Error al obtener NFTs coleccionados:', error);
       setCollectedNFTs([]);
+    } finally {
+      setIsLoading(false); // Finaliza la carga
     }
   }, [address, marketItems]);
 
@@ -140,40 +137,20 @@ const Profile: React.FC = () => {
     }
   }, [address, fetchCollectedNFTs]);
 
-  // Añade este nuevo useEffect
-  useEffect(() => {
-    collectedNFTs.forEach(nft => {
-      console.log(`NFT cargado:
-        Imagen URL: ${nft.image}
-        Token ID: ${nft.tokenId}
-        Dirección del contrato: ${nft.contractAddress}`);
-    });
-  }, [collectedNFTs]);
-
-  useEffect(() => {
-    console.log('Market items actualizados:', marketItems);
-    console.log('Total de items en el mercado:', totalItems);
-    console.log('NFTs del usuario:', nfts);
-  }, [marketItems, totalItems, nfts]);
-
-  const handleApprovalStatus = useCallback((status: LifeCycleStatus) => {
-    console.log('Estado de aprobación:', status);
+  const handleApprovalStatus = useCallback(() => {
     // Lógica adicional para manejar el estado de aprobación
   }, []);
 
-  const handleListingStatus = useCallback((status: LifeCycleStatus) => {
-    console.log('Estado de listado:', status);
+  const handleListingStatus = useCallback(() => {
     // Lógica adicional para manejar el estado de listado
   }, []);
 
   const handleCancelListingStatus = useCallback((status: LifeCycleStatus) => {
-    console.log('Estado de cancelación de listado:', status);
     if (status.statusName === 'success') {
-      console.log('Listado cancelado con éxito');
       setIsDialogOpen(false);
       fetchCollectedNFTs(); // Actualizar la lista de NFTs después de cancelar
     } else if (status.statusName === 'error') {
-      console.error('Error al cancelar el listado:', status.statusData);
+      // Manejar el error si es necesario
     }
   }, []);
 
@@ -182,14 +159,11 @@ const Profile: React.FC = () => {
       // Convertimos el marketItemId a un número, eliminando la 'n' al final
       const marketItemIdNumber = Number(nft.marketItemId.toString());
       handleCancelListingHook(BigInt(marketItemIdNumber));
-    } else {
-      console.error('No se pudo cancelar el listado: marketItemId no disponible');
     }
   }, [handleCancelListingHook]);
 
   useEffect(() => {
     if (isCancelSuccess) {
-      console.log('Listado cancelado con éxito');
       fetchCollectedNFTs(); // Actualizar la lista de NFTs después de cancelar
     }
   }, [isCancelSuccess, fetchCollectedNFTs]);
@@ -200,8 +174,6 @@ const Profile: React.FC = () => {
   };
 
   const handleListNFT = (nft: NFT) => {
-    // Implementa la lógica para listar el NFT
-    console.log('Listar NFT:', nft);
     setListingNFT(nft);
     setIsDialogOpen(true);
   };
@@ -319,48 +291,55 @@ const Profile: React.FC = () => {
 
             <div className="flex-1">
               <TabsContent value="collected">
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
-                  {sortedNFTs.map((nft, i) => (
-                    <Card key={nft.id || i} className="overflow-hidden">
-                      <div 
-                        className="aspect-square relative cursor-pointer" 
-                        onClick={() => handleViewDetails(nft)}
-                      >
-                        <CustomImage
-                          alt={`NFT ${nft.name || i}`}
-                          src={nft.image || "/placeholder.svg"}
-                          layout="fill"
-                          objectFit="cover"
-                        />
-                      </div>
-                      <CardContent className="p-2">
-                        <h4 className="text-sm font-medium truncate">{nft.name || `NFT #${nft.tokenId || i}`}</h4>
-                        <div className="flex justify-end mt-2">
-                          {nft.isListed ? (
-                            <Button variant="outline" size="sm"
-                              onClick={(e) => { e.stopPropagation(); handleCancelListingClick(nft); }}
-                              disabled={isCancelling}
-                            >
-                              {isCancelling ? 'Cancelando...' : 'Cancelar listado'}
-                            </Button>
-                          ) : (
-                            <Button variant="outline" size="sm" className="card-btn"
-                              onClick={(e) => { e.stopPropagation(); handleListNFT(nft); }}
-                            >
-                              Listar
-                            </Button>
-                          )}
+                {isLoading ? (
+                  <div className="flex justify-center items-center h-64">
+                    <Loader2 className="w-12 h-12 animate-spin text-primary" />
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
+                    {sortedNFTs.map((nft, i) => (
+                      <Card key={nft.id || i} className="overflow-hidden">
+                        <div 
+                          className="aspect-square relative cursor-pointer" 
+                          onClick={() => handleViewDetails(nft)}
+                        >
+                          <CustomImage
+                            alt={`NFT ${nft.name || i}`}
+                            src={nft.image || "/placeholder.svg"}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            style={{ objectFit: 'cover' }}
+                          />
                         </div>
-                        {nft.isListed && (
-                          <p className="text-sm mt-1">
-                            Precio listado: {weiToEth(nft.listedPrice || null)} ETH
-                          </p>
-                        )}
-                        {cancelError && <p className="text-red-500 text-sm mt-1">{cancelError}</p>}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        <CardContent className="p-2">
+                          <h4 className="text-sm font-medium truncate">{nft.name || `NFT #${nft.tokenId || i}`}</h4>
+                          <div className="flex justify-end mt-2">
+                            {nft.isListed ? (
+                              <Button variant="outline" size="sm"
+                                onClick={(e) => { e.stopPropagation(); handleCancelListingClick(nft); }}
+                                disabled={isCancelling}
+                              >
+                                {isCancelling ? 'Cancelando...' : 'Cancelar listado'}
+                              </Button>
+                            ) : (
+                              <Button variant="outline" size="sm" className="card-btn"
+                                onClick={(e) => { e.stopPropagation(); handleListNFT(nft); }}
+                              >
+                                Listar
+                              </Button>
+                            )}
+                          </div>
+                          {nft.isListed && (
+                            <p className="text-sm mt-1">
+                              Precio listado: {weiToEth(nft.listedPrice || null)} ETH
+                            </p>
+                          )}
+                          {cancelError && <p className="text-red-500 text-sm mt-1">{cancelError}</p>}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </TabsContent>
               {/* Otros TabsContent para created, favorited, etc. */}
             </div>
@@ -466,8 +445,9 @@ const Profile: React.FC = () => {
                   <CustomImage
                     alt={`NFT ${selectedNFT.name || selectedNFT.tokenId}`}
                     src={selectedNFT.image || "/placeholder.svg"}
-                    layout="fill"
-                    objectFit="cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    style={{ objectFit: 'cover' }}
                   />
                 </div>
                 <p className="mt-2">{selectedNFT.description}</p>

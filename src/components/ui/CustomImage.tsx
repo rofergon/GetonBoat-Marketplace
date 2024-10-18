@@ -1,16 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import Image, { ImageProps } from 'next/image';
 
-interface CustomImageProps {
+interface CustomImageProps extends Omit<ImageProps, 'src' | 'alt'> {
   src: string;
   alt: string;
-  layout: "fill" | "fixed" | "intrinsic" | "responsive";
-  objectFit?: "contain" | "cover" | "fill" | "none" | "scale-down";
   onError?: () => void;
-  className?: string;
 }
 
-const CustomImage: React.FC<CustomImageProps> = ({ src, alt, layout, objectFit, onError, className }) => {
+const CustomImage: React.FC<CustomImageProps> = ({ 
+  src, 
+  alt, 
+  fill, 
+  width, 
+  height, 
+  sizes = "100vw",
+  className, 
+  onError,
+  style,
+  ...rest
+}) => {
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [isGif, setIsGif] = useState(false);
 
@@ -28,18 +36,23 @@ const CustomImage: React.FC<CustomImageProps> = ({ src, alt, layout, objectFit, 
     return null;
   }
 
-  const imageProps = {
+  const imageProps: ImageProps = {
     src: imageSrc,
     alt,
-    layout,
-    objectFit,
+    fill,
+    width: fill ? undefined : width || 100,
+    height: fill ? undefined : height || 100,
+    sizes,
+    className,
+    style: { 
+      objectFit: 'cover' as const, 
+      ...style 
+    },
     onError: () => {
       console.error('Error al cargar la imagen:', src);
       if (onError) onError();
     },
-    width: layout === 'fill' ? undefined : 100,
-    height: layout === 'fill' ? undefined : 100,
-    className,
+    ...rest
   };
 
   if (isGif) {
