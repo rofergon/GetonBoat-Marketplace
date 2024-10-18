@@ -352,7 +352,7 @@ const Profile: React.FC = () => {
                   {filteredCollections.map((collection, index) => (
                     <div
                       key={index}
-                      className={`flex items-center justify-between p-3 bg-secondary rounded-xl cursor-pointer ${
+                      className={`flex items-center p-3 bg-secondary rounded-xl cursor-pointer ${
                         selectedCollection === collection.contractAddress ? 'border-2 border-primary' : ''
                       }`}
                       onClick={() => {
@@ -360,11 +360,19 @@ const Profile: React.FC = () => {
                         setIsCollectionsMenuOpen(false);
                       }}
                     >
+                      <div className="w-12 h-12 mr-3 relative">
+                        <CustomImage
+                          src={collection.thumbnail}
+                          alt={collection.name}
+                          fill
+                          sizes="48px"
+                          className="rounded-lg object-cover"
+                        />
+                      </div>
                       <div>
                         <p className="font-medium">{collection.name}</p>
                         <p className="text-sm text-muted-foreground">{collection.items} items</p>
                       </div>
-                      <p className="text-sm">{collection.floorPrice} ETH</p>
                     </div>
                   ))}
                 </div>

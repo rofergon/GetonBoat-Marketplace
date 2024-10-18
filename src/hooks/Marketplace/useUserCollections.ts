@@ -6,9 +6,9 @@ import { erc1155ABI } from '../../abis/erc1155ABI';
 interface Collection {
   name: string;
   items: number;
-  floorPrice: string;
   contractAddress: string;
   standard: '721' | '1155' | 'unknown';
+  thumbnail: string;
 }
 
 export function useUserCollections(userNFTs: any[]) {
@@ -64,12 +64,15 @@ export function useUserCollections(userNFTs: any[]) {
           items = nftsInCollection.reduce((acc, nft) => acc + (parseInt(nft.amount) || 1), 0);
         }
 
+        // Obtener la primera imagen de la colección como miniatura
+        const thumbnail = nftsInCollection[0]?.image || '/placeholder.svg';
+
         return {
           name: nameResult ?? 'Unknown',
           items,
-          floorPrice: "N/A",
           contractAddress,
           standard,
+          thumbnail,
         };
       });
 
