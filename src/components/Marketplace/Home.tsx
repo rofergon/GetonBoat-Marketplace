@@ -109,8 +109,8 @@ export default function Home() {
                 return (
                   <Card key={item.marketItemId.toString()} className="overflow-hidden">
                     <CardHeader className="p-0">
-                      <div 
-                        className="aspect-square relative cursor-pointer w-full h-0 pb-[100%]" 
+                      <div
+                        className="aspect-square relative cursor-pointer w-full h-0 pb-[100%]"
                         onClick={() => handleOpenDialog(item)}
                       >
                         <CustomImage
@@ -122,14 +122,14 @@ export default function Home() {
                         />
                       </div>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-2">
                       <CardTitle>{metadata?.name || `NFT #${item.tokenId.toString()}`}</CardTitle>
                       <p className="text-sm text-muted-foreground">Precio: {formatEther(BigInt(item.price))} ETH</p>
                     </CardContent>
                     <CardFooter className="flex flex-col space-y-2">
-                      <Button 
-                        className="w-full" 
-                        variant="secondary" 
+                      <Button
+                        className="w-full"
+                        variant="secondary"
                         onClick={() => handleBuy(item)}
                         disabled={isBuying}
                       >
