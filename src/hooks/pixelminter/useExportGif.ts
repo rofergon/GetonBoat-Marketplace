@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import GIF from 'gif.js';
-import { State, Layer } from '../types/types';
+import { State, Layer } from '../../types/types';
 
 export function useExportGif(state: State, fps: number) {
   const [isExporting, setIsExporting] = useState(false);

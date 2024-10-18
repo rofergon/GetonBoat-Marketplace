@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import { useCallback, useRef, MutableRefObject, useEffect } from 'react';
-import { State, Layer } from '../types/types';
+import { State, Layer } from '../../types/types';
 
 interface CanvasRefs {
   canvasRef: React.RefObject<HTMLCanvasElement>;

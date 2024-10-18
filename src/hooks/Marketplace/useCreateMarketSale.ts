@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
-import { marketplaceAbi } from '../abi/marketplace.abi';
+import { marketplaceAbi } from '../../abi/marketplace.abi';
 import { parseEther, Address } from 'viem';
 
 export const useCreateMarketSale = () => {

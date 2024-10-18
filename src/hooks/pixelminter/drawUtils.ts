@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
-import { State } from '../types/types';
+import { State } from '../../types/types';
 
 const isValidCoordinate = (x: number, y: number, gridSize: number): boolean => {
   return x >= 0 && x < gridSize && y >= 0 && y < gridSize;

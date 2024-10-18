@@ -1,10 +1,10 @@
 /* eslint-disable no-unused-vars */
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { State, Frame, Layer, HistoryEntry } from '../types/types';
-import { loadStateFromCache } from '../utils/cacheState';
+import { State, Frame, Layer, HistoryEntry } from '../../types/types';
+import { loadStateFromCache } from '../../utils/cacheState';
 import * as LayerManager from './layerStateManager';
 import { v4 as uuidv4 } from 'uuid';
-import { calculateDay } from '../utils/dateUtils';
+import { calculateDay } from '../../utils/dateUtils';
 
 const usePixelArtStateManager = () => {
   const canvasSize = 1280;

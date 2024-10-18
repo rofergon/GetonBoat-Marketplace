@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
-import { State } from '../types/types';
-import { validateEncodingData, logFrameInfo, encodePixelData } from '../utils/encodingUtils';
+import { State } from '../../types/types';
+import { validateEncodingData, logFrameInfo, encodePixelData } from '../../utils/encodingUtils';
 
 export const useSidePanelLogic = (
   state: State,

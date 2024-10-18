@@ -10,14 +10,14 @@ import Image from 'next/image';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 import { Transaction, TransactionButton, TransactionStatus, TransactionStatusLabel, TransactionStatusAction, LifeCycleStatus } from '@coinbase/onchainkit/transaction';
 
-import { useNFTListing } from '../../hooks/useNFTListing';
-import { useFetchMarketItems } from '../../hooks/useFetchMarketItems';
-import { useNFTs } from '../../hooks/useNFTs'; // Asumiendo que tienes un hook para obtener los NFTs del usuario
+import { useNFTListing } from '../../hooks/Marketplace/useNFTListing';
+import { useFetchMarketItems } from '../../hooks/Marketplace/useFetchMarketItems';
+import { useNFTs } from '../../hooks/Marketplace/useNFTs'; // Asumiendo que tienes un hook para obtener los NFTs del usuario
 import { ethers } from 'ethers';
-import { useCancelNFTListing } from '../../hooks/useCancelNFTListing';
+import { useCancelNFTListing } from '../../hooks/Marketplace/useCancelNFTListing';
 import { parseEther } from 'ethers/lib/utils';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
-import { useUserCollections } from '../../hooks/useUserCollections';
+import { useUserCollections } from '../../hooks/Marketplace/useUserCollections';
 import { Loader2 } from "lucide-react"; // Importa el ícono de carga
 
 interface NFT {

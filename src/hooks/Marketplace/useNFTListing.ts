@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAccount, useContractReads, useContractRead, useWalletClient, usePublicClient } from 'wagmi';
 import { Address, encodeFunctionData } from 'viem';
-import { BasePaintBrushAbi } from '../abi/BasePaintBrushAbi';
-import { marketplaceAbi } from '../abi/marketplace.abi';
+import { BasePaintBrushAbi } from '../../abi/BasePaintBrushAbi';
+import { marketplaceAbi } from '../../abi/marketplace.abi';
 
 const MARKETPLACE_ADDRESS = process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS as Address;
 

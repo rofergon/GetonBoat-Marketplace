@@ -1,17 +1,17 @@
 /* eslint-disable no-undef */
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import PixelArtUI from './PixelArtUI';
-import { useHandleInteraction } from '../../hooks/useHandleInteraction';
-import { useSetupCanvasEffect, useWindowResizeEffect } from '../../hooks/useSetupCanvasEffect';
+import { useHandleInteraction } from '../../hooks/pixelminter/useHandleInteraction';
+import { useSetupCanvasEffect, useWindowResizeEffect } from '../../hooks/pixelminter/useSetupCanvasEffect';
 import { handleExtractPalette } from '../../utils/paletteUtils';
-import useDrawGrid from '../../hooks/useDrawGrid';
-import useCanvasDisplay from '../../hooks/useCanvasDisplay';
+import useDrawGrid from '../../hooks/pixelminter/useDrawGrid';
+import useCanvasDisplay from '../../hooks/pixelminter/useCanvasDisplay';
 import { Feedback, SetFeedbackFunction, BrushData } from '../../types/types';
-import usePixelArtStateManager from '../../hooks/usePixelArtStateManager';
+import usePixelArtStateManager from '../../hooks/pixelminter/usePixelArtStateManager';
 import { saveStateToCache } from '../../utils/cacheState';
-import useShiftFrame from '../../hooks/useShiftFrame';
+import useShiftFrame from '../../hooks/pixelminter/useShiftFrame';
 import ConnectWalletButton from './ConnectWalletButton';
-import { useBrushData } from '../../hooks/useBrushData';
+import { useBrushData } from '../../hooks/pixelminter/useBrushData';
 
 const PixelArt: React.FC = () => {
   const {

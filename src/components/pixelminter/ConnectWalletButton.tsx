@@ -20,7 +20,7 @@ import { useAccount, useContractReads, usePublicClient } from 'wagmi';
 import { BasePaintBrushAbi } from '../../abi/BasePaintBrushAbi';
 import { getContract, ContractFunctionExecutionError } from 'viem';
 import { BrushData } from '../../types/types';
-import { useBrushData } from '../../hooks/useBrushData';
+import { useBrushData } from '../../hooks/pixelminter/useBrushData';
 import { Moon, Sun, CircleUserIcon } from "lucide-react";
 
 const DefaultAvatar = () => (

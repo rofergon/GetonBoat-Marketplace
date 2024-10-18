@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useCallback, useEffect } from 'react';
-import { State, Layer } from '../types/types';
+import { State, Layer } from '../../types/types';
 
 interface UseShiftFrameProps {
   state: State;

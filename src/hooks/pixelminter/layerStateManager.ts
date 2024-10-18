@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { State, Layer } from '../types/types';
+import { State, Layer } from '../../types/types';
 
 export const addLayer = (state: State): Partial<State> => {
   const currentFrame = state.frames[state.currentFrameIndex] || { layers: [], history: [], historyIndex: -1 };

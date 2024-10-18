@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { State, Layer, Frame } from '../types/types';
+import { State, Layer, Frame } from '../../types/types';
 
 export const usePixelCountAndDroplets = (state: State, initialDroplets: number) => {
   const [pixelCount, setPixelCount] = useState(0);

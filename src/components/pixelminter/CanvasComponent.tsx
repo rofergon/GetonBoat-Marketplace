@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useRef, useCallback } from 'react';
 import { State, Layer } from '../../types/types';
-import { useWindowResizeEffect } from '../../hooks/useSetupCanvasEffect';
+import { useWindowResizeEffect } from '../../hooks/pixelminter/useSetupCanvasEffect';
 
 interface CanvasComponentProps {
   state: State;

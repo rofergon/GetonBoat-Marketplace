@@ -5,7 +5,7 @@ import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { Upload, Plus, Image as ImageIcon } from "lucide-react";
-import { useMintNFT } from "../../hooks/useMintNFT";
+import { useMintNFT } from "../../hooks/Marketplace/useMintNFT";
 import { toast } from "react-hot-toast";
 
 export default function Create() {

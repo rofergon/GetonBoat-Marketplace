@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAccount, useReadContracts, usePublicClient } from 'wagmi';
 import { getContract } from 'viem';
-import { BasePaintBrushAbi } from '../abi/BasePaintBrushAbi';
-import { BrushData } from '../types/types';
+import { BasePaintBrushAbi } from '../../abi/BasePaintBrushAbi';
+import { BrushData } from '../../types/types';
 
 const contractAddress = '0xD68fe5b53e7E1AbeB5A4d0A6660667791f39263a';
 

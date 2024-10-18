@@ -1,7 +1,7 @@
 import { useReadContract } from 'wagmi';
-import { marketplaceAbi } from '../abi/marketplace.abi';
+import { marketplaceAbi } from '../../abi/marketplace.abi';
 import { useState, useEffect } from 'react';
-import { NFTDatabaseManager } from '../../pages/api/nftDatabaseManager';
+import { NFTDatabaseManager } from '../../../pages/api/nftDatabaseManager';
 
 const MARKETPLACE_ADDRESS = process.env.NEXT_PUBLIC_MARKETPLACE_ADDRESS as `0x${string}`;
 const ITEMS_PER_PAGE = 50;

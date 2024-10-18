@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { State, Frame } from '../types/types';
+import { State, Frame } from '../../types/types';
 
 export function useAnimationControl(
   state: State,

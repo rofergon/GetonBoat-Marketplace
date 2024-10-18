@@ -1,7 +1,7 @@
 import { useAccount, useReadContracts } from 'wagmi';
 import { useState, useEffect, useMemo } from 'react';
 import { erc721ABI } from '@wagmi/core';
-import { erc1155ABI } from '../abis/erc1155ABI';
+import { erc1155ABI } from '../../abis/erc1155ABI';
 
 interface Collection {
   name: string;

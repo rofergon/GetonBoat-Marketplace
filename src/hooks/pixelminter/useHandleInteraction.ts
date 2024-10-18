@@ -1,8 +1,8 @@
 /* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import { useCallback, useRef, MutableRefObject } from 'react';
-import { State, Layer } from '../types/types';
-import { bucketFill } from '../utils/bucketFill';
+import { State, Layer } from '../../types/types';
+import { bucketFill } from '../../utils/bucketFill';
 import { draw, interpolate } from './drawUtils';
 
 interface UseHandleInteractionProps {

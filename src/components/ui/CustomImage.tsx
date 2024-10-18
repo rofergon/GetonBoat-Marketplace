@@ -36,7 +36,7 @@ const CustomImage: React.FC<CustomImageProps> = ({
     return null;
   }
 
-  const imageProps: ImageProps = {
+  const imageProps: Partial<ImageProps> = {
     src: imageSrc,
     alt,
     sizes,
@@ -52,19 +52,26 @@ const CustomImage: React.FC<CustomImageProps> = ({
     ...rest
   };
 
-  // Si fill es true, usamos fill. De lo contrario, usamos width y height.
+  // Priorizar fill sobre width/height
   if (fill) {
     imageProps.fill = true;
+    // Eliminar width y height si fill está presente
+    delete imageProps.width;
+    delete imageProps.height;
+  } else if (width && height) {
+    imageProps.width = width;
+    imageProps.height = height;
   } else {
-    imageProps.width = width || 100;
-    imageProps.height = height || 100;
+    // Valores por defecto si no se proporciona ni fill ni width/height
+    imageProps.width = 100;
+    imageProps.height = 100;
   }
 
   if (isGif) {
-    return <Image {...imageProps} unoptimized />;
+    return <Image {...imageProps as ImageProps} unoptimized />;
   }
 
-  return <Image {...imageProps} />;
+  return <Image {...imageProps as ImageProps} />;
 };
 
 export default CustomImage;

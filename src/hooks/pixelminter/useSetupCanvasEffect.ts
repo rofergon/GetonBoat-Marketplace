@@ -1,5 +1,5 @@
 import { useEffect, MutableRefObject } from 'react';
-import { State } from '../types/types';
+import { State } from '../../types/types';
 
 export const useSetupCanvasEffect = (
   canvasRef: MutableRefObject<HTMLCanvasElement | null>,

@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Trash } from 'lucide-react';
 import { State, Layer } from '../../types/types';
 import { Input } from "@/components/ui/input";
-import { getCurrentLayers } from '../../hooks/layerStateManager';
+import { getCurrentLayers } from '../../hooks/pixelminter/layerStateManager';
 
 interface LayerManagerProps {
   state: State;

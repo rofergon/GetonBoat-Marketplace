@@ -1,5 +1,5 @@
 import { useCallback, useRef, MutableRefObject, useEffect } from 'react';
-import { State } from '../types/types';
+import { State } from '../../types/types';
 
 function useDrawGrid(gridCanvasRef: MutableRefObject<HTMLCanvasElement | null>,
   stateRef: MutableRefObject<State>) {

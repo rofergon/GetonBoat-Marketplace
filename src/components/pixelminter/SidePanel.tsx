@@ -10,13 +10,13 @@ import ConnectWalletButton from './ConnectWalletButton';
 import LayerManager from './LayerPanel';
 import { State, BrushData } from '../../types/types';
 import { Palette, Grid, Save, Droplet, Layers, Plus, Play, Download } from 'lucide-react';
-import { useSidePanelLogic } from '../../hooks/useSidePanelLogic';
-import { usePixelCountAndDroplets } from '../../hooks/usePixelCount';
+import { useSidePanelLogic } from '../../hooks/pixelminter/useSidePanelLogic';
+import { usePixelCountAndDroplets } from '../../hooks/pixelminter/usePixelCount';
 import MintBPButton from './MintBPButton';
 import MintPixelminterButton from './MintPixelminterButton';
 import { encodePixelData } from '../../utils/encodingUtils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useExportGif } from '../../hooks/useExportGif';
+import { useExportGif } from '../../hooks/pixelminter/useExportGif';
 
 interface SidePanelProps {
   state: State;

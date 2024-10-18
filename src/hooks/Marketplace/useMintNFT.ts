@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useAccount, useWalletClient, usePublicClient } from 'wagmi';
 import { parseEther, Address } from 'viem';
-import { GetonBoatBftsABI } from '../abi/GetonBoatBfts.abi';
+import { GetonBoatBftsABI } from '../../abi/GetonBoatBfts.abi';
 import { useLighthouseUpload } from './useLighthouseUpload';
 import { toast } from 'react-hot-toast';
 

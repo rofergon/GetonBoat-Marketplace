@@ -5,9 +5,9 @@ import { Button } from "../ui/button";
 import { Slider } from "../ui/slider";
 import FrameThumbnail from './FrameThumbnail';
 import { State, Frame } from '../../types/types';
-import { useExportGif } from '../../hooks/useExportGif';
-import { useAnimationControl } from '../../hooks/useAnimationControl';
-import { useAnimationStatus } from '../../hooks/useAnimationStatus';
+import { useExportGif } from '../../hooks/pixelminter/useExportGif';
+import { useAnimationControl } from '../../hooks/pixelminter/useAnimationControl';
+import { useAnimationStatus } from '../../hooks/pixelminter/useAnimationStatus';
 import { useMediaQuery } from 'react-responsive';
 
 interface AnimationControlsProps {

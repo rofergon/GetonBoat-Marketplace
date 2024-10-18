@@ -6,9 +6,9 @@ import { Input } from "../ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
 
 import { ArrowRight, Search } from "lucide-react";
-import { useFetchMarketItems } from '../../hooks/useFetchMarketItems';
+import { useFetchMarketItems } from '../../hooks/Marketplace/useFetchMarketItems';
 import CustomImage from '../ui/CustomImage';
-import { useCreateMarketSale } from '../../hooks/useCreateMarketSale';
+import { useCreateMarketSale } from '../../hooks/Marketplace/useCreateMarketSale';
 import { toast } from 'react-hot-toast';
 import { formatEther } from 'viem';
 

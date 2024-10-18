@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getTotalPixelsPaintedToday } from '../utils/dateUtils';
+import { getTotalPixelsPaintedToday } from '../../utils/dateUtils';
 
 const PIXELS_PER_FRAME = 200;
 const FRAMES_PER_SECOND = 30;

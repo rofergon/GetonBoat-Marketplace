@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useReducer, useRef, useCallback, useMemo } from 'react';
-import { State, Layer } from '../types/types';
+import { State, Layer } from '../../types/types';
 
 interface HistoryEntry {
   frameIndex: number;
