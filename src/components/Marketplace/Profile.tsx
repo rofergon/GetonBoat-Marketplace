@@ -18,7 +18,8 @@ import { useCancelNFTListing } from '../../hooks/Marketplace/useCancelNFTListing
 import { parseEther } from 'ethers/lib/utils';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useUserCollections } from '../../hooks/Marketplace/useUserCollections';
-import { Loader2, ChevronDown, ChevronUp, X } from "lucide-react"; // Importa el ícono de carga
+import { Loader2, ChevronDown, ChevronUp, X, Search } from "lucide-react"; // Importa el ícono de carga y búsqueda
+import { Input } from "../ui/input"; // Asegúrate de importar el componente Input
 
 interface NFT {
   id?: string;
@@ -229,6 +230,14 @@ const Profile: React.FC = () => {
     setIsCollectionsMenuOpen(false);
   };
 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredCollections = useMemo(() => {
+    return sortedCollections.filter(collection =>
+      collection.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [sortedCollections, searchTerm]);
+
   if (!address) {
     return (
       <div className="w-full min-h-screen bg-i flex items-center justify-center">
@@ -314,8 +323,18 @@ const Profile: React.FC = () => {
                     <X size={24} />
                   </Button>
                 </div>
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+                  <Input
+                    type="text"
+                    placeholder="Buscar colecciones..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-full"
+                  />
+                </div>
                 <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-5rem)] lg:max-h-none">
-                  {sortedCollections.map((collection, index) => (
+                  {filteredCollections.map((collection, index) => (
                     <div
                       key={index}
                       className={`flex items-center justify-between p-3 bg-secondary rounded-xl cursor-pointer ${
