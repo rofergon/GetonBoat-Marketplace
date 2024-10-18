@@ -39,9 +39,6 @@ const CustomImage: React.FC<CustomImageProps> = ({
   const imageProps: ImageProps = {
     src: imageSrc,
     alt,
-    fill,
-    width: fill ? undefined : width || 100,
-    height: fill ? undefined : height || 100,
     sizes,
     className,
     style: { 
@@ -54,6 +51,14 @@ const CustomImage: React.FC<CustomImageProps> = ({
     },
     ...rest
   };
+
+  // Si fill es true, usamos fill. De lo contrario, usamos width y height.
+  if (fill) {
+    imageProps.fill = true;
+  } else {
+    imageProps.width = width || 100;
+    imageProps.height = height || 100;
+  }
 
   if (isGif) {
     return <Image {...imageProps} unoptimized />;

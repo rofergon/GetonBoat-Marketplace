@@ -116,8 +116,8 @@ export default function Home() {
                         <CustomImage
                           alt={`NFT ${item.tokenId.toString()}`}
                           src={metadata?.imageurl || "/placeholder.png"}
-                          layout="fill"
-                          objectFit="cover"
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           className="absolute top-0 left-0 w-full h-full"
                         />
                       </div>
@@ -158,6 +158,8 @@ export default function Home() {
               <CustomImage
                 alt={`NFT ${selectedNFT?.tokenId.toString()}`}
                 src={selectedNFT?.metadata?.imageurl || "/placeholder.png"}
+                width={500}
+                height={500}
                 layout="responsive"
               />
             </div>
