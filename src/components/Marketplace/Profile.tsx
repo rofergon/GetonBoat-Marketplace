@@ -348,7 +348,7 @@ const Profile: React.FC = () => {
                     </Button>
                   )}
                 </div>
-                <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-5rem)] lg:max-h-none">
+                <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-11rem)] lg:max-h-none">
                   {filteredCollections.map((collection, index) => (
                     <div
                       key={index}
