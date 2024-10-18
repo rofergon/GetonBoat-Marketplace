@@ -1,6 +1,18 @@
-import { MarketItem } from '@/hooks/useFetchMarketItems';
 import { createClient } from '@libsql/client';
 import { OwnedNft } from 'alchemy-sdk';
+
+// Definimos MarketItem aquí para evitar problemas de importación
+interface MarketItem {
+  marketItemId: bigint;
+  nftContractAddress: `0x${string}`;
+  tokenId: bigint;
+  seller: `0x${string}`;
+  buyer: `0x${string}`;
+  price: bigint;
+  sold: boolean;
+  canceled: boolean;
+  expirationTime: bigint;
+}
 
 interface RawMetadata {
   metadata?: {
