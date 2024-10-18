@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import React, { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { Button } from "../ui/button";
 import { Card, CardContent } from "../ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
@@ -18,7 +18,7 @@ import { useCancelNFTListing } from '../../hooks/Marketplace/useCancelNFTListing
 import { parseEther } from 'ethers/lib/utils';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useUserCollections } from '../../hooks/Marketplace/useUserCollections';
-import { Loader2 } from "lucide-react"; // Importa el ícono de carga
+import { Loader2, ChevronDown, ChevronUp, X } from "lucide-react"; // Importa el ícono de carga
 
 interface NFT {
   id?: string;
@@ -48,6 +48,8 @@ const Profile: React.FC = () => {
   const [listingPrice, setListingPrice] = useState<string>('');
   const [listingPriceWei, setListingPriceWei] = useState<string>('');
   const [listingDuration] = useState<number>(7);
+  const [isCollectionsMenuOpen, setIsCollectionsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const {
     isApproved,
@@ -137,6 +139,19 @@ const Profile: React.FC = () => {
     }
   }, [address, fetchCollectedNFTs]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsCollectionsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const handleApprovalStatus = useCallback(() => {
     // Lógica adicional para manejar el estado de aprobación
   }, []);
@@ -211,6 +226,7 @@ const Profile: React.FC = () => {
   // Función para manejar el clic en una colección
   const handleCollectionClick = (contractAddress: string) => {
     setSelectedCollection(contractAddress);
+    setIsCollectionsMenuOpen(false);
   };
 
   if (!address) {
@@ -269,23 +285,55 @@ const Profile: React.FC = () => {
 
           <div className="flex flex-col lg:flex-row mt-6">
             <div className="w-full lg:w-56 xl:w-64 mb-6 lg:mb-0 lg:pr-4">
-              <h3 className="font-semibold mb-2">Colecciones</h3>
-              <div className="space-y-2">
-                {sortedCollections.map((collection, index) => (
-                  <div 
-                    key={index} 
-                    className={`flex items-center justify-between p-3 bg-secondary rounded-xl cursor-pointer ${
-                      selectedCollection === collection.contractAddress ? 'border-2 border-primary' : ''
-                    }`}
-                    onClick={() => handleCollectionClick(collection.contractAddress)}
+              <div className="lg:hidden mb-4">
+                <Button
+                  onClick={() => setIsCollectionsMenuOpen(!isCollectionsMenuOpen)}
+                  className="w-full flex justify-between items-center rounded-xl"
+                  variant="outline"
+                >
+                  <span>Colecciones</span>
+                  {isCollectionsMenuOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                </Button>
+              </div>
+
+              <div
+                ref={menuRef}
+                className={`
+                  lg:block
+                  ${isCollectionsMenuOpen ? 'fixed inset-0 z-50 bg-background p-4' : 'hidden'}
+                  lg:relative lg:inset-auto lg:z-auto lg:bg-transparent lg:p-0
+                `}
+              >
+                <div className="flex justify-between items-center mb-4 lg:hidden">
+                  <h3 className="font-semibold">Colecciones</h3>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setIsCollectionsMenuOpen(false)}
                   >
-                    <div>
-                      <p className="font-medium">{collection.name}</p>
-                      <p className="text-sm text-muted-foreground">{collection.items} items</p>
+                    <X size={24} />
+                  </Button>
+                </div>
+                <div className="space-y-2 overflow-y-auto max-h-[calc(100vh-5rem)] lg:max-h-none">
+                  {sortedCollections.map((collection, index) => (
+                    <div
+                      key={index}
+                      className={`flex items-center justify-between p-3 bg-secondary rounded-xl cursor-pointer ${
+                        selectedCollection === collection.contractAddress ? 'border-2 border-primary' : ''
+                      }`}
+                      onClick={() => {
+                        handleCollectionClick(collection.contractAddress);
+                        setIsCollectionsMenuOpen(false);
+                      }}
+                    >
+                      <div>
+                        <p className="font-medium">{collection.name}</p>
+                        <p className="text-sm text-muted-foreground">{collection.items} items</p>
+                      </div>
+                      <p className="text-sm">{collection.floorPrice} ETH</p>
                     </div>
-                    <p className="text-sm">{collection.floorPrice} ETH</p>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -299,8 +347,8 @@ const Profile: React.FC = () => {
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4">
                     {sortedNFTs.map((nft, i) => (
                       <Card key={nft.id || i} className="overflow-hidden">
-                        <div 
-                          className="aspect-square relative cursor-pointer" 
+                        <div
+                          className="aspect-square relative cursor-pointer"
                           onClick={() => handleViewDetails(nft)}
                         >
                           <CustomImage
