@@ -1,4 +1,4 @@
-import { createClient } from '@libsql/client';
+import { createClient, Row, ResultSet } from '@libsql/client';
 import { OwnedNft, Nft } from 'alchemy-sdk';
 
 // Definimos MarketItem aquí para evitar problemas de importación
@@ -54,15 +54,24 @@ export class NFTDatabaseManager {
     console.log('Cliente de base de datos inicializado');
   }
 
-  async getLastUpdate(address: string) {
-    const result = await this.client.execute({
-      sql: 'SELECT last_update_block, last_update_time FROM LastUpdate WHERE owner_address = ?',
-      args: [address]
-    });
-    return {
-      lastUpdateBlock: result.rows[0]?.last_update_block as number || 0,
-      lastUpdateTime: result.rows[0]?.last_update_time as number || 0
-    };
+  async getLastUpdate(address: string): Promise<{ lastUpdateBlock: number } | null> {
+    try {
+      const result: ResultSet = await this.client.execute({
+        sql: 'SELECT last_update_block FROM user_updates WHERE owner_address = ?',
+        args: [address],
+      });
+
+      if (result.rows.length > 0) {
+        const lastUpdateBlock = (result.rows[0] as Row).last_update_block;
+        if (typeof lastUpdateBlock === 'number') {
+          return { lastUpdateBlock };
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error al obtener la última actualización:', error);
+      throw error;
+    }
   }
 
   async getNFTsFromDatabase(address: string): Promise<ExistingNFT[]> {
@@ -167,7 +176,7 @@ export class NFTDatabaseManager {
 
   async updateLastUpdate(address: string, currentBlock: number) {
     await this.client.execute({
-      sql: 'INSERT OR REPLACE INTO LastUpdate (owner_address, last_update_block, last_update_time) VALUES (?, ?, ?);',
+      sql: 'INSERT OR REPLACE INTO user_updates (owner_address, last_update_block, last_update_time) VALUES (?, ?, ?);',
       args: [address, currentBlock, Date.now()]
     });
   }
@@ -315,13 +324,93 @@ export class NFTDatabaseManager {
     return null;
   }
 
-  async updateNFTInDatabase(nft: Nft): Promise<void> {
-    // Implementa la lógica para actualizar o insertar un NFT específico
-    // Usa una consulta UPSERT o INSERT ... ON CONFLICT DO UPDATE
+  async updateNFTInDatabase(nft: Nft, ownerAddress: string): Promise<void> {
+    const {
+      contract,
+      tokenId,
+      name,
+      description,
+      image,
+      tokenUri,
+    } = nft;
+
+    const contractAddress = contract.address;
+    const imageUrl = image?.originalUrl || image?.cachedUrl || '';
+    const tokenUriValue = typeof tokenUri === 'string' ? tokenUri : (tokenUri as any)?.raw || '';
+    
+    // Manejo seguro de attributes
+    let attributes = '[]';
+    if ('raw' in nft && typeof (nft as any).raw === 'object' && (nft as any).raw !== null) {
+      const rawData = nft.raw as { metadata?: { attributes?: unknown[] } };
+      if (rawData.metadata && Array.isArray(rawData.metadata.attributes)) {
+        attributes = JSON.stringify(rawData.metadata.attributes);
+      }
+    }
+
+    try {
+      await this.client.execute({
+        sql: `
+          INSERT INTO NFTs (
+            owner_address, token_id, contract_address, name, image, imageurl, 
+            description, token_uri, attributes, acquired_at, updated_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON CONFLICT(owner_address, token_id, contract_address) DO UPDATE SET
+            name = ?,
+            image = ?,
+            imageurl = ?,
+            description = ?,
+            token_uri = ?,
+            attributes = ?,
+            updated_at = ?
+        `,
+        args: [
+          ownerAddress, tokenId, contractAddress, name || '', imageUrl, imageUrl,
+          description || '', tokenUriValue, attributes, Date.now(), Date.now(),
+          name || '', imageUrl, imageUrl, description || '', tokenUriValue, attributes, Date.now()
+        ]
+      });
+
+      console.log(`NFT actualizado en la base de datos: ${contractAddress} - ${tokenId}`);
+    } catch (error) {
+      console.error('Error al actualizar NFT en la base de datos:', error);
+      throw error;
+    }
   }
 
   async removeNFTFromDatabase(address: string, contractAddress: string, tokenId: string): Promise<void> {
-    // Implementación del método
+    try {
+      await this.client.execute({
+        sql: `
+          DELETE FROM NFTs
+          WHERE owner_address = ? AND contract_address = ? AND token_id = ?
+        `,
+        args: [address, contractAddress, tokenId]
+      });
+
+      console.log(`NFT eliminado de la base de datos: ${contractAddress} - ${tokenId}`);
+    } catch (error) {
+      console.error('Error al eliminar NFT de la base de datos:', error);
+      throw error;
+    }
+  }
+
+  async getWalletData(address: string): Promise<boolean> {
+    try {
+      const result: ResultSet = await this.client.execute({
+        sql: 'SELECT COUNT(*) as count FROM NFTs WHERE owner_address = ?',
+        args: [address],
+      });
+
+      if (result.rows.length > 0) {
+        const count = (result.rows[0] as Row).count;
+        return typeof count === 'number' && count > 0;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error al obtener datos de la wallet:', error);
+      throw error;
+    }
   }
 
 } // Añade esta llave de cierre aquí

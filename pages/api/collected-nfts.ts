@@ -21,53 +21,53 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const dbManager = new NFTDatabaseManager();
 
   try {
-    const { lastUpdateBlock } = await dbManager.getLastUpdate(address);
-    
-    const currentBlock = await alchemy.core.getBlockNumber();
-    console.log('Bloque actual:', currentBlock);
+    // Comprobar si hay datos de la wallet en la base de datos
+    const existingData = await dbManager.getWalletData(address);
 
-    const fromBlockHex = `0x${lastUpdateBlock.toString(16)}`;
+    if (!existingData) {
+      console.log('No hay datos existentes para esta wallet. Obteniendo datos de Alchemy...');
+      // Si no hay datos, obtener NFTs de Alchemy
+      const nfts = await alchemy.nft.getNftsForOwner(address);
+      
+      // Procesar y guardar los NFTs en la base de datos
+      for (const nft of nfts.ownedNfts) {
+        await dbManager.updateNFTInDatabase(nft, address);
+      }
 
-    // Obtener transferencias desde el último bloque actualizado
-    const transfers = await alchemy.core.getAssetTransfers({
-      fromBlock: fromBlockHex,
-      toBlock: "latest",
-      toAddress: address,
-      category: [AssetTransfersCategory.ERC721, AssetTransfersCategory.ERC1155],
-    });
+      // Actualizar el último bloque procesado
+      const currentBlock = await alchemy.core.getBlockNumber();
+      await dbManager.updateLastUpdate(address, currentBlock);
 
-    // Obtener transferencias salientes
-    const outgoingTransfers = await alchemy.core.getAssetTransfers({
-      fromBlock: fromBlockHex,
-      toBlock: "latest",
-      fromAddress: address,
-      category: [AssetTransfersCategory.ERC721, AssetTransfersCategory.ERC1155],
-    });
+      console.log('Datos de Alchemy guardados en la base de datos');
+    } else {
+      console.log('Datos existentes encontrados para esta wallet');
+      // Si hay datos, actualizar desde el último bloque procesado
+      const lastUpdateData = await dbManager.getLastUpdate(address);
+      const currentBlock = await alchemy.core.getBlockNumber();
+      console.log('Bloque actual:', currentBlock);
 
-    // Procesar nuevos NFTs
-    for (const transfer of transfers.transfers) {
-      if (transfer.tokenId && transfer.rawContract.address) {
-        try {
-          const nft: Nft = await alchemy.nft.getNftMetadata(
-            transfer.rawContract.address,
-            transfer.tokenId
-          );
-          await dbManager.updateNFTInDatabase(nft);
-        } catch (error) {
-          console.error(`Error al obtener metadatos para NFT: ${transfer.rawContract.address} - ${transfer.tokenId}`, error);
+      if (lastUpdateData !== null && currentBlock > lastUpdateData.lastUpdateBlock) {
+        const fromBlockHex = `0x${lastUpdateData.lastUpdateBlock.toString(16)}`;
+        const transfers = await alchemy.core.getAssetTransfers({
+          fromBlock: fromBlockHex,
+          toBlock: "latest",
+          toAddress: address,
+          category: [AssetTransfersCategory.ERC721, AssetTransfersCategory.ERC1155],
+        });
+
+        for (const transfer of transfers.transfers) {
+          if (transfer.tokenId && transfer.rawContract.address) {
+            const nft = await alchemy.nft.getNftMetadata(
+              transfer.rawContract.address,
+              transfer.tokenId
+            );
+            await dbManager.updateNFTInDatabase(nft, address);
+          }
         }
+
+        await dbManager.updateLastUpdate(address, currentBlock);
       }
     }
-
-    // Eliminar NFTs transferidos
-    for (const transfer of outgoingTransfers.transfers) {
-      if (transfer.tokenId && transfer.rawContract.address) {
-        await dbManager.removeNFTFromDatabase(address, transfer.rawContract.address, transfer.tokenId);
-      }
-    }
-
-    // Actualizar el último bloque procesado
-    await dbManager.updateLastUpdate(address, currentBlock);
 
     // Obtener NFTs actualizados de la base de datos
     const updatedNFTs = await dbManager.getNFTsFromDatabase(address);

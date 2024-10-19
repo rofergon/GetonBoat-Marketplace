@@ -27,15 +27,15 @@ const client = createClient({
 
 async function createTables() {
   try {
-    // Crear la tabla LastUpdate
+    // Crear la tabla user_updates
     await client.execute(`
-      CREATE TABLE IF NOT EXISTS LastUpdate (
+      CREATE TABLE IF NOT EXISTS user_updates (
         owner_address TEXT PRIMARY KEY,
         last_update_block INTEGER NOT NULL,
         last_update_time INTEGER NOT NULL
       )
     `);
-    console.log('Tabla LastUpdate creada o ya existente.');
+    console.log('Tabla user_updates creada o ya existente.');
 
     // Modificar la tabla NFTs
     await client.execute(`

@@ -19,7 +19,6 @@ export interface MarketItem {
 }
 
 export const useFetchMarketItems = (page: number = 0) => {
-  console.log('Hook useFetchMarketItems llamado con página:', page);
   const [marketItems, setMarketItems] = useState<MarketItem[]>([]);
   const [totalItems, setTotalItems] = useState<number>(0);
 
@@ -39,14 +38,12 @@ export const useFetchMarketItems = (page: number = 0) => {
   useEffect(() => {
     if (totalItemsData) {
       const total = Number(totalItemsData);
-      console.log('Actualizando total de items:', total);
       setTotalItems(total);
     }
   }, [totalItemsData]);
 
   useEffect(() => {
     if (fetchedItems && Array.isArray(fetchedItems)) {
-      console.log('Actualizando marketItems con:', fetchedItems);
       setMarketItems(fetchedItems as MarketItem[]);
       updateNFTListingStatus(fetchedItems as MarketItem[]);
     }

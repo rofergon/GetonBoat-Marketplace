@@ -16,6 +16,22 @@ const nextConfig = {
         'gateway.pinata.cloud',  // Otro gateway IPFS alternativo
         'img.dot.fan',
         'arweave.net', // Añadimos el nuevo dominio aquí
+        'data.debox.pro', // Añadimos el nuevo dominio aquí
+        'locksmith.unlock-protocol.com', // Añadimos el nuevo dominio aquí
+        'storage.unlock-protocol.com', // Añadimos el nuevo dominio aquí
+        'storage.withfabric.xyz', // Añadimos el nuevo dominio aquí
+        'beebase.xyz', // Añadimos el nuevo dominio aquí
+        'sia.tech', // Nuevo dominio añadido
+        'www.lighthouse.storage', // Nuevo dominio añadido
+        'filecoin.io', // Nuevo dominio añadido
+        'storj.io', // Nuevo dominio añadido
+        'crust.network', // Nuevo dominio añadido
+        'www.0chain.net', // Nuevo dominio añadido
+        'centrifuge.io', // Nuevo dominio añadido
+        'infura.io', // Nuevo dominio añadido
+        'niftygateway.com', // Nuevo dominio añadido
+        'cloudflare-ipfs.com', // Nuevo dominio añadido
+        'aws.amazon.com', // Nuevo dominio añadido
       ], 
       dangerouslyAllowSVG: true,
       contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
