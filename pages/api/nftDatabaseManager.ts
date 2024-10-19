@@ -1,5 +1,5 @@
 import { createClient } from '@libsql/client';
-import { OwnedNft } from 'alchemy-sdk';
+import { OwnedNft, Nft } from 'alchemy-sdk';
 
 // Definimos MarketItem aquí para evitar problemas de importación
 interface MarketItem {
@@ -313,6 +313,15 @@ export class NFTDatabaseManager {
     }
 
     return null;
+  }
+
+  async updateNFTInDatabase(nft: Nft): Promise<void> {
+    // Implementa la lógica para actualizar o insertar un NFT específico
+    // Usa una consulta UPSERT o INSERT ... ON CONFLICT DO UPDATE
+  }
+
+  async removeNFTFromDatabase(address: string, contractAddress: string, tokenId: string): Promise<void> {
+    // Implementación del método
   }
 
 } // Añade esta llave de cierre aquí

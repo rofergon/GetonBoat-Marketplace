@@ -147,8 +147,15 @@ export interface PixelArtUIProps {
 
 // Añade esta interfaz al final del archivo
 export interface NFT {
-  id: string;
-  name: string;
-  image: string;
-  // Añade más propiedades según sea necesario para tu NFT
+  id?: string;
+  name?: string;
+  tokenId?: string;
+  image?: string;
+  description?: string;
+  tokenURI?: string;
+  attributes?: { trait_type: string; value: string }[];
+  contractAddress?: string;
+  isListed?: boolean;
+  listedPrice?: string | null;
+  marketItemId?: bigint;
 }

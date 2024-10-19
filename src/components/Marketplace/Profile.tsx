@@ -20,23 +20,7 @@ import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useUserCollections } from '../../hooks/Marketplace/useUserCollections';
 import { Loader2, ChevronDown, ChevronUp, X, Search } from "lucide-react"; // Importa el ícono de carga y búsqueda
 import { Input } from "../ui/input"; // Asegúrate de importar el componente Input
-
-interface NFT {
-  id?: string;
-  name?: string;
-  tokenId?: string;
-  image?: string;
-  description?: string;
-  tokenURI?: string;
-  attributes?: { trait_type: string; value: string }[];
-  contractAddress?: string;
-  isListed?: boolean;
-  listedPrice?: string | null;
-  marketItemId?: bigint;
-}
-
-
-
+import { NFT } from '../../types/types';
 
 const Profile: React.FC = () => {
   const [collectedNFTs, setCollectedNFTs] = useState<NFT[]>([]);
@@ -101,38 +85,37 @@ const Profile: React.FC = () => {
 
   const fetchCollectedNFTs = useCallback(async () => {
     if (!address) return;
-    setIsLoading(true); // Inicia la carga
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/collected-nfts?userAddress=${address}`);
       const data = await response.json();
 
-      const nftsWithListingInfo = data.nfts.map((nft: NFT) => {
-        const listedItem = marketItems.find(item =>
-          item.nftContractAddress.toLowerCase() === (nft.contractAddress?.toLowerCase() ?? '') &&
-          item.tokenId.toString() === nft.tokenId
+      // Actualizar el estado de manera incremental
+      setCollectedNFTs(prevNFTs => {
+        const updatedNFTs = [...prevNFTs];
+        data.nfts.forEach((newNFT: NFT) => {
+          const index = updatedNFTs.findIndex(nft => 
+            nft.contractAddress === newNFT.contractAddress && nft.tokenId === newNFT.tokenId
+          );
+          if (index !== -1) {
+            updatedNFTs[index] = newNFT;
+          } else {
+            updatedNFTs.push(newNFT);
+          }
+        });
+        // Eliminar NFTs que ya no están en la wallet
+        return updatedNFTs.filter(nft => 
+          data.nfts.some((newNFT: NFT) => 
+            newNFT.contractAddress === nft.contractAddress && newNFT.tokenId === nft.tokenId
+          )
         );
-
-        return {
-          ...nft,
-          isListed: !!listedItem,
-          listedPrice: listedItem ? listedItem.price.toString() : null,
-          marketItemId: listedItem ? listedItem.marketItemId : undefined
-        };
       });
-
-      setCollectedNFTs(nftsWithListingInfo);
-
-      const listedIds = new Set(nftsWithListingInfo
-        .filter((nft: NFT) => nft.isListed)
-        .map((nft: NFT) => nft.id?.toString() || '')
-      );
-      setListedNFTs(listedIds as Set<string>);
     } catch (error) {
-      setCollectedNFTs([]);
+      console.error('Error fetching NFTs:', error);
     } finally {
-      setIsLoading(false); // Finaliza la carga
+      setIsLoading(false);
     }
-  }, [address, marketItems]);
+  }, [address]);
 
   useEffect(() => {
     if (address) {
