@@ -24,7 +24,7 @@ export default function Home() {
   const [showUserNFTs, setShowUserNFTs] = useState(false);
   const [collectionNames, setCollectionNames] = useState<{ [key: string]: string }>({});
 
-  // Usar el hook useUserCollections
+  // Use the useUserCollections hook
   const userCollections = useUserCollections(marketItems);
 
   useEffect(() => {
@@ -46,14 +46,14 @@ export default function Home() {
             const data = await response.json();
             metadata[item.marketItemId.toString()] = data;
             
-            // Obtener el nombre de la colección
+            // Get the collection name
             if (!names[item.nftContractAddress]) {
               const collectionResponse = await fetch(`/api/collection-info?contractAddress=${item.nftContractAddress}`);
               const collectionData = await collectionResponse.json();
-              names[item.nftContractAddress] = collectionData.name || 'Colección Desconocida';
+              names[item.nftContractAddress] = collectionData.name || 'Unknown Collection';
             }
           } catch (error) {
-            console.error('Error al obtener metadatos:', error);
+            console.error('Error fetching metadata:', error);
           }
         }
       }
@@ -75,15 +75,15 @@ export default function Home() {
         BigInt(marketItem.price)
       );
       if (isSuccess) {
-        toast.success('NFT comprado con éxito');
-        // Aquí puedes actualizar la lista de NFTs o redirigir al usuario
+        toast.success('NFT purchased successfully');
+        // Here you can update the NFT list or redirect the user
       }
     } catch (error) {
-      console.error('Error al comprar el NFT:', error);
+      console.error('Error buying NFT:', error);
       if (error instanceof Error) {
         toast.error(error.message);
       } else {
-        toast.error('Error desconocido al comprar el NFT');
+        toast.error('Unknown error buying NFT');
       }
     }
   };
@@ -109,24 +109,24 @@ export default function Home() {
           <div className="flex flex-col items-center space-y-4 text-center">
             <div className="space-y-2">
               <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-white">
-                Descubre, Compra y Vende NFTs Únicos
+                Discover, Buy, and Sell Unique NFTs
               </h1>
               <p className="mx-auto max-w-[700px] text-gray-300 md:text-xl">
-                Explora nuestra colección de NFTs y encuentra piezas únicas para tu colección digital.
+                Explore our NFT collection and find unique pieces for your digital collection.
               </p>
             </div>
             <div className="w-full max-w-sm space-y-2">
               <form className="flex space-x-2" onSubmit={handleSearch}>
                 <Input
                   className="max-w-lg flex-1 bg-white text-black"
-                  placeholder="Buscar por dirección de wallet"
+                  placeholder="Search by wallet address"
                   type="text"
                   value={searchAddress}
                   onChange={(e) => setSearchAddress(e.target.value)}
                 />
                 <Button type="submit" className="bg-white text-black hover:bg-gray-200">
                   <Search className="h-4 w-4" />
-                  <span className="sr-only">Buscar</span>
+                  <span className="sr-only">Search</span>
                 </Button>
               </form>
             </div>
@@ -139,16 +139,16 @@ export default function Home() {
       ) : (
         <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
           <div className="container px-4 md:px-6">
-            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-8">Últimos Listados</h2>
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-8">Latest Listings</h2>
             {isLoading ? (
-              <p>Cargando...</p>
+              <p>Loading...</p>
             ) : fetchError ? (
-              <p>Error al cargar los items: {fetchError.message}</p>
+              <p>Error loading items: {fetchError.message}</p>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {sortedMarketItems.slice(0, 8).map((item) => {
                   const metadata = nftMetadata[item.marketItemId.toString()];
-                  const collectionName = collectionNames[item.nftContractAddress] || 'Colección Desconocida';
+                  const collectionName = collectionNames[item.nftContractAddress] || 'Unknown Collection';
                   return (
                     <Card key={item.marketItemId.toString()} className="overflow-hidden">
                       <CardHeader className="p-0">
@@ -168,7 +168,7 @@ export default function Home() {
                       <CardContent className="pt-2">
                         <CardTitle>{metadata?.name || `NFT #${item.tokenId.toString()}`}</CardTitle>
                         <p className="text-sm text-muted-foreground">{collectionName}</p>
-                        <p className="text-sm text-muted-foreground">Precio: {formatEther(BigInt(item.price))} ETH</p>
+                        <p className="text-sm text-muted-foreground">Price: {formatEther(BigInt(item.price))} ETH</p>
                       </CardContent>
                       <CardFooter className="flex flex-col space-y-2">
                         <Button
@@ -177,7 +177,7 @@ export default function Home() {
                           onClick={() => handleBuy(item)}
                           disabled={isBuying}
                         >
-                          {isBuying ? 'Comprando...' : `Comprar por ${formatEther(BigInt(item.price))} ETH`}
+                          {isBuying ? 'Buying...' : `Buy for ${formatEther(BigInt(item.price))} ETH`}
                         </Button>
                       </CardFooter>
                     </Card>
@@ -187,7 +187,7 @@ export default function Home() {
             )}
             <div className="mt-12 text-center">
               <Button>
-                Ver más <ArrowRight className="ml-2 h-4 w-4" />
+                See more <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -210,9 +210,9 @@ export default function Home() {
               />
             </div>
             <p className="mt-2">{selectedNFT?.metadata?.description}</p>
-            <p className="mt-2">Precio: {formatEther(BigInt(selectedNFT?.price || 0))} ETH</p>
-            <p>ID del Token: {selectedNFT?.tokenId.toString()}</p>
-            <p>Dirección del Contrato: {selectedNFT?.nftContractAddress}</p>
+            <p className="mt-2">Price: {formatEther(BigInt(selectedNFT?.price || 0))} ETH</p>
+            <p>Token ID: {selectedNFT?.tokenId.toString()}</p>
+            <p>Contract Address: {selectedNFT?.nftContractAddress}</p>
           </div>
         </DialogContent>
       </Dialog>

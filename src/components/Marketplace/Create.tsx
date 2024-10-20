@@ -24,14 +24,14 @@ export default function Create() {
     event.preventDefault();
     
     if (!selectedFile) {
-      toast.error("Por favor, selecciona una imagen");
+      toast.error("Please select an image");
       return;
     }
 
     try {
       await mintNFT(nftName, description, selectedFile);
       
-      // Resetear el formulario
+      // Reset the form
       setNftName("");
       setDescription("");
       setSelectedFile(null);
@@ -42,35 +42,35 @@ export default function Create() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Crear Nuevo NFT</h1>
+      <h1 className="text-3xl font-bold mb-8">Create New NFT</h1>
       <Card className="max-w-2xl mx-auto">
         <form onSubmit={handleSubmit}>
           <CardHeader>
-            <CardTitle>Detalles del NFT</CardTitle>
+            <CardTitle>NFT Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="nftName">Nombre</Label>
+              <Label htmlFor="nftName">Name</Label>
               <Input
                 id="nftName"
-                placeholder="Ingrese el nombre de su NFT"
+                placeholder="Enter your NFT name"
                 value={nftName}
                 onChange={(e) => setNftName(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Descripción</Label>
+              <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                placeholder="Describa su NFT"
+                placeholder="Describe your NFT"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="image">Imagen</Label>
+              <Label htmlFor="image">Image</Label>
               <div className="flex items-center space-x-2">
                 <Input
                   id="image"
@@ -94,7 +94,7 @@ export default function Create() {
                     <div className="text-center">
                       <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
                       <span className="mt-2 block text-sm font-medium text-muted-foreground">
-                        Seleccionar imagen
+                        Select image
                       </span>
                     </div>
                   )}
@@ -105,10 +105,10 @@ export default function Create() {
           <CardFooter>
             <Button type="submit" className="w-full" disabled={isMinting || isUploading}>
               {isMinting || isUploading ? (
-                "Procesando..."
+                "Processing..."
               ) : (
                 <>
-                  <Plus className="mr-2 h-4 w-4" /> Crear y Mintear NFT
+                  <Plus className="mr-2 h-4 w-4" /> Create and Mint NFT
                 </>
               )}
             </Button>

@@ -14,41 +14,43 @@ interface RoadmapSection {
 
 const roadmapData: RoadmapSection[] = [
   {
-    title: "Zona Educativa",
+    title: "Educational Zone",
     items: [
-      { title: "Guía de introducción a NFTs", description: "Crear contenido educativo sobre los fundamentos de los NFTs", status: 'in-progress' },
-      { title: "Tutoriales de minting", description: "Desarrollar tutoriales paso a paso sobre cómo crear y mintear NFTs", status: 'planned' },
-      { title: "Tutoriales sobre Base Name", description: "Crear guías explicativas sobre el concepto y uso de Base Name en NFTs", status: 'planned' },
-      { title: "Webinars con artistas establecidos", description: "Organizar sesiones en vivo con artistas exitosos en el espacio NFT", status: 'planned' },
-      { title: "Recursos de marketing digital", description: "Proporcionar guías sobre cómo promocionar NFTs en redes sociales", status: 'planned' },
-      { title: "Programa de mentoría", description: "Lanzar un programa de mentoría para artistas emergentes", status: 'planned' },
+      { title: "Introduction to NFTs Guide", description: "Create educational content on the fundamentals of NFTs", status: 'in-progress' },
+      { title: "Minting Tutorials", description: "Develop step-by-step tutorials on how to create and mint NFTs", status: 'planned' },
+      { title: "Base Name Tutorials", description: "Create explanatory guides on the concept and use of Base Name in NFTs", status: 'planned' },
+      { title: "Webinars with Established Artists", description: "Organize live sessions with successful artists in the NFT space", status: 'planned' },
+      { title: "Digital Marketing Resources", description: "Provide guides on how to promote NFTs on social media", status: 'planned' },
+      { title: "Mentorship Program", description: "Launch a mentorship program for emerging artists", status: 'planned' },
+      { title: "Coworking Meetups", description: "Organize meetups in coworking spaces with local artists", status: 'planned' },
     ]
   },
   {
     title: "NFTs",
     items: [
-      { title: "Lanzamiento de colección inicial", description: "Lanzar nuestra primera colección de NFTs exclusivos", status: 'completed' },
-      { title: "Integración con wallets populares", description: "Añadir soporte para MetaMask, WalletConnect, etc.", status: 'completed' },
-      { title: "Implementar minting dinámico", description: "Permitir a los usuarios crear sus propios NFTs en la plataforma", status: 'completed' },
-      { title: "Listado, compra y venta de NFTs", description: "Implementar funcionalidad completa para listar, comprar y vender NFTs en la plataforma", status: 'completed' },
-      { title: "Editor de animación pixel art", description: "Implementar un editor para crear animaciones pixel art y convertirlas en NFTs", status: 'completed' },
-      { title: "Integracion Estandar ERC 1155", description: "Permite la creación de copias de NFTs y colecciones", status: 'planned' },
+      { title: "Initial Collection Launch", description: "Launch our first collection of exclusive NFTs", status: 'completed' },
+      { title: "Integration with Popular Wallets", description: "Add support for MetaMask, WalletConnect, etc.", status: 'completed' },
+      { title: "Implement Dynamic Minting", description: "Allow users to create their own NFTs on the platform", status: 'completed' },
+      { title: "NFT Listing, Buying, and Selling", description: "Implement full functionality to list, buy, and sell NFTs on the platform", status: 'completed' },
+      { title: "Pixel Art Animation Editor", description: "Implement an editor to create pixel art animations and convert them into NFTs", status: 'completed' },
+      { title: "ERC-1155 Standard Integration", description: "Allow the creation of NFT copies and collections", status: 'planned' },
+      { title: "Music NFT Section", description: "Add a dedicated section for music-based NFTs and audio files", status: 'planned' },
     ]
   },
   {
-    title: "Subastas",
+    title: "Auctions",
     items: [
-      { title: "Sistema de subastas básico", description: "Implementar funcionalidad de subasta para NFTs", status: 'in-progress' },
-      { title: "Subastas con tiempo limitado", description: "Añadir subastas con cuenta regresiva", status: 'planned' },
-      { title: "Subastas silenciosas", description: "Implementar sistema de subastas silenciosas", status: 'planned' },
+      { title: "Basic Auction System", description: "Implement auction functionality for NFTs", status: 'in-progress' },
+      { title: "Time-Limited Auctions", description: "Add countdown auctions", status: 'planned' },
+      { title: "Silent Auctions", description: "Implement silent auction system", status: 'planned' },
     ]
   },
   {
     title: "DAO",
     items: [
-      { title: "Lanzamiento de token de gobernanza", description: "Crear y distribuir tokens para la gobernanza de la DAO", status: 'planned' },
-      { title: "Sistema de propuestas", description: "Implementar sistema para que los miembros puedan hacer y votar propuestas", status: 'planned' },
-      { title: "Integración con Snapshot", description: "Utilizar Snapshot para votaciones off-chain", status: 'planned' },
+      { title: "Governance Token Launch", description: "Create and distribute tokens for DAO governance", status: 'planned' },
+      { title: "Proposal System", description: "Implement system for members to make and vote on proposals", status: 'planned' },
+      { title: "Snapshot Integration", description: "Use Snapshot for off-chain voting", status: 'planned' },
     ]
   }
 ];
@@ -71,9 +73,9 @@ const Roadmap: React.FC = () => {
                     item.status === 'in-progress' ? 'bg-yellow-500 text-black' :
                     'bg-blue-500 text-white'
                   }`}>
-                    {item.status === 'completed' ? 'Completado' :
-                      item.status === 'in-progress' ? 'En progreso' :
-                      'Planeado'}
+                    {item.status === 'completed' ? 'Completed' :
+                      item.status === 'in-progress' ? 'In Progress' :
+                      'Planned'}
                   </span>
                   <h4 className="mt-1 font-semibold">{item.title}</h4>
                   <p className="text-sm text-muted-foreground">{item.description}</p>
