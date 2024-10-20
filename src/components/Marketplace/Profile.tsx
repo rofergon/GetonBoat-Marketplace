@@ -49,7 +49,7 @@ const Profile: React.FC = () => {
   } = useNFTListing(listingNFT?.contractAddress as `0x${string}`, listingNFT?.tokenId || '');
 
   const [currentPage] = useState(0);
-  const { marketItems, totalItems: _totalItems } = useFetchMarketItems(currentPage);
+  const { totalItems: _totalItems } = useFetchMarketItems(currentPage);
   const { nfts: _nfts } = useNFTs(address);
 
   const [, setListedNFTs] = useState<Set<string>>(new Set());

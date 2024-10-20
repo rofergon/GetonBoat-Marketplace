@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import CustomImage from '../ui/CustomImage';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
@@ -12,9 +12,14 @@ import { NFT } from '../../types/types';
 import { useUpdateEmptyTokenURIs } from '../../hooks/useUpdateEmptyTokenURIs';
 import { Address, Avatar, Name, Identity, Badge } from '@coinbase/onchainkit/identity';
 import Image from 'next/image';
+import { isAddress } from 'viem';
 
 interface UserNFTsProps {
   userAddress: string;
+}
+
+const formatAddress = (address: string | undefined): `0x${string}` | undefined => {
+  return address && isAddress(address) ? address as `0x${string}` : undefined;
 }
 
 const UserNFTs: React.FC<UserNFTsProps> = ({ userAddress }) => {
@@ -166,12 +171,12 @@ const UserNFTs: React.FC<UserNFTsProps> = ({ userAddress }) => {
       <div className="max-w-[1920px] mx-auto px-2 sm:px-4 lg:px-6 -mt-24">
         <div className="flex flex-col sm:flex-row items-start sm:items-end mb-6">
           <Avatar
-            address={userAddress || undefined}
+            address={formatAddress(userAddress)}
             className="w-32 h-32 rounded-full border-4 border-background"
           />
           <div className="mt-4 sm:mt-0 sm:ml-4 mb-2">
             <Identity
-              address={userAddress || '0x0'}
+              address={formatAddress(userAddress) || '0x0000000000000000000000000000000000000000'}
               schemaId="0x8d2d6cc5c0f8b3cb29b6e9f5c0c70b39a0c88a7c0e3f5d0d92f1f5e3c64c1a0b"
             >
               <Name className="text-2xl font-bold">

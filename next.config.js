@@ -48,6 +48,11 @@ const nextConfig = {
         'www.arcade.fun', // Agregamos este nuevo dominio
         'paragraph.xyz', // Agregamos este nuevo dominio
         'far.cards', // Agregamos este nuevo dominio
+        'assets.cymbal.xyz', // Agregamos este nuevo dominio
+        'lambda.im', // Agregamos este nuevo dominio
+        'nft.clashmon.com', // Agregamos este nuevo dominio
+        'cdn.galxe.com', // Agregamos este nuevo dominio
+        's3.launchpad.heymint.xyz', // Agregamos este nuevo dominio
       ], 
       dangerouslyAllowSVG: true,
       contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

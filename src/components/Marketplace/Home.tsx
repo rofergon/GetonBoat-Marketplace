@@ -12,6 +12,7 @@ import { useCreateMarketSale } from '../../hooks/Marketplace/useCreateMarketSale
 import { toast } from 'react-hot-toast';
 import { formatEther } from 'viem';
 import UserNFTs from './UserNFTs';
+import { useUserCollections } from '../../hooks/Marketplace/useUserCollections';
 
 export default function Home() {
   const { marketItems, isLoading, error: fetchError } = useFetchMarketItems(0);
@@ -21,22 +22,43 @@ export default function Home() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchAddress, setSearchAddress] = useState('');
   const [showUserNFTs, setShowUserNFTs] = useState(false);
+  const [collectionNames, setCollectionNames] = useState<{ [key: string]: string }>({});
+
+  // Usar el hook useUserCollections
+  const userCollections = useUserCollections(marketItems);
+
+  useEffect(() => {
+    const names: { [key: string]: string } = {};
+    userCollections.forEach(collection => {
+      names[collection.contractAddress.toLowerCase()] = collection.name;
+    });
+    setCollectionNames(names);
+  }, [userCollections]);
 
   useEffect(() => {
     const fetchMetadata = async () => {
       const metadata: { [key: string]: any } = {};
+      const names: { [key: string]: string } = {};
       for (const item of marketItems) {
         if (item.tokenId) {
           try {
             const response = await fetch(`/api/nft-metadata?tokenId=${item.tokenId.toString()}&contractAddress=${item.nftContractAddress}`);
             const data = await response.json();
             metadata[item.marketItemId.toString()] = data;
+            
+            // Obtener el nombre de la colección
+            if (!names[item.nftContractAddress]) {
+              const collectionResponse = await fetch(`/api/collection-info?contractAddress=${item.nftContractAddress}`);
+              const collectionData = await collectionResponse.json();
+              names[item.nftContractAddress] = collectionData.name || 'Colección Desconocida';
+            }
           } catch (error) {
             console.error('Error al obtener metadatos:', error);
           }
         }
       }
       setNftMetadata(metadata);
+      setCollectionNames(names);
     };
 
     if (marketItems.length > 0) {
@@ -126,6 +148,7 @@ export default function Home() {
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {sortedMarketItems.slice(0, 8).map((item) => {
                   const metadata = nftMetadata[item.marketItemId.toString()];
+                  const collectionName = collectionNames[item.nftContractAddress] || 'Colección Desconocida';
                   return (
                     <Card key={item.marketItemId.toString()} className="overflow-hidden">
                       <CardHeader className="p-0">
@@ -144,6 +167,7 @@ export default function Home() {
                       </CardHeader>
                       <CardContent className="pt-2">
                         <CardTitle>{metadata?.name || `NFT #${item.tokenId.toString()}`}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{collectionName}</p>
                         <p className="text-sm text-muted-foreground">Precio: {formatEther(BigInt(item.price))} ETH</p>
                       </CardContent>
                       <CardFooter className="flex flex-col space-y-2">
