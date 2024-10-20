@@ -39,6 +39,13 @@ const nextConfig = {
         'superrare.com',
         'ipfs.fleek.co',
         'gateway.lighthouse.storage', // Agregamos este nuevo dominio
+        'assets-chibi-go.s3.amazonaws.com', // Agregamos este nuevo dominio
+        'assets.bueno.art', // Agregamos este nuevo dominio
+        'g2-minter.vercel.app', // Agregamos este nuevo dominio
+        'files.iyk.app', // Agregamos este nuevo dominio
+        'property.checkin.gg', // Agregamos este nuevo dominio
+        'highlight-creator-assets.highlight.xyz', // Agregamos este nuevo dominio
+        'www.arcade.fun', // Agregamos este nuevo dominio
       ], 
       dangerouslyAllowSVG: true,
       contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

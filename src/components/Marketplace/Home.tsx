@@ -11,6 +11,7 @@ import CustomImage from '../ui/CustomImage';
 import { useCreateMarketSale } from '../../hooks/Marketplace/useCreateMarketSale';
 import { toast } from 'react-hot-toast';
 import { formatEther } from 'viem';
+import UserNFTs from './UserNFTs';
 
 export default function Home() {
   const { marketItems, isLoading, error: fetchError } = useFetchMarketItems(0);
@@ -18,6 +19,8 @@ export default function Home() {
   const { handleCreateMarketSale, isBuying, isSuccess } = useCreateMarketSale();
   const [selectedNFT, setSelectedNFT] = useState<any | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchAddress, setSearchAddress] = useState('');
+  const [showUserNFTs, setShowUserNFTs] = useState(false);
 
   useEffect(() => {
     const fetchMetadata = async () => {
@@ -70,6 +73,13 @@ export default function Home() {
     setIsDialogOpen(true);
   };
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchAddress) {
+      setShowUserNFTs(true);
+    }
+  };
+
   return (
     <>
       <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 bg-black">
@@ -84,8 +94,14 @@ export default function Home() {
               </p>
             </div>
             <div className="w-full max-w-sm space-y-2">
-              <form className="flex space-x-2">
-                <Input className="max-w-lg flex-1 bg-white text-black" placeholder="Buscar NFTs" type="text" />
+              <form className="flex space-x-2" onSubmit={handleSearch}>
+                <Input
+                  className="max-w-lg flex-1 bg-white text-black"
+                  placeholder="Buscar por dirección de wallet"
+                  type="text"
+                  value={searchAddress}
+                  onChange={(e) => setSearchAddress(e.target.value)}
+                />
                 <Button type="submit" className="bg-white text-black hover:bg-gray-200">
                   <Search className="h-4 w-4" />
                   <span className="sr-only">Buscar</span>
@@ -95,59 +111,65 @@ export default function Home() {
           </div>
         </div>
       </section>
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
-        <div className="container px-4 md:px-6">
-          <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-8">Últimos Listados</h2>
-          {isLoading ? (
-            <p>Cargando...</p>
-          ) : fetchError ? (
-            <p>Error al cargar los items: {fetchError.message}</p>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {sortedMarketItems.slice(0, 8).map((item) => {
-                const metadata = nftMetadata[item.marketItemId.toString()];
-                return (
-                  <Card key={item.marketItemId.toString()} className="overflow-hidden">
-                    <CardHeader className="p-0">
-                      <div
-                        className="aspect-square relative cursor-pointer w-full h-0 pb-[100%]"
-                        onClick={() => handleOpenDialog(item)}
-                      >
-                        <CustomImage
-                          alt={`NFT ${item.tokenId.toString()}`}
-                          src={metadata?.imageurl || "/placeholder.png"}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          className="absolute top-0 left-0 w-full h-full"
-                        />
-                      </div>
-                    </CardHeader>
-                    <CardContent className="pt-2">
-                      <CardTitle>{metadata?.name || `NFT #${item.tokenId.toString()}`}</CardTitle>
-                      <p className="text-sm text-muted-foreground">Precio: {formatEther(BigInt(item.price))} ETH</p>
-                    </CardContent>
-                    <CardFooter className="flex flex-col space-y-2">
-                      <Button
-                        className="w-full"
-                        variant="secondary"
-                        onClick={() => handleBuy(item)}
-                        disabled={isBuying}
-                      >
-                        {isBuying ? 'Comprando...' : `Comprar por ${formatEther(BigInt(item.price))} ETH`}
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                );
-              })}
+      
+      {showUserNFTs ? (
+        <UserNFTs userAddress={searchAddress} />
+      ) : (
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-muted">
+          <div className="container px-4 md:px-6">
+            <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl mb-8">Últimos Listados</h2>
+            {isLoading ? (
+              <p>Cargando...</p>
+            ) : fetchError ? (
+              <p>Error al cargar los items: {fetchError.message}</p>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {sortedMarketItems.slice(0, 8).map((item) => {
+                  const metadata = nftMetadata[item.marketItemId.toString()];
+                  return (
+                    <Card key={item.marketItemId.toString()} className="overflow-hidden">
+                      <CardHeader className="p-0">
+                        <div
+                          className="aspect-square relative cursor-pointer w-full h-0 pb-[100%]"
+                          onClick={() => handleOpenDialog(item)}
+                        >
+                          <CustomImage
+                            alt={`NFT ${item.tokenId.toString()}`}
+                            src={metadata?.imageurl || "/placeholder.png"}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            className="absolute top-0 left-0 w-full h-full"
+                          />
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-2">
+                        <CardTitle>{metadata?.name || `NFT #${item.tokenId.toString()}`}</CardTitle>
+                        <p className="text-sm text-muted-foreground">Precio: {formatEther(BigInt(item.price))} ETH</p>
+                      </CardContent>
+                      <CardFooter className="flex flex-col space-y-2">
+                        <Button
+                          className="w-full"
+                          variant="secondary"
+                          onClick={() => handleBuy(item)}
+                          disabled={isBuying}
+                        >
+                          {isBuying ? 'Comprando...' : `Comprar por ${formatEther(BigInt(item.price))} ETH`}
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+            <div className="mt-12 text-center">
+              <Button>
+                Ver más <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
             </div>
-          )}
-          <div className="mt-12 text-center">
-            <Button>
-              Ver más <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
+      
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
