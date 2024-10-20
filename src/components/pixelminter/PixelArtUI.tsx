@@ -148,10 +148,10 @@ const PixelArtUI: React.FC<PixelArtUIProps> = ({
             toggleOnionSkinning={toggleOnionSkinning}
             updateOnionSkinningOpacity={updateOnionSkinningOpacity}
           />
-
           <button
             onClick={toggleSidePanel}
             className="p-1 bg-muted hover:bg-muted focus:outline-none rounded absolute bottom-3 z-50"
+            title="Toggle Side Panel"
             style={{
               width: '32px',
               height: '32px',
