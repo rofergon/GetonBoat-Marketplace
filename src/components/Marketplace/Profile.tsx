@@ -18,9 +18,10 @@ import { useCancelNFTListing } from '../../hooks/Marketplace/useCancelNFTListing
 import { parseEther } from 'ethers/lib/utils';
 import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useUserCollections } from '../../hooks/Marketplace/useUserCollections';
-import { Loader2, ChevronDown, ChevronUp, X, Search } from "lucide-react"; // Importa el ícono de carga y búsqueda
+import { Loader2, ChevronDown, ChevronUp, X, Search, RefreshCw } from "lucide-react"; // Importa el ícono de carga y búsqueda
 import { Input } from "../ui/input"; // Asegúrate de importar el componente Input
 import { NFT } from '../../types/types';
+import { useUpdateEmptyTokenURIs } from '../../hooks/useUpdateEmptyTokenURIs'; // Importa el hook
 
 const Profile: React.FC = () => {
   const [collectedNFTs, setCollectedNFTs] = useState<NFT[]>([]);
@@ -221,6 +222,21 @@ const Profile: React.FC = () => {
     );
   }, [sortedCollections, searchTerm]);
 
+  const { updateEmptyTokenURIs, isUpdating } = useUpdateEmptyTokenURIs();
+
+  const handleUpdateTokenURI = async () => {
+    try {
+      console.log(`Iniciando actualización de nombres y tokenURIs para NFTs con nombre vacío`);
+      await updateEmptyTokenURIs();
+      console.log(`Actualización de nombres y tokenURIs completada`);
+      // Actualiza la lista de NFTs después de la actualización
+      await fetchCollectedNFTs();
+      console.log(`Lista de NFTs actualizada después de la actualización`);
+    } catch (error) {
+      console.error('Error al actualizar nombres y tokenURIs:', error);
+    }
+  };
+
   if (!address) {
     return (
       <div className="w-full min-h-screen bg-i flex items-center justify-center">
@@ -364,6 +380,18 @@ const Profile: React.FC = () => {
 
             <div className="flex-1">
               <TabsContent value="collected">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold">NFTs Coleccionados</h2>
+                  <Button
+                    onClick={handleUpdateTokenURI}
+                    disabled={isUpdating}
+                    className="flex items-center space-x-2"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isUpdating ? 'animate-spin' : ''}`} />
+                    <span>{isUpdating ? 'Actualizando...' : 'Actualizar metadatos'}</span>
+                  </Button>
+                </div>
+                
                 {isLoading ? (
                   <div className="flex justify-center items-center h-64">
                     <Loader2 className="w-12 h-12 animate-spin text-primary" />

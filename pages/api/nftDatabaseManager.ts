@@ -413,4 +413,162 @@ export class NFTDatabaseManager {
     }
   }
 
+  async getNFTsWithEmptyTokenURI(): Promise<{ contractAddress: string; tokenId: string }[]> {
+    try {
+      const result = await this.client.execute({
+        sql: 'SELECT contract_address, token_id FROM NFTs WHERE token_uri = "" OR token_uri IS NULL',
+        args: []
+      });
+
+      return result.rows.map((row: any) => ({
+        contractAddress: row.contract_address,
+        tokenId: row.token_id
+      }));
+    } catch (error) {
+      console.error('Error al obtener NFTs con tokenURI vacío:', error);
+      throw error;
+    }
+  }
+
+  async updateNFTTokenURI(contractAddress: string, tokenId: string, tokenURI: string): Promise<void> {
+    try {
+      await this.client.execute({
+        sql: 'UPDATE NFTs SET token_uri = ? WHERE contract_address = ? AND token_id = ?',
+        args: [tokenURI, contractAddress, tokenId]
+      });
+      console.log(`TokenURI actualizado para NFT: ${contractAddress} - ${tokenId}`);
+    } catch (error) {
+      console.error('Error al actualizar tokenURI del NFT:', error);
+      throw error;
+    }
+  }
+
+  async getNFTsWithEmptyName(): Promise<{ contractAddress: string; tokenId: string }[]> {
+    try {
+      const result = await this.client.execute({
+        sql: 'SELECT contract_address, token_id FROM NFTs WHERE name = "" OR name IS NULL',
+        args: []
+      });
+
+      return result.rows.map((row: any) => ({
+        contractAddress: row.contract_address,
+        tokenId: row.token_id
+      }));
+    } catch (error) {
+      console.error('Error al obtener NFTs con nombre vacío:', error);
+      throw error;
+    }
+  }
+
+  async updateNFTNameAndTokenURI(contractAddress: string, tokenId: string, name: string, tokenURI: string): Promise<void> {
+    try {
+      await this.client.execute({
+        sql: 'UPDATE NFTs SET name = ?, token_uri = ? WHERE contract_address = ? AND token_id = ?',
+        args: [name, tokenURI, contractAddress, tokenId]
+      });
+      console.log(`Nombre y TokenURI actualizados para NFT: ${contractAddress} - ${tokenId}`);
+    } catch (error) {
+      console.error('Error al actualizar nombre y tokenURI del NFT:', error);
+      throw error;
+    }
+  }
+
+  async getNFTsWithEmptyNameOrImage(): Promise<{ contractAddress: string; tokenId: string }[]> {
+    try {
+      const result = await this.client.execute({
+        sql: 'SELECT contract_address, token_id FROM NFTs WHERE name = "" OR name IS NULL OR image = "" OR image IS NULL',
+        args: []
+      });
+
+      return result.rows.map((row: any) => ({
+        contractAddress: row.contract_address,
+        tokenId: row.token_id
+      }));
+    } catch (error) {
+      console.error('Error al obtener NFTs con nombre o imagen vacía:', error);
+      throw error;
+    }
+  }
+
+  async updateNFTNameImageAndTokenURI(contractAddress: string, tokenId: string, name: string, image: string, tokenURI: string): Promise<void> {
+    try {
+      const result = await this.client.execute({
+        sql: 'UPDATE NFTs SET name = ?, image = ?, token_uri = ? WHERE contract_address = ? AND token_id = ?',
+        args: [name, image, tokenURI, contractAddress, tokenId]
+      });
+      console.log(`Nombre, imagen y TokenURI actualizados para NFT: ${contractAddress} - ${tokenId}`, result);
+      if (result.rowsAffected === 0) {
+        console.warn(`No se actualizó ningún registro para NFT: ${contractAddress} - ${tokenId}`);
+      }
+    } catch (error) {
+      console.error('Error al actualizar nombre, imagen y tokenURI del NFT:', error);
+      throw error;
+    }
+  }
+
+  async getNFTsWithEmptyNameOrDescription(): Promise<{ contractAddress: string; tokenId: string }[]> {
+    try {
+      const result = await this.client.execute({
+        sql: 'SELECT contract_address, token_id FROM NFTs WHERE name = "" OR name IS NULL OR description = "" OR description IS NULL',
+        args: []
+      });
+
+      return result.rows.map((row: any) => ({
+        contractAddress: row.contract_address,
+        tokenId: row.token_id
+      }));
+    } catch (error) {
+      console.error('Error al obtener NFTs con nombre o descripción vacíos:', error);
+      throw error;
+    }
+  }
+
+  async updateNFTMetadata(contractAddress: string, tokenId: string, name: string, image: string, imageurl: string, description: string, tokenURI: string): Promise<void> {
+    try {
+      console.log(`Intentando actualizar metadata para NFT: ${contractAddress} - ${tokenId}`);
+      console.log(`Nuevos datos: name=${name}, image=${image}, imageurl=${imageurl}, description=${description}, tokenURI=${tokenURI}`);
+
+      const result = await this.client.execute({
+        sql: 'UPDATE NFTs SET name = ?, image = ?, imageurl = ?, description = ?, token_uri = ? WHERE contract_address = ? AND token_id = ?',
+        args: [name, image, imageurl, description, tokenURI, contractAddress, tokenId]
+      });
+
+      console.log(`Resultado de la actualización:`, result);
+
+      if (result.rowsAffected === 0) {
+        console.warn(`No se actualizó ningún registro para NFT: ${contractAddress} - ${tokenId}. Verificando si el NFT existe.`);
+        
+        const checkResult = await this.client.execute({
+          sql: 'SELECT * FROM NFTs WHERE contract_address = ? AND token_id = ?',
+          args: [contractAddress, tokenId]
+        });
+
+        if (checkResult.rows.length === 0) {
+          console.error(`El NFT ${contractAddress} - ${tokenId} no existe en la base de datos. Insertando nuevo registro.`);
+          await this.insertNewNFT(contractAddress, tokenId, name, image, imageurl, description, tokenURI);
+        } else {
+          console.error(`El NFT existe pero no se actualizó. Datos actuales:`, checkResult.rows[0]);
+        }
+      } else {
+        console.log(`Metadata actualizado con éxito para NFT: ${contractAddress} - ${tokenId}`);
+      }
+    } catch (error) {
+      console.error('Error al actualizar metadata del NFT:', error);
+      throw error;
+    }
+  }
+
+  async insertNewNFT(contractAddress: string, tokenId: string, name: string, image: string, imageurl: string, description: string, tokenURI: string): Promise<void> {
+    try {
+      const result = await this.client.execute({
+        sql: 'INSERT INTO NFTs (contract_address, token_id, name, image, imageurl, description, token_uri) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        args: [contractAddress, tokenId, name, image, imageurl, description, tokenURI]
+      });
+      console.log(`Nuevo NFT insertado: ${contractAddress} - ${tokenId}`, result);
+    } catch (error) {
+      console.error('Error al insertar nuevo NFT:', error);
+      throw error;
+    }
+  }
+
 } // Añade esta llave de cierre aquí

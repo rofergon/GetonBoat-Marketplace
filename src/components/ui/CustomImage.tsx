@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Image, { ImageProps } from 'next/image';
+import { ipfsToHttp } from '../../utils/ipfsToHttp'; // Asegúrate de que la ruta sea correcta
 
 interface CustomImageProps extends Omit<ImageProps, 'src' | 'alt'> {
   src: string;
@@ -24,8 +25,9 @@ const CustomImage: React.FC<CustomImageProps> = ({
 
   useEffect(() => {
     if (src) {
-      setImageSrc(src);
-      setIsGif(src.toLowerCase().endsWith('.gif'));
+      const convertedSrc = ipfsToHttp(src);
+      setImageSrc(convertedSrc);
+      setIsGif(convertedSrc.toLowerCase().endsWith('.gif'));
     } else {
       setImageSrc(null);
       setIsGif(false);
