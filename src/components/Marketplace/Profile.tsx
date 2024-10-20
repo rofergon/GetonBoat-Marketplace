@@ -91,26 +91,10 @@ const Profile: React.FC = () => {
       const response = await fetch(`/api/collected-nfts?userAddress=${address}`);
       const data = await response.json();
 
-      // Actualizar el estado de manera incremental
-      setCollectedNFTs(prevNFTs => {
-        const updatedNFTs = [...prevNFTs];
-        data.nfts.forEach((newNFT: NFT) => {
-          const index = updatedNFTs.findIndex(nft => 
-            nft.contractAddress === newNFT.contractAddress && nft.tokenId === newNFT.tokenId
-          );
-          if (index !== -1) {
-            updatedNFTs[index] = newNFT;
-          } else {
-            updatedNFTs.push(newNFT);
-          }
-        });
-        // Eliminar NFTs que ya no están en la wallet
-        return updatedNFTs.filter(nft => 
-          data.nfts.some((newNFT: NFT) => 
-            newNFT.contractAddress === nft.contractAddress && newNFT.tokenId === nft.tokenId
-          )
-        );
-      });
+      setCollectedNFTs(data.nfts.map((nft: NFT) => ({
+        ...nft,
+        isListed: nft.marketItemId !== null && nft.marketItemId !== undefined
+      })));
     } catch (error) {
       console.error('Error fetching NFTs:', error);
     } finally {
@@ -156,7 +140,6 @@ const Profile: React.FC = () => {
 
   const handleCancelListingClick = useCallback((nft: NFT) => {
     if (nft.marketItemId) {
-      // Convertimos el marketItemId a un número, eliminando la 'n' al final
       const marketItemIdNumber = Number(nft.marketItemId.toString());
       handleCancelListingHook(BigInt(marketItemIdNumber));
     }
