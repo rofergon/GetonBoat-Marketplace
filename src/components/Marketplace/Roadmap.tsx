@@ -18,6 +18,7 @@ const roadmapData: RoadmapSection[] = [
     items: [
       { title: "Guía de introducción a NFTs", description: "Crear contenido educativo sobre los fundamentos de los NFTs", status: 'in-progress' },
       { title: "Tutoriales de minting", description: "Desarrollar tutoriales paso a paso sobre cómo crear y mintear NFTs", status: 'planned' },
+      { title: "Tutoriales sobre Base Name", description: "Crear guías explicativas sobre el concepto y uso de Base Name en NFTs", status: 'planned' },
       { title: "Webinars con artistas establecidos", description: "Organizar sesiones en vivo con artistas exitosos en el espacio NFT", status: 'planned' },
       { title: "Recursos de marketing digital", description: "Proporcionar guías sobre cómo promocionar NFTs en redes sociales", status: 'planned' },
       { title: "Programa de mentoría", description: "Lanzar un programa de mentoría para artistas emergentes", status: 'planned' },
@@ -27,8 +28,10 @@ const roadmapData: RoadmapSection[] = [
     title: "NFTs",
     items: [
       { title: "Lanzamiento de colección inicial", description: "Lanzar nuestra primera colección de NFTs exclusivos", status: 'completed' },
-      { title: "Integración con wallets populares", description: "Añadir soporte para MetaMask, WalletConnect, etc.", status: 'in-progress' },
-      { title: "Implementar minting dinámico", description: "Permitir a los usuarios crear sus propios NFTs en la plataforma", status: 'planned' },
+      { title: "Integración con wallets populares", description: "Añadir soporte para MetaMask, WalletConnect, etc.", status: 'completed' },
+      { title: "Implementar minting dinámico", description: "Permitir a los usuarios crear sus propios NFTs en la plataforma", status: 'completed' },
+      { title: "Listado, compra y venta de NFTs", description: "Implementar funcionalidad completa para listar, comprar y vender NFTs en la plataforma", status: 'completed' },
+      { title: "Editor de animación pixel art", description: "Implementar un editor para crear animaciones pixel art y convertirlas en NFTs", status: 'completed' },
       { title: "Integracion Estandar ERC 1155", description: "Permite la creación de copias de NFTs y colecciones", status: 'planned' },
     ]
   },
