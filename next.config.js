@@ -46,6 +46,8 @@ const nextConfig = {
         'property.checkin.gg', // Agregamos este nuevo dominio
         'highlight-creator-assets.highlight.xyz', // Agregamos este nuevo dominio
         'www.arcade.fun', // Agregamos este nuevo dominio
+        'paragraph.xyz', // Agregamos este nuevo dominio
+        'far.cards', // Agregamos este nuevo dominio
       ], 
       dangerouslyAllowSVG: true,
       contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

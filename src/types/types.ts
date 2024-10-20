@@ -158,4 +158,6 @@ export interface NFT {
   isListed?: boolean;
   listedPrice?: string | null;
   marketItemId?: bigint;
+  collectionName?: string; // Añadimos esta línea
+  // Añade cualquier otra propiedad que uses en Profile y que no esté aquí
 }
